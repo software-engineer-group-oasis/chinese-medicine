@@ -2,6 +2,8 @@
 "use client"
 import {useSearchParams} from "next/navigation";
 
+import GrowthTimeline from '@/components/GrowthTimeline';
+
 export default function HerbPage() {
     const searchParam = useSearchParams();
     console.log(searchParam.get('id') || 'no id')
@@ -25,6 +27,11 @@ export default function HerbPage() {
                             <li> 用途 ：治疗湿热腹泻、心烦口渴、目赤肿痛等症</li>
                             <li>特点 ：重庆最著名的道地药材之一</li>
                         </ul>
+                    </div>
+                    <div className="plant-growth-container">
+                        <h1>🌱 植物生长周期溯源</h1>
+                        <p>以下是番茄的完整生长过程：</p>
+                        <GrowthTimeline />
                     </div>
                 </article>
             </main>
