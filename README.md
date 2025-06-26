@@ -1,3 +1,12 @@
+前端主要的工具包括：
+- next.js 框架
+- antd UI组件
+- zustand 状态管理
+- tainwindcss 简化css
+- echarts 图表展示
+- echarts-for-react 简化echarts的使用
+- axios api请求
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
