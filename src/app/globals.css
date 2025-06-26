@@ -12,11 +12,15 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* 移除暗色模式设置，统一使用亮色主题 */
+:root {
+  --primary-color: #4caf50; /* 中药主题色 - 绿色 */
+  --secondary-color: #8bc34a; /* 次要主题色 */
+  --accent-color: #ff9800; /* 强调色 */
+  --success-color: #4caf50; /* 成功色 */
+  --warning-color: #ff9800; /* 警告色 */
+  --error-color: #f44336; /* 错误色 */
+  --border-color: #e0e0e0; /* 边框色 */
 }
 
 body {
