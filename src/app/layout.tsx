@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import React from "react";
+import Navbar, { NAVBAR_HEIGHT } from "@/components/Navbar";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -15,7 +16,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {children}
+        <Navbar />
+        <div style={{ paddingTop: NAVBAR_HEIGHT }}>
+          {children}
+        </div>
       </body>
     </html>
   );

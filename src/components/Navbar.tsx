@@ -1,0 +1,42 @@
+import Link from 'next/link';
+import React from 'react';
+
+const NAVBAR_HEIGHT = 60;
+
+const Navbar: React.FC = () => {
+    return (
+        <nav style={{
+            width: '100%',
+            background: 'linear-gradient(90deg, #355C3A 0%, #8C6B2F 100%)',
+            color: '#fff',
+            padding: '0 40px',
+            height: NAVBAR_HEIGHT,
+            display: 'flex',
+            alignItems: 'center',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+            fontFamily: 'STKaiti, KaiTi, serif',
+            fontSize: 18,
+            letterSpacing: 2,
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            zIndex: 100,
+        }}>
+            <div style={{fontWeight: 'bold', fontSize: 22, color: '#FFD700', marginRight: 40}}>
+                <Link href="/">中药智慧平台</Link>
+            </div>
+            <div style={{display: 'flex', gap: 32}}>
+                <Link href="/herb" style={{color: '#fff', textDecoration: 'none', transition: 'color 0.2s', fontWeight: 500}}>中药百科</Link>
+                <Link href="/course-resource" style={{color: '#fff', textDecoration: 'none', transition: 'color 0.2s', fontWeight: 500}}>中药课程资源</Link>
+                <Link href="/research" style={{color: '#fff', textDecoration: 'none', transition: 'color 0.2s', fontWeight: 500}}>中药课题研究</Link>
+                <Link href="/training" style={{color: '#fff', textDecoration: 'none', transition: 'color 0.2s', fontWeight: 500}}>中药制作培训管理</Link>
+                <Link href="/evaluation" style={{color: '#fff', textDecoration: 'none', transition: 'color 0.2s', fontWeight: 500}}>中药质量评价与申报</Link>
+            </div>
+        </nav>
+    );
+};
+
+export default Navbar;
+
+// 导出导航栏高度，供全局布局使用
+export { NAVBAR_HEIGHT };

@@ -5,6 +5,7 @@ import ReactEcharts from 'echarts-for-react';
 import * as echarts from 'echarts';
 import chongQingJson from "@/assets/chongQing.json"
 import {useRouter} from "next/navigation"
+import Link from 'next/link';
 
 echarts.registerMap('chongQing', {geoJSON: chongQingJson });
 console.log(chongQingJson)
@@ -81,7 +82,7 @@ const option: echarts.EChartOption = {
 
 function chongQingMap() {
     const router = useRouter();
-    function handleClick(params:never) {
+    function handleClick(params: any) {
         const encodedName = encodeURIComponent(params.name);
         router.push(`/secondary_district?name=${encodedName}&value=${params.value || 0}`)
     }
@@ -95,7 +96,6 @@ function chongQingMap() {
                     onEvents={{ click: handleClick }}
                 />
             </div>
-
         </>
         )
 
