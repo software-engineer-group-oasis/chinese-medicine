@@ -2,6 +2,8 @@
 
 import Script from 'next/script';
 import { useState, useCallback } from 'react';
+import { Input, Button } from "antd";
+import { UserOutlined,  LockOutlined} from '@ant-design/icons';
 
 interface LoginProps {
     onLoginSuccess?: (token: string) => void;
@@ -79,30 +81,36 @@ const Login = ({ onLoginSuccess, onLoginError }: LoginProps) => {
     }, [username, password]);
 
     return (
-        <div className="login-container">
-            <h2>用户登录</h2>
-            {error && <div style={{ color: 'red' }}>{error}</div>}
-            <input
-                type="text"
-                placeholder="用户名"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                disabled={loading}
-            />
-            <input
-                type="password"
-                placeholder="密码"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={loading}
-            />
-            <button onClick={handleLogin} disabled={loading}>
-                {loading ? '验证中...' : '登录'}
-            </button>
+            <div className="w-fit h-fit flex flex-col gap-4 py-6 px-10 bg-slate-400/30 rounded-2xl shadow-2xl backdrop-blur-sm"
+                 style={{
+                     position: "absolute",
+                     left: "50rem",
+                     top: "5rem"
+            }}>
+                <header className="flex justify-between">
+                    <div><img src="/images/草药.svg" alt="logo" width={50} /></div>
+                    <p>中草药信息系统登录</p>
+                </header>
+                {error && <div style={{ color: 'red' }}>{error}</div>}
+                <Input size="large" placeholder="用户名" prefix={<UserOutlined />}
+                       value={username}
+                       onChange={(e) => setUsername(e.target.value)}
+                       disabled={loading}
+                />
+                <Input size="large" prefix={<LockOutlined />}
+                       type="password"
+                       placeholder="密码"
+                       value={password}
+                       onChange={(e) => setPassword(e.target.value)}
+                       disabled={loading}
+                />
+                <Button onClick={handleLogin} disabled={loading}>
+                    {loading ? '验证中...' : '登录'}
+                </Button>
 
-            {/* 加载验证码 SDK */}
-            <Script src={process.env.NEXT_PUBLIC_TENCENT_CAPTCHA_URL}  strategy="beforeInteractive" />
-        </div>
+                {/* 加载验证码 SDK */}
+                <Script src={process.env.NEXT_PUBLIC_TENCENT_CAPTCHA_URL}  strategy="beforeInteractive" />
+            </div>
     );
 };
 

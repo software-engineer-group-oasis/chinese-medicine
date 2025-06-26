@@ -13,7 +13,11 @@ export default function LoginPage() {
     };
 
     return (
-        <div style={{ maxWidth: 400, margin: 'auto', padding: 40 }}>
+        <div className="h-screen w-full" style={{
+            backgroundImage: `url(/images/login-bg.avif)`,
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'cover',
+        }}>
             <Login onLoginSuccess={handleSuccess} onLoginError={handleError} />
         </div>
     );
