@@ -1,0 +1,765 @@
+// 中药课程资源详情页面
+"use client"
+
+import { useState, useRef, useEffect } from 'react';
+import { 
+  Card, Row, Col, Button, Typography, Tag, Divider, Tabs, 
+  List, Tooltip, Rate, Space, Statistic, Descriptions, Progress,
+  Dropdown, Menu, message, Avatar
+} from 'antd';
+import { 
+  PlayCircleOutlined, PauseCircleOutlined, DownloadOutlined, 
+  HeartOutlined, HeartFilled, StarOutlined, StarFilled,
+  ShareAltOutlined, FileTextOutlined, ExperimentOutlined,
+  InfoCircleOutlined, MedicineBoxOutlined, SettingOutlined,
+  FullscreenOutlined, SoundOutlined, ArrowLeftOutlined,
+  ClockCircleOutlined, CommentOutlined, FireOutlined
+} from '@ant-design/icons';
+import Link from 'next/link';
+import Image from 'next/image';
+import { useRouter, useSearchParams } from 'next/navigation';
+import CommentSection from '@/components/CommentSection';
+
+const { Title, Text, Paragraph } = Typography;
+const { TabPane } = Tabs;
+
+// 模拟课程数据
+const mockCourses = [
+  {
+    id: 1,
+    title: '中药材鉴别基础',
+    cover: '/images/黄连.jpg',
+    videoUrl: 'https://example.com/videos/中药材鉴别基础.mp4',
+    documentUrl: 'https://example.com/documents/中药材鉴别基础.pdf',
+    description: '学习中药材的基本鉴别方法，包括性状鉴别、显微鉴别等技术',
+    tags: ['基础', '本科生', '鉴别'],
+    rating: 4.8,
+    reviews: 156,
+    likes: 230,
+    favorites: 185,
+    category: '基础课程',
+    relatedHerbs: [
+      { name: '黄连', description: '苦寒药材，清热燥湿、泻火解毒' },
+      { name: '党参', description: '补中益气、健脾益肺' },
+      { name: '当归', description: '补血活血，调经止痛' }
+    ],
+    createdAt: '2023-05-15',
+    author: '张教授',
+    authorTitle: '中药学教授',
+    authorAvatar: '/images/黄连.jpg',
+    duration: '3小时20分钟',
+    viewCount: 2560,
+    downloadCount: 420,
+    experimentSteps: [
+      {
+        title: '准备工作',
+        content: '1. 准备放大镜、显微镜等观察工具\n2. 准备待鉴别的中药材样品\n3. 准备参考样品和文献资料'
+      },
+      {
+        title: '性状鉴别',
+        content: '1. 观察中药材的外观特征（形状、大小、颜色）\n2. 检查表面特征（纹理、毛发等）\n3. 断面观察（质地、颜色、层次）\n4. 气味检测'
+      },
+      {
+        title: '显微鉴别',
+        content: '1. 制作临时切片\n2. 显微镜下观察组织结构\n3. 识别特征性细胞和组织\n4. 与参考样品对比'
+      },
+      {
+        title: '理化鉴别',
+        content: '1. 进行简单的化学反应测试\n2. 薄层色谱法（TLC）检测\n3. 记录并分析结果'
+      },
+      {
+        title: '结果判断',
+        content: '1. 综合各项鉴别结果\n2. 与标准品对照\n3. 得出鉴别结论\n4. 撰写鉴别报告'
+      }
+    ],
+    resources: [
+      { name: '课程视频', type: 'video', size: '1.2GB', url: 'https://example.com/videos/中药材鉴别基础.mp4' },
+      { name: '课程讲义', type: 'pdf', size: '15MB', url: 'https://example.com/documents/中药材鉴别基础.pdf' },
+      { name: '实验指导', type: 'pdf', size: '8MB', url: 'https://example.com/documents/中药材鉴别实验指导.pdf' },
+      { name: '药材图谱', type: 'zip', size: '120MB', url: 'https://example.com/resources/药材图谱.zip' }
+    ]
+  },
+  {
+    id: 2,
+    title: '中药炮制工艺实验',
+    cover: '/images/黄连.jpg',
+    videoUrl: 'https://example.com/videos/中药炮制工艺实验.mp4',
+    documentUrl: 'https://example.com/documents/中药炮制工艺实验.pdf',
+    description: '详细讲解中药炮制的各种方法，包括炒、炙、蒸、煮等工艺流程',
+    tags: ['实验', '本科生', '炮制'],
+    rating: 4.6,
+    reviews: 98,
+    likes: 185,
+    favorites: 142,
+    category: '实验课程',
+    relatedHerbs: [
+      { name: '黄芪', description: '补气固表，利水消肿' },
+      { name: '白芍', description: '养血柔肝，缓中止痛' },
+      { name: '甘草', description: '补脾益气，清热解毒，调和诸药' }
+    ],
+    createdAt: '2023-06-22',
+    author: '李教授',
+    authorTitle: '中药炮制学专家',
+    authorAvatar: '/images/黄连.jpg',
+    duration: '4小时15分钟',
+    viewCount: 1850,
+    downloadCount: 320,
+    experimentSteps: [
+      {
+        title: '炮制前准备',
+        content: '1. 了解药材性质和炮制目的\n2. 准备炮制设备和辅料\n3. 药材初步处理（清洗、切制等）'
+      },
+      {
+        title: '炒制法',
+        content: '1. 准备炒制设备（炒锅、温度计等）\n2. 掌握不同炒制温度和时间\n3. 实践清炒、砂炒、麸炒等方法\n4. 观察药材炒制过程中的变化'
+      },
+      {
+        title: '炙制法',
+        content: '1. 准备炙制所需材料（蜜、酒、醋等）\n2. 掌握蜜炙、酒炙、醋炙等方法\n3. 控制炙制温度和时间\n4. 观察炙制前后药材的变化'
+      },
+      {
+        title: '蒸煮法',
+        content: '1. 准备蒸煮设备\n2. 掌握蒸制、煮制的工艺参数\n3. 实践不同蒸煮方法\n4. 记录蒸煮过程中的现象'
+      },
+      {
+        title: '炮制后处理',
+        content: '1. 药材晾晒或烘干\n2. 炮制品质量检查\n3. 包装与贮藏\n4. 撰写炮制报告'
+      }
+    ],
+    resources: [
+      { name: '课程视频', type: 'video', size: '1.5GB', url: 'https://example.com/videos/中药炮制工艺实验.mp4' },
+      { name: '实验讲义', type: 'pdf', size: '12MB', url: 'https://example.com/documents/中药炮制工艺实验.pdf' },
+      { name: '炮制图解', type: 'pdf', size: '20MB', url: 'https://example.com/documents/炮制图解.pdf' },
+      { name: '实验数据表', type: 'excel', size: '5MB', url: 'https://example.com/resources/炮制实验数据.xlsx' }
+    ]
+  },
+  {
+    id: 3,
+    title: '中药化学成分分析',
+    cover: '/images/黄连.jpg',
+    videoUrl: 'https://example.com/videos/中药化学成分分析.mp4',
+    documentUrl: 'https://example.com/documents/中药化学成分分析.pdf',
+    description: '介绍中药材中常见化学成分的提取、分离与鉴定方法',
+    tags: ['进阶', '研究生', '化学分析'],
+    rating: 4.9,
+    reviews: 120,
+    likes: 210,
+    favorites: 175,
+    category: '进阶课程',
+    relatedHerbs: [
+      { name: '三七', description: '散瘀止血，消肿定痛' },
+      { name: '丹参', description: '活血祛瘀，凉血消痈，养血安神' },
+      { name: '黄芩', description: '清热燥湿，泻火解毒，止血，安胎' }
+    ],
+    createdAt: '2023-07-10',
+    author: '王教授',
+    authorTitle: '中药化学研究专家',
+    authorAvatar: '/images/黄连.jpg',
+    duration: '5小时40分钟',
+    viewCount: 1680,
+    downloadCount: 380,
+    experimentSteps: [
+      {
+        title: '样品准备',
+        content: '1. 药材粉碎与干燥\n2. 称量与记录\n3. 溶剂选择与配制'
+      },
+      {
+        title: '提取方法',
+        content: '1. 溶剂浸提法\n2. 索氏提取法\n3. 超声辅助提取\n4. 微波辅助提取\n5. 提取物浓缩与干燥'
+      },
+      {
+        title: '分离纯化',
+        content: '1. 液-液萃取\n2. 柱色谱法（硅胶、凝胶等）\n3. 薄层色谱（TLC）\n4. 高效液相色谱（HPLC）\n5. 分离组分的收集与处理'
+      },
+      {
+        title: '结构鉴定',
+        content: '1. 紫外-可见光谱分析\n2. 红外光谱分析\n3. 质谱分析\n4. 核磁共振分析\n5. 数据整合与结构确证'
+      },
+      {
+        title: '含量测定',
+        content: '1. 标准曲线制作\n2. 样品测定\n3. 数据处理与分析\n4. 结果报告撰写'
+      }
+    ],
+    resources: [
+      { name: '课程视频', type: 'video', size: '2.1GB', url: 'https://example.com/videos/中药化学成分分析.mp4' },
+      { name: '课程讲义', type: 'pdf', size: '25MB', url: 'https://example.com/documents/中药化学成分分析.pdf' },
+      { name: '分析方法汇编', type: 'pdf', size: '18MB', url: 'https://example.com/documents/分析方法汇编.pdf' },
+      { name: '实验数据处理软件', type: 'exe', size: '45MB', url: 'https://example.com/resources/数据处理软件.exe' },
+      { name: '标准图谱集', type: 'pdf', size: '30MB', url: 'https://example.com/resources/标准图谱集.pdf' }
+    ]
+  }
+];
+
+// 模拟视频播放进度记录
+const mockVideoProgress = {
+  1: 0,
+  2: 1255, // 秒
+  3: 4500  // 秒
+};
+
+// 格式化时间（秒转为时:分:秒）
+const formatTime = (seconds: number) => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+  
+  return [
+    hours.toString().padStart(2, '0'),
+    minutes.toString().padStart(2, '0'),
+    secs.toString().padStart(2, '0')
+  ].join(':');
+};
+
+// 解析时间字符串为秒数
+const parseTimeToSeconds = (timeStr: string) => {
+  if (!timeStr) return 0;
+  
+  const parts = timeStr.split(':').map(part => parseInt(part, 10));
+  if (parts.length === 3) {
+    return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  } else if (parts.length === 2) {
+    return parts[0] * 60 + parts[1];
+  }
+  return 0;
+};
+
+export default function CourseDetailPage({ params }: { params: { id: string } }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const courseId = parseInt(params.id, 10);
+  const course = mockCourses.find(c => c.id === courseId);
+  
+  const [activeTab, setActiveTab] = useState('video');
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(80);
+  const [quality, setQuality] = useState('720p');
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+  
+  const videoRef = useRef<HTMLVideoElement>(null);
+  
+  // 初始化视频播放位置
+  useEffect(() => {
+    if (!course) return;
+    
+    // 从URL参数获取时间点
+    const timeParam = searchParams.get('t');
+    let startTime = 0;
+    
+    if (timeParam) {
+      // 如果URL中有时间参数，优先使用
+      startTime = parseTimeToSeconds(timeParam);
+    } else if (mockVideoProgress[courseId]) {
+      // 否则使用保存的进度
+      startTime = mockVideoProgress[courseId];
+    }
+    
+    // 设置视频开始时间
+    if (videoRef.current && startTime > 0) {
+      videoRef.current.currentTime = startTime;
+      setCurrentTime(startTime);
+    }
+  }, [courseId, searchParams]);
+  
+  // 视频事件处理
+  const handleTimeUpdate = () => {
+    if (videoRef.current) {
+      setCurrentTime(videoRef.current.currentTime);
+    }
+  };
+  
+  const handleLoadedMetadata = () => {
+    if (videoRef.current) {
+      setDuration(videoRef.current.duration);
+    }
+  };
+  
+  const handlePlayPause = () => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+  
+  const handleVolumeChange = (newVolume: number) => {
+    setVolume(newVolume);
+    if (videoRef.current) {
+      videoRef.current.volume = newVolume / 100;
+    }
+  };
+  
+  const handleQualityChange = (quality: string) => {
+    setQuality(quality);
+    message.success(`已切换到${quality}画质`);
+    // 实际项目中这里需要切换视频源
+  };
+  
+  const handleFullscreen = () => {
+    const videoContainer = document.getElementById('video-container');
+    if (!videoContainer) return;
+    
+    if (!isFullscreen) {
+      if (videoContainer.requestFullscreen) {
+        videoContainer.requestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+    
+    setIsFullscreen(!isFullscreen);
+  };
+  
+  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!videoRef.current || !duration) return;
+    
+    const progressBar = e.currentTarget;
+    const rect = progressBar.getBoundingClientRect();
+    const offsetX = e.clientX - rect.left;
+    const newTime = (offsetX / rect.width) * duration;
+    
+    videoRef.current.currentTime = newTime;
+    setCurrentTime(newTime);
+  };
+  
+  const handleLike = () => {
+    setIsLiked(!isLiked);
+    message.success(isLiked ? '已取消点赞' : '已点赞');
+  };
+  
+  const handleFavorite = () => {
+    setIsFavorite(!isFavorite);
+    message.success(isFavorite ? '已取消收藏' : '已收藏到我的课程');
+  };
+  
+  const handleDownload = (resource: any) => {
+    message.success(`开始下载: ${resource.name}`);
+    // 实际项目中这里需要处理文件下载逻辑
+  };
+  
+  const handleShare = () => {
+    // 复制当前页面链接
+    navigator.clipboard.writeText(window.location.href);
+    message.success('链接已复制，可以分享给他人');
+  };
+  
+  if (!course) {
+    return (
+      <div className="p-6 pt-20 text-center">
+        <Title level={4}>课程不存在</Title>
+        <Button type="primary" onClick={() => router.push('/course-resource')}>
+          <ArrowLeftOutlined /> 返回课程列表
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6 pt-20">
+      {/* 返回按钮 */}
+      <div className="mb-4">
+        <Button type="link" onClick={() => router.push('/course-resource')} className="pl-0">
+          <ArrowLeftOutlined /> 返回课程列表
+        </Button>
+      </div>
+      
+      {/* 课程标题 */}
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <Title level={2} className="mb-2">{course.title}</Title>
+          <div>
+            {course.tags.map(tag => (
+              <Tag 
+                key={tag} 
+                color={
+                  tag === '基础' ? 'blue' : 
+                  tag === '进阶' ? 'purple' : 
+                  tag === '实验' ? 'green' : 
+                  tag === '本科生' ? 'cyan' : 
+                  tag === '研究生' ? 'magenta' : 
+                  'default'
+                }
+                className="mr-1"
+              >
+                {tag}
+              </Tag>
+            ))}
+            <Text type="secondary" className="ml-2">
+              <ClockCircleOutlined className="mr-1" />
+              {course.duration}
+            </Text>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Button 
+            icon={isLiked ? <HeartFilled className="text-red-500" /> : <HeartOutlined />} 
+            onClick={handleLike}
+          >
+            {isLiked ? '已点赞' : '点赞'} ({course.likes + (isLiked ? 1 : 0)})
+          </Button>
+          <Button 
+            icon={isFavorite ? <StarFilled className="text-yellow-500" /> : <StarOutlined />} 
+            onClick={handleFavorite}
+          >
+            {isFavorite ? '已收藏' : '收藏'}
+          </Button>
+          <Button icon={<ShareAltOutlined />} onClick={handleShare}>分享</Button>
+        </div>
+      </div>
+      
+      <Row gutter={[24, 24]}>
+        <Col xs={24} lg={18}>
+          {/* 内容展示区 */}
+          <Card className="mb-6">
+            <Tabs activeKey={activeTab} onChange={setActiveTab}>
+              <TabPane 
+                tab={<span><PlayCircleOutlined />视频播放</span>} 
+                key="video"
+              >
+                <div id="video-container" className="relative bg-black rounded-lg overflow-hidden mb-4">
+                  {/* 视频播放器 */}
+                  <video
+                    ref={videoRef}
+                    className="w-full aspect-video"
+                    onTimeUpdate={handleTimeUpdate}
+                    onLoadedMetadata={handleLoadedMetadata}
+                    onPlay={() => setIsPlaying(true)}
+                    onPause={() => setIsPlaying(false)}
+                    onEnded={() => setIsPlaying(false)}
+                    poster={course.cover}
+                    controls={false}
+                  >
+                    <source src={course.videoUrl} type="video/mp4" />
+                    您的浏览器不支持HTML5视频播放。
+                  </video>
+                  
+                  {/* 自定义控制栏 */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white p-2">
+                    <div className="flex items-center justify-between mb-2">
+                      {/* 播放/暂停按钮 */}
+                      <Button 
+                        type="text" 
+                        icon={isPlaying ? <PauseCircleOutlined className="text-white text-xl" /> : <PlayCircleOutlined className="text-white text-xl" />} 
+                        onClick={handlePlayPause}
+                        className="text-white"
+                      />
+                      
+                      {/* 时间显示 */}
+                      <div className="text-xs">
+                        {formatTime(currentTime)} / {formatTime(duration)}
+                      </div>
+                      
+                      {/* 音量控制 */}
+                      <Dropdown 
+                        overlay={
+                          <Card className="p-2" style={{ width: 200 }}>
+                            <div className="flex items-center">
+                              <SoundOutlined className="mr-2" />
+                              <div className="flex-1">
+                                <Progress 
+                                  percent={volume} 
+                                  size="small" 
+                                  onChange={handleVolumeChange}
+                                  showInfo={false}
+                                />
+                              </div>
+                              <div className="ml-2 w-8 text-center">{volume}%</div>
+                            </div>
+                          </Card>
+                        } 
+                        placement="top"
+                        trigger={['click']}
+                      >
+                        <Button 
+                          type="text" 
+                          icon={<SoundOutlined className="text-white" />} 
+                          className="text-white"
+                        />
+                      </Dropdown>
+                      
+                      {/* 画质选择 */}
+                      <Dropdown 
+                        overlay={
+                          <Menu>
+                            <Menu.Item key="1080p" onClick={() => handleQualityChange('1080p')}>1080p</Menu.Item>
+                            <Menu.Item key="720p" onClick={() => handleQualityChange('720p')}>720p</Menu.Item>
+                            <Menu.Item key="480p" onClick={() => handleQualityChange('480p')}>480p</Menu.Item>
+                            <Menu.Item key="360p" onClick={() => handleQualityChange('360p')}>360p</Menu.Item>
+                          </Menu>
+                        } 
+                        placement="top"
+                      >
+                        <Button 
+                          type="text" 
+                          icon={<SettingOutlined className="text-white" />} 
+                          className="text-white"
+                        >
+                          {quality}
+                        </Button>
+                      </Dropdown>
+                      
+                      {/* 全屏按钮 */}
+                      <Button 
+                        type="text" 
+                        icon={<FullscreenOutlined className="text-white" />} 
+                        onClick={handleFullscreen}
+                        className="text-white"
+                      />
+                    </div>
+                    
+                    {/* 进度条 */}
+                    <div 
+                      className="h-1 bg-gray-600 rounded cursor-pointer"
+                      onClick={handleSeek}
+                    >
+                      <div 
+                        className="h-full bg-blue-500 rounded"
+                        style={{ width: `${(currentTime / duration) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </TabPane>
+              
+              <TabPane 
+                tab={<span><FileTextOutlined />文档预览</span>} 
+                key="document"
+              >
+                <div className="bg-gray-100 p-4 rounded-lg text-center h-[400px] flex flex-col items-center justify-center">
+                  <FileTextOutlined style={{ fontSize: 48 }} className="text-gray-400 mb-4" />
+                  <Title level={4}>文档预览</Title>
+                  <Paragraph className="mb-4">此处将显示PDF或PPT文档预览</Paragraph>
+                  <Button type="primary" icon={<DownloadOutlined />} onClick={() => handleDownload(course.resources.find(r => r.type === 'pdf'))}>
+                    下载文档
+                  </Button>
+                </div>
+              </TabPane>
+              
+              <TabPane 
+                tab={<span><ExperimentOutlined />实验步骤</span>} 
+                key="experiment"
+              >
+                <div className="bg-white p-4 rounded-lg">
+                  <Title level={4} className="mb-4">实验步骤指导</Title>
+                  
+                  {course.experimentSteps.map((step, index) => (
+                    <div key={index} className="mb-6">
+                      <div className="flex items-center mb-2">
+                        <div className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center mr-2">
+                          {index + 1}
+                        </div>
+                        <Title level={5} className="mb-0">{step.title}</Title>
+                      </div>
+                      <div className="ml-8">
+                        {step.content.split('\n').map((line, i) => (
+                          <Paragraph key={i} className="mb-1">{line}</Paragraph>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </TabPane>
+            </Tabs>
+          </Card>
+          
+          {/* 课程信息 */}
+          <Card 
+            title={<span><InfoCircleOutlined className="mr-2" />课程信息</span>}
+            className="mb-6"
+          >
+            <Row gutter={[24, 24]}>
+              <Col xs={24} md={16}>
+                <Title level={4} className="mb-4">课程简介</Title>
+                <Paragraph>{course.description}</Paragraph>
+                
+                <Divider />
+                
+                <Descriptions title="基本信息" column={{ xs: 1, sm: 2, md: 3 }}>
+                  <Descriptions.Item label="创建时间">{course.createdAt}</Descriptions.Item>
+                  <Descriptions.Item label="课程时长">{course.duration}</Descriptions.Item>
+                  <Descriptions.Item label="适用对象">{course.tags.find(tag => tag === '本科生' || tag === '研究生')}</Descriptions.Item>
+                  <Descriptions.Item label="课程类别">{course.category}</Descriptions.Item>
+                  <Descriptions.Item label="观看次数">{course.viewCount}</Descriptions.Item>
+                  <Descriptions.Item label="下载次数">{course.downloadCount}</Descriptions.Item>
+                </Descriptions>
+              </Col>
+              
+              <Col xs={24} md={8}>
+                <Card className="bg-gray-50">
+                  <div className="flex items-center mb-4">
+                    <Avatar src={course.authorAvatar} size={64} className="mr-4" />
+                    <div>
+                      <Title level={5} className="mb-0">{course.author}</Title>
+                      <Text type="secondary">{course.authorTitle}</Text>
+                    </div>
+                  </div>
+                  <div className="flex justify-between mb-2">
+                    <Statistic title="课程数" value={mockCourses.filter(c => c.author === course.author).length} />
+                    <Statistic title="评分" value={course.rating} suffix="/5" />
+                  </div>
+                </Card>
+              </Col>
+            </Row>
+          </Card>
+          
+          {/* 关联药材 */}
+          <Card 
+            title={<span><MedicineBoxOutlined className="mr-2" />关联药材</span>}
+            className="mb-6"
+          >
+            <List
+              grid={{ gutter: 16, xs: 1, sm: 2, md: 3 }}
+              dataSource={course.relatedHerbs}
+              renderItem={herb => (
+                <List.Item>
+                  <Link href={`/herb?name=${herb.name}`}>
+                    <Card hoverable className="text-center">
+                      <div className="mb-2">
+                        <Avatar size={64} src="/images/黄连.jpg" />
+                      </div>
+                      <Title level={5}>{herb.name}</Title>
+                      <Text type="secondary">{herb.description}</Text>
+                    </Card>
+                  </Link>
+                </List.Item>
+              )}
+            />
+          </Card>
+          
+          {/* 资源下载 */}
+          <Card 
+            title={<span><DownloadOutlined className="mr-2" />资源下载</span>}
+            className="mb-6"
+          >
+            <List
+              dataSource={course.resources}
+              renderItem={resource => (
+                <List.Item
+                  actions={[
+                    <Button 
+                      key="download" 
+                      type="primary" 
+                      icon={<DownloadOutlined />}
+                      onClick={() => handleDownload(resource)}
+                    >
+                      下载
+                    </Button>
+                  ]}
+                >
+                  <List.Item.Meta
+                    avatar={
+                      <Avatar 
+                        icon={
+                          resource.type === 'video' ? <PlayCircleOutlined /> : 
+                          resource.type === 'pdf' ? <FileTextOutlined /> : 
+                          resource.type === 'excel' ? <FileTextOutlined /> : 
+                          <DownloadOutlined />
+                        } 
+                        style={{
+                          backgroundColor: 
+                            resource.type === 'video' ? '#1890ff' : 
+                            resource.type === 'pdf' ? '#f5222d' : 
+                            resource.type === 'excel' ? '#52c41a' : 
+                            '#faad14'
+                        }}
+                      />
+                    }
+                    title={resource.name}
+                    description={`${resource.type.toUpperCase()} · ${resource.size}`}
+                  />
+                </List.Item>
+              )}
+            />
+          </Card>
+          
+          {/* 评论区 */}
+          <Card 
+            title={<span><CommentOutlined className="mr-2" />评论区</span>}
+            className="mb-6"
+          >
+            <CommentSection />
+          </Card>
+        </Col>
+        
+        {/* 右侧推荐课程 */}
+        <Col xs={24} lg={6}>
+          <Card 
+            title={<span><FireOutlined className="mr-2 text-red-500" />相关课程推荐</span>}
+            className="mb-6"
+          >
+            <List
+              itemLayout="horizontal"
+              dataSource={mockCourses.filter(c => c.id !== courseId).slice(0, 3)}
+              renderItem={item => (
+                <List.Item>
+                  <Link href={`/course-resource/${item.id}`} className="w-full">
+                    <div className="flex">
+                      <div className="relative w-20 h-12 mr-2 flex-shrink-0">
+                        <Image 
+                          src={item.cover} 
+                          alt={item.title}
+                          fill
+                          style={{objectFit: 'cover'}}
+                          className="rounded"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <Text strong ellipsis>{item.title}</Text>
+                        <div>
+                          <Rate disabled defaultValue={Math.round(item.rating)} className="text-xs" />
+                          <Text className="text-xs ml-1">{item.rating}</Text>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                </List.Item>
+              )}
+            />
+            <div className="mt-4 text-center">
+              <Link href="/course-resource">
+                <Button type="link">查看更多课程</Button>
+              </Link>
+            </div>
+          </Card>
+          
+          <Card title={<span><StarOutlined className="mr-2 text-yellow-500" />课程评分</span>}>
+            <div className="text-center mb-4">
+              <Title level={2} className="mb-0 text-yellow-500">{course.rating}</Title>
+              <Rate disabled defaultValue={Math.round(course.rating)} className="text-xl" />
+              <div className="text-gray-500 mt-1">{course.reviews} 人评价</div>
+            </div>
+            
+            <div>
+              {[5, 4, 3, 2, 1].map(star => {
+                // 模拟各星级的评价比例
+                const percent = star === 5 ? 70 : star === 4 ? 20 : star === 3 ? 7 : star === 2 ? 2 : 1;
+                
+                return (
+                  <div key={star} className="flex items-center mb-2">
+                    <div className="w-8 text-right mr-2">{star}星</div>
+                    <Progress 
+                      percent={percent} 
+                      size="small" 
+                      showInfo={false} 
+                      strokeColor={star >= 4 ? '#52c41a' : star === 3 ? '#faad14' : '#f5222d'}
+                      className="flex-1"
+                    />
+                    <div className="w-10 text-right">{percent}%</div>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+        </Col>
+      </Row>
+    </div>
+  );
+}
