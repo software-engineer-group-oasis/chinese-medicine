@@ -13,7 +13,77 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
 
 echarts.registerMap('chongQing', {geoJSON: chongQingJson });
-console.log(chongQingJson)
+// console.log(chongQingJson)
+
+const herbPercentageData = [
+    { name: '黄连', value: 35 },
+    { name: '川贝母', value: 25 },
+    { name: '天麻', value: 15 },
+    { name: '杜仲', value: 10 },
+    { name: '其他', value: 15 }
+];
+
+const pieOption: echarts.EChartOption = {
+    title: {
+        text: '重庆主要中药材占比',
+        left: 'center',
+        textStyle: {
+            color: '#FFF',
+            fontSize: 24,
+            fontWeight: 'bold'
+        }
+    },
+    tooltip: {
+        trigger: 'item',
+        formatter: '{a} <br/>{b}: {c} ({d}%)',
+        backgroundColor: 'rgba(50, 50, 50, 0.7)',
+        textStyle: {
+            color: '#fff'
+        }
+    },
+    legend: {
+        orient: 'vertical',
+        left: 'left',
+        textStyle: {
+            color: '#FFF'
+        }
+    },
+    series: [
+        {
+            name: '中药材占比',
+            type: 'pie',
+            radius: ['40%', '70%'],
+            avoidLabelOverlap: false,
+            itemStyle: {
+                borderRadius: 10,
+                borderColor: '#fff',
+                borderWidth: 2
+            },
+            label: {
+                show: true,
+                formatter: '{b}: {d}%',
+                color: '#FFF'
+            },
+            emphasis: {
+                label: {
+                    show: true,
+                    fontSize: '18',
+                    fontWeight: 'bold'
+                }
+            },
+            labelLine: {
+                show: true
+            },
+            data: herbPercentageData
+        }
+    ],
+    animation: true,
+    animationType: 'scale',
+    animationEasing: 'elasticOut',
+    animationDelay: function (idx) {
+        return Math.random() * 200;
+    }
+};
 
 const option: echarts.EChartOption = {
     // backgroundColor: 'rgba(12, 32, 56, 0.8)',
@@ -134,6 +204,15 @@ function chongQingMap() {
                     style={{ width: '100%', height: '100%' }}
                     onEvents={{ click: handleClick }}
                 />
+            </div>
+            {/* 饼图部分 */}
+            <div className="flex flex-col items-center my-12">
+                <div className="max-w-[80%] h-[500px] w-full bg-linear-to-br/longer from-indigo-500 to-teal-400 rounded-3xl shadow-amber400 shadow-md p-6">
+                    <ReactEcharts
+                        option={pieOption}
+                        style={{ width: '100%', height: '100%' }}
+                    />
+                </div>
             </div>
             <div className={'flex justify-center'}>
                 <div className={'flex flex-col gap-10 max-w-[50%]'}>
