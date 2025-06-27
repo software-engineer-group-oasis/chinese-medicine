@@ -199,16 +199,17 @@ function chongQingMap() {
 
     return (
         <>
-            <div id={'chart-container'} className="my-4 max-w-[80%] h-[80vh] min-h-[500px] mx-auto bg-linear-to-br/longer from-indigo-500 to-teal-400 rounded-3xl shadow-amber400 shadow-md ">
+            <div id={'chart-container'} className="my-4 max-w-[80%] h-[80vh] min-h-[500px] mx-auto rounded-3xl shadow-amber400 shadow-md ">
+                <div className="absolute inset-0 bg-cover bg-center " style={{ backgroundImage: 'url(/images/data-bg.png)' }}></div>
                 <ReactEcharts
                     option={option}
-                    style={{ width: '100%', height: '100%' }}
+                    style={{ width: '100%', height: '100%'}}
                     onEvents={{ click: handleClick }}
                 />
             </div>
             {/* 饼图部分 */}
             <div className="flex flex-col items-center my-12">
-                <div className="max-w-[80%] h-[500px] w-full bg-linear-to-br/longer from-indigo-500 to-teal-400 rounded-3xl shadow-amber400 shadow-md p-6">
+                <div className="max-w-[80%] h-[500px] w-full bg-linear-to-br from-slate-400 to-slate-900 rounded-3xl shadow-amber400 shadow-md p-6">
                     <ReactEcharts
                         option={pieOption}
                         style={{ width: '100%', height: '100%' }}
@@ -276,6 +277,10 @@ function chongQingMap() {
                   position: relative;
                   overflow: hidden;
               }
+              
+              #chart-container .absolute {
+                  z-index: -1;
+              }
 
               #chart-container::before,
               #chart-container::after {
@@ -284,8 +289,8 @@ function chongQingMap() {
                   top: 0;
                   left: -50%;
                   width: 200%;
-                  height: 0.5rem;
-                  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+                  height: 5rem;
+                  background: linear-gradient(90deg, transparent, oklch(74.6% 0.16 232.661), transparent);
                   animation: moveHorizontal 5s ease-in-out infinite;
               }
 

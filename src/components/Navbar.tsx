@@ -21,7 +21,7 @@ const Navbar: React.FC = () => {
             top: 0,
             left: 0,
             zIndex: 100,
-        }} className="w-[100%] px-4 py-2 shadow-slate-400 shadow-md backdrop-blur-xs bg-linear-to-r from-green-600/70 to-amber-500/70">
+        }} className="w-[100%] px-4 py-2 shadow-slate-400 shadow-md backdrop-blur-xs bg-slate-800/50">
             <div style={{fontWeight: 'bold', fontSize: 22, color: '#FFD700', marginRight: 40}} className="flex-1 flex gap-2">
                 <img src='/images/草药.svg' width={20} />
                 <Link href="/">中药智慧平台</Link>
