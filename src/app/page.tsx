@@ -8,6 +8,7 @@ import {useRouter} from "next/navigation"
 import {chongQingHerbs} from '@/mock/data'
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import TreeOrigins from "@/components/TreeOrigins";
 
 // 注册GSAP插件
 gsap.registerPlugin(ScrollTrigger);
@@ -214,6 +215,7 @@ function chongQingMap() {
                     />
                 </div>
             </div>
+            <TreeOrigins />
             <div className={'flex justify-center'}>
                 <div className={'flex flex-col gap-10 max-w-[50%]'}>
                     {chongQingHerbs.map((item, index) => (
