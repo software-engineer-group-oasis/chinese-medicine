@@ -1,6 +1,6 @@
 "use client"
 import Link from "next/link";
-import {DatabaseTwoTone, DownCircleTwoTone, UpCircleTwoTone} from "@ant-design/icons";
+import {DatabaseTwoTone, UpCircleTwoTone} from "@ant-design/icons";
 
 
 const routes = [
@@ -14,11 +14,6 @@ const routes = [
         path: '/research/upload',
         icon: () => <UpCircleTwoTone />,
     },
-    {
-        name: '数据下载',
-        path: '/research/download',
-        icon: () => <DownCircleTwoTone />,
-    }
 ]
 
 export default function ResearchNav() {
