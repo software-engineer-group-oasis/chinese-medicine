@@ -21,6 +21,7 @@
   --warning-color: #ff9800; /* 警告色 */
   --error-color: #f44336; /* 错误色 */
   --border-color: #e0e0e0; /* 边框色 */
+  cursor: url('/cursor.svg'), auto;
 }
 
 body {

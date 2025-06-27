@@ -68,6 +68,13 @@ export default function ChongqingHerbs() {
                     overflow: hidden;
                     z-index: 1;
                     background-color: oklch(79.2% 0.209 151.711);
+                    transition: all 0.3s ease;
+                }
+
+                .herb-card:hover {
+                    background-color: oklch(90.5% 0.182 98.111);
+                    border: 2px dashed #000;
+                    padding: 4rem;
                 }
 
                 .herb-card::before {
