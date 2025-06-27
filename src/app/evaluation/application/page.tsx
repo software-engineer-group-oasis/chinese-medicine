@@ -18,6 +18,7 @@ import {
   ScanOutlined, CloudUploadOutlined, AuditOutlined
 } from '@ant-design/icons';
 import Link from 'next/link';
+import { applicationTemplates, applicationRequirements, herbEvaluations } from '@/mock/evaluation';
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
@@ -35,69 +36,7 @@ export default function ApplicationPage() {
   const [previewVisible, setPreviewVisible] = useState(false);
   const [fileList, setFileList] = useState([]);
   
-  // 模拟申报模板数据
-  const applicationTemplates = [
-    { id: '1', name: '非物质文化遗产申报模板', type: '国家级', lastUpdated: '2023-10-15' },
-    { id: '2', name: '地理标志产品保护申报模板', type: '省级', lastUpdated: '2023-09-22' },
-    { id: '3', name: '中药材品质认证申报模板', type: '行业标准', lastUpdated: '2023-11-05' },
-    { id: '4', name: '道地药材认定申报模板', type: '国家级', lastUpdated: '2023-08-18' },
-  ];
-  
-  // 模拟药材评价数据
-  const herbEvaluations = [
-    {
-      id: '1',
-      herbName: '黄连',
-      latinName: 'Coptis chinensis',
-      origin: '重庆石柱',
-      evaluationCount: 56,
-      averageScore: 4.7,
-      lastEvaluated: '2023-11-20',
-      qualityLevel: '优秀',
-    },
-    {
-      id: '2',
-      herbName: '党参',
-      latinName: 'Codonopsis pilosula',
-      origin: '甘肃岷县',
-      evaluationCount: 42,
-      averageScore: 4.2,
-      lastEvaluated: '2023-11-18',
-      qualityLevel: '良好',
-    },
-    {
-      id: '3',
-      herbName: '川芎',
-      latinName: 'Ligusticum chuanxiong',
-      origin: '四川都江堰',
-      evaluationCount: 38,
-      averageScore: 4.5,
-      lastEvaluated: '2023-11-15',
-      qualityLevel: '优秀',
-    },
-    {
-      id: '4',
-      herbName: '当归',
-      latinName: 'Angelica sinensis',
-      origin: '甘肃岷县',
-      evaluationCount: 45,
-      averageScore: 3.8,
-      lastEvaluated: '2023-10-25',
-      qualityLevel: '良好',
-    },
-  ];
 
-  // 模拟申报要求数据
-  const applicationRequirements = [
-    { id: '1', name: '基本信息', required: true, description: '包括药材名称、产地、历史沿革等基本信息' },
-    { id: '2', name: '质量评价报告', required: true, description: '药材质量评价的详细报告，包括外观、成分等维度' },
-    { id: '3', name: '生产工艺', required: true, description: '药材的种植、采收、加工等工艺流程' },
-    { id: '4', name: '特色与价值', required: true, description: '药材的特色、价值及其在医药学上的意义' },
-    { id: '5', name: '历史文献', required: false, description: '相关历史文献记载及考证' },
-    { id: '6', name: '图片资料', required: true, description: '药材外观、生长环境、加工过程等图片' },
-    { id: '7', name: '检测报告', required: true, description: '权威机构出具的检测报告' },
-    { id: '8', name: '专家意见', required: false, description: '行业专家对药材质量的评价意见' },
-  ];
 
   // 处理模板选择
   const handleTemplateSelect = (templateId) => {
