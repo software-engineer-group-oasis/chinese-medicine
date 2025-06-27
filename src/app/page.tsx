@@ -18,6 +18,7 @@ console.log(chongQingJson)
 const option: echarts.EChartOption = {
     // backgroundColor: 'rgba(12, 32, 56, 0.8)',
     animation: true,
+    animationType: 'linear',
     animationDuration: 2000,
     animationEasing: 'cubicOut',
     tooltip: {
@@ -31,17 +32,22 @@ const option: echarts.EChartOption = {
             return `${params.name}<br/>数值：${params.value || 0}`;
         }
     },
+    itemStyle: {
+        color: '#00BFFF',
+        borderColor: '#FFA500',
+        borderWidth: 2,
+    },
     title: {
         text: '重庆中药材分布图',
         textStyle: {
-            color: '#000',
+            color: '#FFF',
             fontWeight: 'bold',
-            fontSize: 18
+            fontSize: 32
         },
         left: "center",
         top: 20
     },
-    visualMap: {
+    visualMap: { // 热力图
         min: 0,
         max: 300,
         inRange: {
@@ -49,10 +55,11 @@ const option: echarts.EChartOption = {
         },
         text: ['高值', '低值'],
         textStyle: {
-            color: '#000'
+            color: '#FFF'
         },
         calculable: true,
         bottom: 40,
+        left: 40,
     },
     series: [{
         type: 'map',
@@ -64,9 +71,13 @@ const option: echarts.EChartOption = {
                 return params?.name || ''
             },
         },
-        emphasis: {
+        emphasis: { // 鼠标移入
             areaColor: '#2a333d',
-            borderColor: '#111'
+            borderColor: '#111',
+            itemStyle: {
+                shadowBlur: 10,
+                shadowColor: 'rgba(255, 165, 0, 0.8)' // 光晕
+            }
         },
         data: [
             {
@@ -117,7 +128,7 @@ function chongQingMap() {
 
     return (
         <>
-            <div className="w-full h-[80vh] min-h-[500px]">
+            <div id={'chart-container'} className="my-4 max-w-[80%] h-[80vh] min-h-[500px] mx-auto bg-linear-to-br/longer from-indigo-500 to-teal-400 rounded-3xl shadow-amber400 shadow-md ">
                 <ReactEcharts
                     option={option}
                     style={{ width: '100%', height: '100%' }}
@@ -164,7 +175,37 @@ function chongQingMap() {
                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
                   border: 2px solid #000;
               }
-            `}</style>
+
+              #chart-container {
+                  position: relative;
+                  overflow: hidden;
+              }
+
+              #chart-container::before,
+              #chart-container::after {
+                  content: '';
+                  position: absolute;
+                  top: 0;
+                  left: -50%;
+                  width: 200%;
+                  height: 0.5rem;
+                  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+                  animation: moveHorizontal 5s ease-in-out infinite;
+              }
+
+              #chart-container::after {
+                  top: auto;
+                  bottom: 0;
+                  animation-delay: 2.5s;
+              }
+
+              @keyframes moveHorizontal {
+                  0% { transform: translateX(-50%); }
+                  50% { transform: translateX(50%); }
+                  100% { transform: translateX(-50%); }
+              }
+            `}
+            </style>
 
 
         </>
