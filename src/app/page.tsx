@@ -7,6 +7,8 @@ import chongQingJson from "@/assets/chongQing.json"
 import {useRouter} from "next/navigation"
 import TreeOrigins from "@/components/TreeOrigins";
 import ChongqingHerbs from "@/components/ChongqingHerbs";
+import IndexDataTable from "@/components/IndexDataTable";
+import IndexPieChart from "@/components/IndexPieChart";
 
 echarts.registerMap('chongQing', {geoJSON: chongQingJson });
 // console.log(chongQingJson)
@@ -17,6 +19,15 @@ const herbPercentageData = [
     { name: '天麻', value: 15 },
     { name: '杜仲', value: 10 },
     { name: '其他', value: 15 }
+];
+
+// 用于滚动表格box-1
+const initialData = [
+    { id: 1, name: '黄连', value: 35 },
+    { id: 2, name: '川贝母', value: 25 },
+    { id: 3, name: '天麻', value: 15 },
+    { id: 4, name: '杜仲', value: 10 },
+    { id: 5, name: '其他', value: 15 }
 ];
 
 const pieOption: echarts.EChartOption = {
@@ -63,7 +74,7 @@ const pieOption: echarts.EChartOption = {
             emphasis: {
                 label: {
                     show: true,
-                    fontSize: '18',
+                    fontSize: 16,
                     fontWeight: 'bold'
                 }
             },
@@ -74,11 +85,7 @@ const pieOption: echarts.EChartOption = {
         }
     ],
     animation: true,
-    animationType: 'scale',
     animationEasing: 'elasticOut',
-    animationDelay: function (idx) {
-        return Math.random() * 200;
-    }
 };
 
 const option: echarts.EChartOption = {
@@ -110,7 +117,7 @@ const option: echarts.EChartOption = {
             fontWeight: 'bold',
             fontSize: 32
         },
-        left: "center",
+        left: 'center',
         top: 20
     },
     visualMap: { // 热力图
@@ -137,10 +144,12 @@ const option: echarts.EChartOption = {
                 return params?.name || ''
             },
         },
+        layoutCenter: ['45%', '50%'],
+        layoutSize: '80%',
         emphasis: { // 鼠标移入
-            areaColor: '#2a333d',
-            borderColor: '#111',
             itemStyle: {
+                color: '#2a333d',
+                borderColor: '#111',
                 shadowBlur: 10,
                 shadowColor: 'rgba(255, 165, 0, 0.8)' // 光晕
             }
@@ -171,31 +180,42 @@ function chongQingMap() {
 
     return (
         <>
-            <div id={'chart-container'} className="my-4 max-w-[80%] h-[80vh] min-h-[500px] mx-auto rounded-3xl shadow-amber400 shadow-md ">
-                <div className="absolute inset-0 bg-cover bg-center " style={{ backgroundImage: 'url(/images/data-bg.png)' }}></div>
+            <div id={'chart-container'} className="my-4 w-[80%] h-[80vh] min-h-[500px] mx-auto rounded-3xl shadow-amber400 shadow-md ">
+                <div className="absolute inset-0 bg-cover bg-center " style={{ backgroundImage: 'url(/images/index_bg.png)' }}></div>
                 <ReactEcharts
                     option={option}
                     style={{ width: '100%', height: '100%'}}
                     onEvents={{ click: handleClick }}
                 />
-            </div>
-            {/* 饼图部分 */}
-            <div className="flex flex-col items-center my-12">
-                <div className="max-w-[80%] h-[500px] w-full bg-linear-to-br from-slate-400 to-slate-900 rounded-3xl shadow-amber400 shadow-md p-6">
-                    <ReactEcharts
-                        option={pieOption}
-                        style={{ width: '100%', height: '100%' }}
-                    />
+                <div id={'data-table'}>
+                    <IndexDataTable initialData={initialData} />
+                </div>
+                <div id={'index-pie-chart'}>
+                    <IndexPieChart pieOption={pieOption} />
                 </div>
             </div>
+
             <TreeOrigins />
             <ChongqingHerbs />
 
+
             <style jsx>{`
-              #chart-container {
-                  position: relative;
-                  overflow: hidden;
-              }
+                #chart-container {
+                    position: relative;
+                    overflow: hidden;
+                }
+                #data-table {
+                    position: absolute;
+                    top: 12%;
+                    left: 2%;
+                    width: 30%;
+                }
+                #index-pie-chart {
+                    position: absolute;
+                    bottom:12%;
+                    right: 0;
+                    width: 40%;
+                }
               
               #chart-container .absolute {
                   z-index: -1;
