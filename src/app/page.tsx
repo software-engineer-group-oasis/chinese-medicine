@@ -219,11 +219,26 @@ function chongQingMap() {
                     {chongQingHerbs.map((item, index) => (
                         <div key={index} className="herb-card flex gap-6 border-stone-900 border-2 rounded-2xl py-10 px-5"
                              ref={el => cardRefs.current[index] = el}>
-                            <div><img src={item.image} className="w-[10rem] aspect-square rounded-2xl object-cover shadow-stone-600 shadow-md"/></div>
-                            <div className={'flex-1'}>
-                                <div className={'font-bold text-3xl'}>{item.name}</div>
-                                <div className={'py-8'}>{item.description}</div>
-                            </div>
+                            { index % 2 === 0 && (
+                                <>
+                                    <div><img src={item.image} className="w-[10rem] aspect-square rounded-2xl object-cover shadow-stone-600 shadow-md"/></div>
+                                    <div className={'flex-1'}>
+                                        <div className={'font-bold text-3xl'}>{item.name}</div>
+                                        <div className={'py-8'}>{item.description}</div>
+                                    </div>
+                                </>
+                            )}
+                            {
+                                index % 2 === 1 && (
+                                    <>
+                                        <div className={'flex-1'}>
+                                            <div className={'font-bold text-3xl'}>{item.name}</div>
+                                            <div className={'py-8'}>{item.description}</div>
+                                        </div>
+                                        <div><img src={item.image} className="w-[10rem] aspect-square rounded-2xl object-cover shadow-stone-600 shadow-md"/></div>
+                                    </>
+                                )
+                            }
                         </div>
                     ))}
                 </div>
