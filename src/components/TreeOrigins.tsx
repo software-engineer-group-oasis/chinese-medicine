@@ -22,7 +22,7 @@ export default function TreeOrigins() {
         <div className={'flex gap-10 justify-center py-8 max-w-[80%] mx-auto'}>
             {
                 treeOrigins.map((treeOrigin, index) => (
-                    <div key={index} className={'flex flex-col py-4 px-2 items-center rounded-md transition-all duration-300 hover:bg-green-500 hover:shadow-lg'}>
+                    <div key={index} className={'flex flex-col py-4 px-2 items-center rounded-md transition-all duration-300 hover:bg-green-500 hover:shadow-lg hover:-translate-y-1/4'}>
                         <img src={treeOrigin.image} alt={treeOrigin.origin} className={'rounded-md w-40 h-40 object-cover'} />
                         <p className={'text-xl font-bold py-4'}>{treeOrigin.origin}</p>
                         <p className={'text-xs text-center w-60'}>{treeOrigin.description}</p>
