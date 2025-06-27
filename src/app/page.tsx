@@ -5,14 +5,8 @@ import ReactEcharts from 'echarts-for-react';
 import * as echarts from 'echarts';
 import chongQingJson from "@/assets/chongQing.json"
 import {useRouter} from "next/navigation"
-import {chongQingHerbs} from '@/mock/data'
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import TreeOrigins from "@/components/TreeOrigins";
 import ChongqingHerbs from "@/components/ChongqingHerbs";
-
-// 注册GSAP插件
-gsap.registerPlugin(ScrollTrigger);
 
 echarts.registerMap('chongQing', {geoJSON: chongQingJson });
 // console.log(chongQingJson)
