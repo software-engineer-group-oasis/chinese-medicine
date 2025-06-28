@@ -21,7 +21,8 @@
     "react-dom": "^19.0.0",
     "uuid": "^11.1.0",
     "ws": "^8.18.2",
-    "zustand": "^5.0.5"
+    "zustand": "^5.0.5",
+    "cos-nodejs-sdk-v5": "latest"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
