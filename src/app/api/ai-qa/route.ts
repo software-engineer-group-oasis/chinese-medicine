@@ -3,12 +3,12 @@ import { v4 as uuidv4 } from 'uuid';
 import WebSocket from 'ws';
 import CryptoJS from 'crypto-js';
 
-// 讯飞星火X1大模型API配置（请替换为你自己的信息）
-const APPID = '18848346';
-const API_KEY = '66e21c751f0b7bf2ee8aee9d32d94069';
-const API_SECRET = 'MjRmODUwNTMxZDEyZTE0ZjA4OGIzYWM5';
-const HOST = 'spark-api.xf-yun.com';
-const PATH = '/v1/x1';
+// 讯飞星火X1大模型API配置（从环境变量读取）
+const APPID = process.env.XUNFEI_APPID;
+const API_KEY = process.env.XUNFEI_API_KEY;
+const API_SECRET = process.env.XUNFEI_API_SECRET;
+const HOST = process.env.XUNFEI_HOST;
+const PATH = process.env.XUNFEI_PATH;
 const BASE_URL = `wss://${HOST}${PATH}`;
 
 // 生成RFC1123格式时间字符串
