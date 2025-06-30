@@ -1,267 +1,297 @@
-// 中药评价与申报模块主页面
+// 中药评价模块主页面 - 面向普通用户
 "use client"
-import { useState } from 'react';
-import { Card, Row, Col, Button, Statistic, Divider } from 'antd';
-import { LineChartOutlined, FormOutlined, FileSearchOutlined, HistoryOutlined, ExportOutlined, StarOutlined } from '@ant-design/icons';
+
+import { useState, useEffect } from 'react';
+import { 
+  Card, Row, Col, Input, Button, Statistic, Divider, Tag, List, 
+  Typography, Rate, Badge, Avatar, Tooltip, Empty, Tabs
+} from 'antd';
+import { 
+  SearchOutlined, FireOutlined, TrophyOutlined, RiseOutlined, 
+  StarOutlined, EnvironmentOutlined, HeartOutlined, LikeOutlined
+} from '@ant-design/icons';
 import Link from 'next/link';
-// 导入echarts图表组件
-import ReactECharts from 'echarts-for-react';
-import type { EChartsOption } from 'echarts';
+import Image from 'next/image';
+import { mockHerbs, regionRankings } from '@/mock/evaluation';
 
-export default function EvaluationPage() {
-  // 模拟评价数据统计
-  const [stats] = useState({
-    totalEvaluations: 128,
-    pendingEvaluations: 15,
-    completedEvaluations: 113,
-    standardVersions: 3
-  });
+const { Title, Text, Paragraph } = Typography;
+const { TabPane } = Tabs;
 
-  // 评价趋势图表配置
-  const trendOption: EChartsOption = {
-    title: {
-      text: '近期评价趋势',
-      left: 'center',
-      textStyle: {
-        fontSize: 14
-      }
-    },
-    tooltip: {
-      trigger: 'axis'
-    },
-    xAxis: {
-      type: 'category',
-      data: ['1月', '2月', '3月', '4月', '5月', '6月']
-    },
-    yAxis: {
-      type: 'value'
-    },
-    series: [
-      {
-        name: '评价数量',
-        type: 'line',
-        smooth: true,
-        data: [12, 18, 24, 32, 28, 14],
-        itemStyle: {
-          color: '#1677ff'
-        },
-        areaStyle: {
-          color: {
-            type: 'linear',
-            x: 0,
-            y: 0,
-            x2: 0,
-            y2: 1,
-            colorStops: [{
-              offset: 0, color: 'rgba(22, 119, 255, 0.5)'
-            }, {
-              offset: 1, color: 'rgba(22, 119, 255, 0.1)'
-            }]
-          }
-        }
-      }
-    ]
-  };
 
-  // 评价分布饼图配置
-  const distributionOption: EChartsOption = {
-    title: {
-      text: '评价结果分布',
-      left: 'center',
-      textStyle: {
-        fontSize: 14
-      }
-    },
-    tooltip: {
-      trigger: 'item',
-      formatter: '{a} <br/>{b}: {c} ({d}%)'
-    },
-    legend: {
-      orient: 'vertical',
-      left: 'left',
-      data: ['优秀', '良好', '合格', '待改进', '不合格']
-    },
-    series: [
-      {
-        name: '评价结果',
-        type: 'pie',
-        radius: ['50%', '70%'],
-        avoidLabelOverlap: false,
-        itemStyle: {
-          borderRadius: 10,
-          borderColor: '#fff',
-          borderWidth: 2
-        },
-        label: {
-          show: false,
-          position: 'center'
-        },
-        emphasis: {
-          label: {
-            show: true,
-            fontSize: '14',
-            fontWeight: 'bold'
-          }
-        },
-        labelLine: {
-          show: false
-        },
-        data: [
-          { value: 35, name: '优秀', itemStyle: { color: '#52c41a' } },
-          { value: 42, name: '良好', itemStyle: { color: '#1677ff' } },
-          { value: 26, name: '合格', itemStyle: { color: '#faad14' } },
-          { value: 8, name: '待改进', itemStyle: { color: '#fa8c16' } },
-          { value: 2, name: '不合格', itemStyle: { color: '#f5222d' } }
-        ]
-      }
-    ]
-  };
+export default function HerbEvaluationPage() {
+  const [searchText, setSearchText] = useState('');
+  const [filteredHerbs, setFilteredHerbs] = useState(mockHerbs);
+  
+  // 搜索功能
+  useEffect(() => {
+    if (searchText) {
+      const filtered = mockHerbs.filter(herb => 
+        herb.name.includes(searchText) || 
+        herb.latinName.toLowerCase().includes(searchText.toLowerCase()) ||
+        herb.efficacy.includes(searchText) ||
+        herb.region.includes(searchText)
+      );
+      setFilteredHerbs(filtered);
+    } else {
+      setFilteredHerbs(mockHerbs);
+    }
+  }, [searchText]);
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">中药评价与申报管理系统</h1>
+      <Title level={2} className="mb-6">中药材评价系统</Title>
       
-      {/* 统计卡片 */}
-      <Row gutter={[16, 16]} className="mb-6">
-        <Col xs={24} sm={12} md={6}>
-          <Card bordered={false} className="shadow-sm hover:shadow-md transition-shadow">
-            <Statistic 
-              title="总评价数" 
-              value={stats.totalEvaluations} 
-              prefix={<LineChartOutlined />} 
-              valueStyle={{ color: '#1677ff' }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={6}>
-          <Card bordered={false} className="shadow-sm hover:shadow-md transition-shadow">
-            <Statistic 
-              title="待处理评价" 
-              value={stats.pendingEvaluations} 
-              valueStyle={{ color: '#faad14' }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={6}>
-          <Card bordered={false} className="shadow-sm hover:shadow-md transition-shadow">
-            <Statistic 
-              title="已完成评价" 
-              value={stats.completedEvaluations} 
-              valueStyle={{ color: '#52c41a' }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={6}>
-          <Card bordered={false} className="shadow-sm hover:shadow-md transition-shadow">
-            <Statistic 
-              title="评价标准版本" 
-              value={stats.standardVersions} 
-              valueStyle={{ color: '#722ed1' }}
-            />
-          </Card>
-        </Col>
-      </Row>
+      {/* 搜索栏 */}
+      <div className="mb-8">
+        <Input.Search
+          placeholder="搜索中药名称、功效或产地..."
+          enterButton={<Button type="primary" icon={<SearchOutlined />}>搜索</Button>}
+          size="large"
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          className="max-w-3xl"
+        />
+      </div>
 
-      {/* 功能导航卡片 */}
-      <h2 className="text-xl font-semibold mb-4">功能导航</h2>
-      <Row gutter={[16, 16]} className="mb-6">
-        <Col xs={24} sm={12} md={8}>
-          <Link href="/evaluation/form-design">
-            <Card 
-              hoverable 
-              className="h-full"
-              cover={<div className="bg-blue-50 p-6 flex justify-center"><FormOutlined style={{ fontSize: '48px', color: '#1677ff' }} /></div>}
-            >
-              <Card.Meta 
-                title="评价表单自定义" 
-                description="设置药材外观、成分含量、来源渠道等评价维度" 
-              />
-            </Card>
-          </Link>
+      <Row gutter={[24, 24]}>
+        {/* 左侧中药展示区域 */}
+        <Col xs={24} lg={16}>
+          <Title level={4} className="mb-4">
+            <StarOutlined className="mr-2" />中药材评价展示
+          </Title>
+          
+          {filteredHerbs.length > 0 ? (
+            <Row gutter={[16, 16]}>
+              {filteredHerbs.map(herb => (
+                <Col xs={24} sm={12} key={herb.id}>
+                  <Link href={`/herb?id=${herb.name}`}>
+                    <Card 
+                      hoverable 
+                      className="h-full"
+                      cover={
+                        <div className="p-4 bg-gray-50 flex justify-center">
+                          <div className="relative w-32 h-32">
+                            <Image 
+                              src={herb.image} 
+                              alt={herb.name}
+                              fill
+                              style={{objectFit: 'cover'}}
+                              className="rounded-lg"
+                            />
+                          </div>
+                        </div>
+                      }
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <Title level={4} className="mb-0">{herb.name}</Title>
+                          <Text type="secondary" italic>{herb.latinName}</Text>
+                        </div>
+                        <Badge count={`No.${herb.rank}`} style={{ backgroundColor: '#52c41a' }} />
+                      </div>
+                      
+                      <div className="mb-2">
+                        <Rate disabled defaultValue={Math.round(herb.score)} className="text-sm" />
+                        <Text strong className="ml-2">{herb.score}</Text>
+                        <Text type="secondary" className="ml-2">({herb.reviews}次评价)</Text>
+                      </div>
+                      
+                      <Paragraph ellipsis={{ rows: 2 }} className="mb-2">
+                        <Text strong>功效：</Text>{herb.efficacy}
+                      </Paragraph>
+                      
+                      <div className="flex items-center mb-2">
+                        <EnvironmentOutlined className="mr-1 text-blue-500" />
+                        <Text>{herb.region}</Text>
+                        <Text type="secondary" className="ml-2">¥{herb.price}/kg</Text>
+                        <Text 
+                          type={herb.priceChange.startsWith('+') ? 'success' : 'danger'}
+                          className="ml-1"
+                        >
+                          {herb.priceChange}
+                        </Text>
+                      </div>
+                      
+                      <div>
+                        {herb.tags.map(tag => (
+                          <Tag key={tag} color={tag === '名贵' ? 'gold' : tag === '热销' ? 'red' : 'blue'} className="mr-1">
+                            {tag}
+                          </Tag>
+                        ))}
+                      </div>
+                    </Card>
+                  </Link>
+                </Col>
+              ))}
+            </Row>
+          ) : (
+            <Empty description="未找到相关中药材" />
+          )}
         </Col>
-        <Col xs={24} sm={12} md={8}>
-          <Link href="/evaluation/record-entry">
-            <Card 
-              hoverable 
-              className="h-full"
-              cover={<div className="bg-green-50 p-6 flex justify-center"><FileSearchOutlined style={{ fontSize: '48px', color: '#52c41a' }} /></div>}
-            >
-              <Card.Meta 
-                title="评价记录录入" 
-                description="填写打分、文字说明，上传图文材料佐证" 
-              />
-            </Card>
-          </Link>
-        </Col>
-        <Col xs={24} sm={12} md={8}>
-          <Link href="/evaluation/standard-versions">
-            <Card 
-              hoverable 
-              className="h-full"
-              cover={<div className="bg-purple-50 p-6 flex justify-center"><HistoryOutlined style={{ fontSize: '48px', color: '#722ed1' }} /></div>}
-            >
-              <Card.Meta 
-                title="评价标准版本控制" 
-                description="配置不同版本的评价标准，并记录使用历史" 
-              />
-            </Card>
-          </Link>
-        </Col>
-        <Col xs={24} sm={12} md={8}>
-          <Link href="/evaluation/results">
-            <Card 
-              hoverable 
-              className="h-full"
-              cover={<div className="bg-yellow-50 p-6 flex justify-center"><ExportOutlined style={{ fontSize: '48px', color: '#faad14' }} /></div>}
-            >
-              <Card.Meta 
-                title="结果查询与导出" 
-                description="条件筛选、批量导出评价记录" 
-              />
-            </Card>
-          </Link>
-        </Col>
-        <Col xs={24} sm={12} md={8}>
-          <Link href="/evaluation/herbs">
-            <Card 
-              hoverable 
-              className="h-full"
-              cover={<div className="bg-green-50 p-6 flex justify-center"><StarOutlined style={{ fontSize: '48px', color: '#52c41a' }} /></div>}
-            >
-              <Card.Meta 
-                title="中药评价展示" 
-                description="查看中药评价结果、排行榜与市场分析" 
-              />
-            </Card>
-          </Link>
-        </Col>
-        <Col xs={24} sm={12} md={8}>
-          <Link href="/evaluation/application">
-            <Card 
-              hoverable 
-              className="h-full"
-              cover={<div className="bg-red-50 p-6 flex justify-center"><FileSearchOutlined style={{ fontSize: '48px', color: '#f5222d' }} /></div>}
-            >
-              <Card.Meta 
-                title="申报材料联动" 
-                description="从评价数据生成申报用的报告模板" 
-              />
-            </Card>
-          </Link>
-        </Col>
-      </Row>
-
-      {/* 数据可视化 */}
-      <Divider orientation="left">数据分析</Divider>
-      <Row gutter={[16, 16]}>
-        <Col xs={24} md={12}>
-          <Card bordered={false} className="shadow-sm">
-            <ReactECharts option={trendOption} style={{ height: '300px' }} />
+        
+        {/* 右侧排行榜区域 */}
+        <Col xs={24} lg={8}>
+          <Card className="mb-6">
+            <Tabs defaultActiveKey="1">
+              <TabPane 
+                tab={<span><TrophyOutlined />优质中药排行</span>}
+                key="1"
+              >
+                <List
+                  itemLayout="horizontal"
+                  dataSource={mockHerbs.slice(0, 5)}
+                  renderItem={(item, index) => (
+                    <List.Item>
+                      <List.Item.Meta
+                        avatar={
+                          <Avatar 
+                            style={{ 
+                              backgroundColor: index === 0 ? '#f56a00' : index === 1 ? '#7265e6' : index === 2 ? '#ffbf00' : '#00a2ae' 
+                            }}
+                          >
+                            {index + 1}
+                          </Avatar>
+                        }
+                        title={
+                          <Link href={`/herb?id=${item.name}`}>
+                            {item.name}
+                            <Rate disabled defaultValue={Math.round(item.score)} className="text-xs ml-2" />
+                          </Link>
+                        }
+                        description={
+                          <div>
+                            <Text type="secondary">{item.region}</Text>
+                            <div>
+                              <Tag color="blue">{item.efficacy.split('、')[0]}</Tag>
+                              <Tag color="green">评分 {item.score}</Tag>
+                            </div>
+                          </div>
+                        }
+                      />
+                    </List.Item>
+                  )}
+                />
+                <div className="text-right mt-2">
+                  <Link href="/evaluation/ranking">
+                    <Button type="link">查看完整排行 &gt;</Button>
+                  </Link>
+                </div>
+              </TabPane>
+              
+              <TabPane 
+                tab={<span><EnvironmentOutlined />优质产区排行</span>}
+                key="2"
+              >
+                <List
+                  itemLayout="horizontal"
+                  dataSource={regionRankings}
+                  renderItem={(item, index) => (
+                    <List.Item>
+                      <List.Item.Meta
+                        avatar={
+                          <Avatar 
+                            style={{ 
+                              backgroundColor: index === 0 ? '#f56a00' : index === 1 ? '#7265e6' : index === 2 ? '#ffbf00' : '#00a2ae' 
+                            }}
+                          >
+                            {index + 1}
+                          </Avatar>
+                        }
+                        title={
+                          <span>
+                            {item.region}
+                            <Rate disabled defaultValue={Math.round(item.score)} className="text-xs ml-2" />
+                          </span>
+                        }
+                        description={
+                          <div>
+                            <Text type="secondary">代表药材：</Text>
+                            {item.herbs.map((herb, i) => (
+                              <Tag key={i} color="blue">{herb}</Tag>
+                            ))}
+                          </div>
+                        }
+                      />
+                    </List.Item>
+                  )}
+                />
+                <div className="text-right mt-2">
+                  <Link href="/evaluation/ranking">
+                    <Button type="link">查看完整排行 &gt;</Button>
+                  </Link>
+                </div>
+              </TabPane>
+              
+              <TabPane 
+                tab={<span><FireOutlined />热门需求排行</span>}
+                key="3"
+              >
+                <List
+                  itemLayout="horizontal"
+                  dataSource={mockHerbs.sort((a, b) => {
+                    const demandOrder = { '极高': 5, '高': 4, '中高': 3, '中': 2, '低': 1 };
+                    return demandOrder[b.demand] - demandOrder[a.demand];
+                  }).slice(0, 5)}
+                  renderItem={(item, index) => (
+                    <List.Item>
+                      <List.Item.Meta
+                        avatar={
+                          <Avatar 
+                            style={{ 
+                              backgroundColor: index === 0 ? '#f56a00' : index === 1 ? '#7265e6' : index === 2 ? '#ffbf00' : '#00a2ae' 
+                            }}
+                          >
+                            {index + 1}
+                          </Avatar>
+                        }
+                        title={
+                          <Link href={`/herb?id=${item.name}`}>
+                            {item.name}
+                            <Tag color="red" className="ml-2">需求{item.demand}</Tag>
+                          </Link>
+                        }
+                        description={
+                          <div>
+                            <Text type="secondary">{item.region}</Text>
+                            <div className="flex items-center">
+                              <Text>¥{item.price}/kg</Text>
+                              <Text 
+                                type={item.priceChange.startsWith('+') ? 'success' : 'danger'}
+                                className="ml-1"
+                              >
+                                {item.priceChange}
+                              </Text>
+                            </div>
+                          </div>
+                        }
+                      />
+                    </List.Item>
+                  )}
+                />
+                <div className="text-right mt-2">
+                  <Link href="/evaluation/demand-ranking">
+                    <Button type="link">查看完整排行 &gt;</Button>
+                  </Link>
+                </div>
+              </TabPane>
+            </Tabs>
           </Card>
-        </Col>
-        <Col xs={24} md={12}>
-          <Card bordered={false} className="shadow-sm">
-            <ReactECharts option={distributionOption} style={{ height: '300px' }} />
+          
+          {/* 申报入口 */}
+          <Card 
+            title={<span><RiseOutlined className="mr-2" />中药材申报入口</span>}
+            className="mb-6"
+          >
+            <Paragraph>
+              通过我们的评价系统，您可以为优质中药材申请评级认证，提升产品价值和市场竞争力。
+            </Paragraph>
+            <div className="text-center mt-4">
+              <Link href="/evaluation/application">
+                <Button type="primary" size="large">
+                  进入申报系统
+                </Button>
+              </Link>
+            </div>
           </Card>
         </Col>
       </Row>

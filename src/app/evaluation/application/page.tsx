@@ -619,7 +619,7 @@ export default function ApplicationPage() {
     <div className="p-6">
       <Breadcrumb className="mb-4">
         <Breadcrumb.Item>
-          <Link href="/evaluation"><ArrowLeftOutlined /> 中药评价与申报</Link>
+          <Link href="/evaluation"><ArrowLeftOutlined /> 中药评价</Link>
         </Breadcrumb.Item>
         <Breadcrumb.Item>申报材料联动</Breadcrumb.Item>
       </Breadcrumb>
