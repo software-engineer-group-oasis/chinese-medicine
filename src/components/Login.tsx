@@ -61,6 +61,7 @@ const Login = ({ onLoginSuccess, onLoginError }: LoginProps) => {
                     .then(data => {
                         if (data.code === 0) {
                             console.log('data', data)
+                            console.log("user in Login", data.user);
                             onLoginSuccess?.(data.user, data.token);
                         } else {
                             throw new Error(data.message || '登录失败');

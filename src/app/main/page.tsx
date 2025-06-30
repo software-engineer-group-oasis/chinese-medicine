@@ -175,7 +175,7 @@ function chongQingMap() {
     const router = useRouter();
     function handleClick(params:never) {
         const encodedName = encodeURIComponent(params.name);
-        router.push(`/secondary_district?name=${encodedName}&value=${params.value || 0}`)
+        router.push(`/main/secondary_district?name=${encodedName}&value=${params.value || 0}`)
     }
 
     return (

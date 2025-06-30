@@ -4,12 +4,21 @@ import Login from '@/components/Login';
 import useAuthStore from "@/store/useAuthStore";
 import {toast, Toaster} from "react-hot-toast";
 import {useRouter} from "next/navigation";
+import {useEffect} from "react";
 
 export default function LoginPage() {
     const router = useRouter()
     //@ts-ignore
-    const { login } = useAuthStore();
+    const { login, isLoggedIn, initializeAuth } = useAuthStore();
+    useEffect(() => {
+        initializeAuth();
+        if (isLoggedIn) {
+            router.push("/main");
+        }
+    },[])
+
     const handleSuccess = (user:object, token: string) => {
+        console.log("user:", user, "token:", token);
         login(user, token)
         toast.success('登录成功');
         router.push("/main");
