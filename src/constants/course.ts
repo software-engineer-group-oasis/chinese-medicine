@@ -13,7 +13,7 @@ export const COURSE_TARGETS = [
 
 export const COURSE_TAGS = [
   { value: '选修', label: '选修', color: 'purple' },
-  { value: '进修', label: '进修', color: 'green' },
+  { value: '必修', label: '必修', color: 'green' },
   { value: '本科生', label: '本科生', color: 'cyan' },
   { value: '研究生', label: '研究生', color: 'magenta' },
   { value: '博士生', label: '博士生', color: 'blue' },
