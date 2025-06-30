@@ -14,9 +14,8 @@ import {
 import Link from 'next/link';
 import Image from 'next/image';
 import { mockCourses ,mockLearningHistory} from '@/mock/courseResource';
-
+import { COURSE_CATEGORIES, COURSE_TARGETS } from '@/constants/course';
 const { Title, Text, Paragraph } = Typography;
-
 
 
 
@@ -91,55 +90,27 @@ export default function CourseResourcePage() {
             <div className="flex flex-wrap gap-4 mt-4 md:mt-0">
               <div>
                 <Text strong className="mr-2">课程类别:</Text>
-                <Button.Group>
-                  <Button 
-                    type={categoryFilter === 'all' ? 'primary' : 'default'}
-                    onClick={() => setCategoryFilter('all')}
+                 {COURSE_CATEGORIES.map(cat => (
+                  <Button
+                    key={cat.value}
+                    type={categoryFilter === cat.value ? 'primary' : 'default'}
+                    onClick={() => setCategoryFilter(cat.value)}
                   >
-                    全部
+                    {cat.label}
                   </Button>
-                  <Button 
-                    type={categoryFilter === '基础课程' ? 'primary' : 'default'}
-                    onClick={() => setCategoryFilter('基础课程')}
-                  >
-                    基础课程
-                  </Button>
-                  <Button 
-                    type={categoryFilter === '进阶课程' ? 'primary' : 'default'}
-                    onClick={() => setCategoryFilter('进阶课程')}
-                  >
-                    进阶课程
-                  </Button>
-                  <Button 
-                    type={categoryFilter === '实验课程' ? 'primary' : 'default'}
-                    onClick={() => setCategoryFilter('实验课程')}
-                  >
-                    实验课程
-                  </Button>
-                </Button.Group>
+              ))}
               </div>
               <div>
                 <Text strong className="mr-2">适用对象:</Text>
-                <Button.Group>
-                  <Button 
-                    type={targetFilter === 'all' ? 'primary' : 'default'}
-                    onClick={() => setTargetFilter('all')}
-                  >
-                    全部
-                  </Button>
-                  <Button 
-                    type={targetFilter === '本科生' ? 'primary' : 'default'}
-                    onClick={() => setTargetFilter('本科生')}
-                  >
-                    本科生
-                  </Button>
-                  <Button 
-                    type={targetFilter === '研究生' ? 'primary' : 'default'}
-                    onClick={() => setTargetFilter('研究生')}
-                  >
-                    研究生
-                  </Button>
-                </Button.Group>
+                  {COURSE_TARGETS.map(tar => (
+                        <Button
+                          key={tar.value}
+                          type={targetFilter === tar.value ? 'primary' : 'default'}
+                          onClick={() => setTargetFilter(tar.value)}
+                        >
+                          {tar.label}
+                        </Button>
+                   ))}
               </div>
             </div>
           </Col>
@@ -281,8 +252,8 @@ export default function CourseResourcePage() {
                       <div className="flex items-start mb-2">
                         <div className="relative w-16 h-12 mr-2 flex-shrink-0">
                           <Image 
-                            src={item.cover} 
-                            alt={item.title}
+                            src={item.cover || "/default-cover.png"} 
+                            alt={item.title || "课程封面"}
                             fill
                             style={{objectFit: 'cover'}}
                             className="rounded"
@@ -336,12 +307,23 @@ export default function CourseResourcePage() {
             <List
               size="small"
               dataSource={[
-                { title: '全部课程', count: mockCourses.length, link: '/course-resource' },
-                { title: '基础课程', count: mockCourses.filter(c => c.category === '基础课程').length, link: '/course-resource?category=基础课程' },
-                { title: '进阶课程', count: mockCourses.filter(c => c.category === '进阶课程').length, link: '/course-resource?category=进阶课程' },
-                { title: '实验课程', count: mockCourses.filter(c => c.category === '实验课程').length, link: '/course-resource?category=实验课程' },
-                { title: '本科生课程', count: mockCourses.filter(c => c.tags.includes('本科生')).length, link: '/course-resource?target=本科生' },
-                { title: '研究生课程', count: mockCourses.filter(c => c.tags.includes('研究生')).length, link: '/course-resource?target=研究生' },
+                // { title: '全部课程', count: mockCourses.length, link: '/course-resource' },
+                // { title: '基础课程', count: mockCourses.filter(c => c.category === '基础课程').length, link: '/course-resource?category=基础课程' },
+                // { title: '进阶课程', count: mockCourses.filter(c => c.category === '进阶课程').length, link: '/course-resource?category=进阶课程' },
+                // { title: '实验课程', count: mockCourses.filter(c => c.category === '实验课程').length, link: '/course-resource?category=实验课程' },
+                // { title: '本科生课程', count: mockCourses.filter(c => c.tags.includes('本科生')).length, link: '/course-resource?target=本科生' },
+                // { title: '研究生课程', count: mockCourses.filter(c => c.tags.includes('研究生')).length, link: '/course-resource?target=研究生' },
+                  { title: '全部课程', count: mockCourses.length, link: '/course-resource' },
+                  ...COURSE_CATEGORIES.filter(c => c.value !== 'all').map(c => ({
+                    title: `${c.label}课程`,
+                    count: mockCourses.filter(course => course.category === c.value).length,
+                    link: `/course-resource?category=${c.value}`,
+                  })),
+                  ...COURSE_TARGETS.filter(t => t.value !== 'all').map(t => ({
+                    title: `${t.label}课程`,
+                    count: mockCourses.filter(course => course.tags.includes(t.value)).length,
+                    link: `/course-resource?target=${t.value}`,
+                  })),
               ]}
               renderItem={item => (
                 <List.Item>

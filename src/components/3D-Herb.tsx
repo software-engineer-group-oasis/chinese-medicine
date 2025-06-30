@@ -7,9 +7,10 @@ interface Herb3DProps {
 }
 
 const modelMap: Record<string, string> = {
-  '黄连': '/3d-models/黄柏.glb',
-  '三七': '/3d-models/鹿茸.glb',
+  '黄柏': '/3d-models/黄柏.glb',
+  '鹿茸': '/3d-models/鹿茸.glb',
   '麻黄': '/3d-models/麻黄.glb',
+  '丁香': '/3d-models/dingxiang_pbr.glb',
   // 其他模型名与文件名映射
 };
 
