@@ -1,7 +1,7 @@
 // 首页，展示重庆市地图数据
 "use client"
-import React, {useEffect, useRef} from 'react';
-import ReactEcharts from 'echarts-for-react';
+import React, {Suspense, useEffect, useRef, useState} from 'react';
+import type {EChartsOption} from 'echarts-for-react';
 import * as echarts from 'echarts';
 import chongQingJson from "@/assets/chongQing.json"
 import {useRouter} from "next/navigation"
@@ -9,25 +9,28 @@ import TreeOrigins from "@/components/TreeOrigins";
 import ChongqingHerbs from "@/components/ChongqingHerbs";
 import IndexDataTable from "@/components/IndexDataTable";
 import IndexPieChart from "@/components/IndexPieChart";
+import axiosInstance from "@/api/config";
+import ChongQingMapOption from "@/config/ChongQingMapOption";
+import ChongQingMap from "@/components/ChongQingMap";
 
-echarts.registerMap('chongQing', {geoJSON: chongQingJson });
+echarts.registerMap('chongQing', {geoJSON: chongQingJson});
 // console.log(chongQingJson)
 
 const herbPercentageData = [
-    { name: '黄连', value: 35 },
-    { name: '川贝母', value: 25 },
-    { name: '天麻', value: 15 },
-    { name: '杜仲', value: 10 },
-    { name: '其他', value: 15 }
+    {name: '黄连', value: 35},
+    {name: '川贝母', value: 25},
+    {name: '天麻', value: 15},
+    {name: '杜仲', value: 10},
+    {name: '其他', value: 15}
 ];
 
 // 用于滚动表格box-1
 const initialData = [
-    { id: 1, name: '黄连', value: 35 },
-    { id: 2, name: '川贝母', value: 25 },
-    { id: 3, name: '天麻', value: 15 },
-    { id: 4, name: '杜仲', value: 10 },
-    { id: 5, name: '其他', value: 15 }
+    {id: 1, name: '黄连', value: 35},
+    {id: 2, name: '川贝母', value: 25},
+    {id: 3, name: '天麻', value: 15},
+    {id: 4, name: '杜仲', value: 10},
+    {id: 5, name: '其他', value: 15}
 ];
 
 const pieOption: echarts.EChartOption = {
@@ -88,115 +91,43 @@ const pieOption: echarts.EChartOption = {
     animationEasing: 'elasticOut',
 };
 
-const option: echarts.EChartOption = {
-    // backgroundColor: 'rgba(12, 32, 56, 0.8)',
-    animation: true,
-    animationType: 'linear',
-    animationDuration: 2000,
-    animationEasing: 'cubicOut',
-    tooltip: {
-        backgroundColor: 'rgba(50, 50, 50, 0.7)',
-        borderColor: '#333',
-        textStyle: {
-            color: '#fff'
-        },
-        trigger: 'item',
-        formatter: (params) => {
-            return `${params.name}<br/>数值：${params.value || 0}`;
-        }
-    },
-    itemStyle: {
-        color: '#00BFFF',
-        borderColor: '#FFA500',
-        borderWidth: 2,
-    },
-    title: {
-        text: '重庆中药材分布图',
-        textStyle: {
-            color: '#FFF',
-            fontWeight: 'bold',
-            fontSize: 32
-        },
-        left: 'center',
-        top: 20
-    },
-    visualMap: { // 热力图
-        min: 0,
-        max: 300,
-        inRange: {
-            color: ['#5B8FF9', '#61DDAA', '#F6BD16', '#F6903D', '#E8684A']
-        },
-        text: ['高值', '低值'],
-        textStyle: {
-            color: '#FFF'
-        },
-        calculable: true,
-        bottom: 40,
-        left: 40,
-    },
-    series: [{
-        type: 'map',
-        map: 'chongQing', // 这里必须已经通过 registerMap 注册过
-        roam: true,
-        label: {
-            show:true,//显示标签
-            formatter: (params) => {
-                return params?.name || ''
-            },
-        },
-        layoutCenter: ['45%', '50%'],
-        layoutSize: '80%',
-        emphasis: { // 鼠标移入
-            itemStyle: {
-                color: '#2a333d',
-                borderColor: '#111',
-                shadowBlur: 10,
-                shadowColor: 'rgba(255, 165, 0, 0.8)' // 光晕
+
+export default function ChongQingMapPage() {
+
+    const [chongQingMapOption, setChongQingMapOption] = useState<EChartsOption>({});
+
+    useEffect(() => {
+        axiosInstance.get("/herb-info-service/herbs/location/count/districts").then(res => {
+            let max = 0;
+            for (let i = 0; i < res.data.result.length; i++) {
+                if (res.data.result[i].herbCount > max) {
+                    max = res.data.result[i].herbCount;
+                }
             }
-        },
-        data: [
-            {
-                name: "云阳县",
-                value: 120,
-            },
-            {
-                name: "涪陵区",
-                value: 345,
-            },
-            {
-                name: "渝北区",
-                value: 200,
-            },
-        ]
-    }]
-};
-
-function chongQingMap() {
-    const router = useRouter();
-    function handleClick(params:never) {
-        const encodedName = encodeURIComponent(params.name);
-        router.push(`/main/secondary_district?name=${encodedName}&value=${params.value || 0}`)
-    }
-
+            const data = res.data.result.map((item: { districtName: string, herbCount: number }) => ({
+                name: item.districtName,
+                value: item.herbCount
+            }))
+            setChongQingMapOption(ChongQingMapOption({data, max}))
+        })
+    }, []);
     return (
         <>
-            <div id={'chart-container'} className="my-4 w-[80%] h-[80vh] min-h-[500px] mx-auto rounded-3xl shadow-amber400 shadow-md ">
-                <div className="absolute inset-0 bg-cover bg-center " style={{ backgroundImage: 'url(/images/index_bg.png)' }}></div>
-                <ReactEcharts
-                    option={option}
-                    style={{ width: '100%', height: '100%'}}
-                    onEvents={{ click: handleClick }}
-                />
+            <div id={'chart-container'}
+                 className="my-4 w-[80%] h-[80vh] min-h-[500px] mx-auto rounded-3xl shadow-amber400 shadow-md ">
+                <div className="absolute inset-0 bg-cover bg-center "
+                     style={{backgroundImage: 'url(/images/index_bg.png)'}}></div>
+                <ChongQingMap option={chongQingMapOption}/>
                 <div id={'data-table'}>
-                    <IndexDataTable initialData={initialData} />
+                    <IndexDataTable initialData={initialData}/>
                 </div>
                 <div id={'index-pie-chart'}>
-                    <IndexPieChart pieOption={pieOption} />
+                    <IndexPieChart pieOption={pieOption}/>
                 </div>
             </div>
 
-            <TreeOrigins />
-            <ChongqingHerbs />
+            <TreeOrigins/>
+            <ChongqingHerbs/>
 
 
             <style jsx>{`
@@ -204,53 +135,59 @@ function chongQingMap() {
                     position: relative;
                     overflow: hidden;
                 }
+
                 #data-table {
                     position: absolute;
                     top: 12%;
                     left: 2%;
                     width: 30%;
                 }
+
                 #index-pie-chart {
                     position: absolute;
-                    bottom:12%;
+                    bottom: 12%;
                     right: 0;
                     width: 40%;
                 }
-              
-              #chart-container .absolute {
-                  z-index: -1;
-              }
 
-              #chart-container::before,
-              #chart-container::after {
-                  content: '';
-                  position: absolute;
-                  top: 0;
-                  left: -50%;
-                  width: 200%;
-                  height: 5rem;
-                  background: linear-gradient(90deg, transparent, oklch(74.6% 0.16 232.661), transparent);
-                  animation: moveHorizontal 5s ease-in-out infinite;
-              }
+                #chart-container .absolute {
+                    z-index: -1;
+                }
 
-              #chart-container::after {
-                  top: auto;
-                  bottom: 0;
-                  animation-delay: 2.5s;
-              }
+                #chart-container::before,
+                #chart-container::after {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: -50%;
+                    width: 200%;
+                    height: 5rem;
+                    background: linear-gradient(90deg, transparent, oklch(74.6% 0.16 232.661), transparent);
+                    animation: moveHorizontal 5s ease-in-out infinite;
+                }
 
-              @keyframes moveHorizontal {
-                  0% { transform: translateX(-50%); }
-                  50% { transform: translateX(50%); }
-                  100% { transform: translateX(-50%); }
-              }
+                #chart-container::after {
+                    top: auto;
+                    bottom: 0;
+                    animation-delay: 2.5s;
+                }
+
+                @keyframes moveHorizontal {
+                    0% {
+                        transform: translateX(-50%);
+                    }
+                    50% {
+                        transform: translateX(50%);
+                    }
+                    100% {
+                        transform: translateX(-50%);
+                    }
+                }
             `}
             </style>
 
 
         </>
-        )
+    )
 
 }
-
-export default chongQingMap;
