@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from 'react';
 import { 
   Card, Row, Col, Button, Typography, Tag, Divider, Tabs, 
   List, Tooltip, Rate, Space, Statistic, Descriptions, Progress,
-  Dropdown, Menu, message, Avatar
+  Dropdown, Menu, message, Avatar, Slider
 } from 'antd';
 import { 
   PlayCircleOutlined, PauseCircleOutlined, DownloadOutlined, 
@@ -20,9 +20,9 @@ import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import CommentSection from '@/components/CommentSection';
 import { mockCourses, mockVideoProgress } from '@/mock/courseResource';
+import { COURSE_TAGS} from '@/constants/course';   
 const { Title, Text, Paragraph } = Typography;
 const { TabPane } = Tabs;
-
 
 
 
@@ -82,9 +82,9 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
     if (timeParam) {
       // 如果URL中有时间参数，优先使用
       startTime = parseTimeToSeconds(timeParam);
-    } else if (mockVideoProgress[courseId]) {
+    } else if (mockVideoProgress[courseId as keyof typeof mockVideoProgress]) {
       // 否则使用保存的进度
-      startTime = mockVideoProgress[courseId];
+      startTime = mockVideoProgress[courseId as keyof typeof mockVideoProgress];
     }
     
     // 设置视频开始时间
@@ -206,22 +206,14 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
         <div>
           <Title level={2} className="mb-2">{course.title}</Title>
           <div>
-            {course.tags.map(tag => (
-              <Tag 
-                key={tag} 
-                color={
-                  tag === '基础' ? 'blue' : 
-                  tag === '进阶' ? 'purple' : 
-                  tag === '实验' ? 'green' : 
-                  tag === '本科生' ? 'cyan' : 
-                  tag === '研究生' ? 'magenta' : 
-                  'default'
-                }
-                className="mr-1"
-              >
-                {tag}
-              </Tag>
-            ))}
+            {course.tags.map(tag => {
+              const tagConf = COURSE_TAGS.find(t => t.value === tag);
+              return (
+                <Tag key={tag} color={tagConf?.color || 'default'}>
+                  {tagConf?.label || tag}
+                </Tag>
+              );
+            })}
             <Text type="secondary" className="ml-2">
               <ClockCircleOutlined className="mr-1" />
               {course.duration}
@@ -267,7 +259,7 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
                     poster={course.cover}
                     controls={false}
                   >
-                    <source src={course.videoUrl} type="video/mp4" />
+                    <source src={(course as any).videoUrl || ''} type="video/mp4" />
                     您的浏览器不支持HTML5视频播放。
                   </video>
                   
@@ -294,11 +286,11 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
                             <div className="flex items-center">
                               <SoundOutlined className="mr-2" />
                               <div className="flex-1">
-                                <Progress 
-                                  percent={volume} 
-                                  size="small" 
+                                <Slider 
+                                  min={0}
+                                  max={100}
+                                  value={volume}
                                   onChange={handleVolumeChange}
-                                  showInfo={false}
                                 />
                               </div>
                               <div className="ml-2 w-8 text-center">{volume}%</div>
@@ -367,7 +359,7 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
                   <FileTextOutlined style={{ fontSize: 48 }} className="text-gray-400 mb-4" />
                   <Title level={4}>文档预览</Title>
                   <Paragraph className="mb-4">此处将显示PDF或PPT文档预览</Paragraph>
-                  <Button type="primary" icon={<DownloadOutlined />} onClick={() => handleDownload(course.resources.find(r => r.type === 'pdf'))}>
+                  <Button type="primary" icon={<DownloadOutlined />} onClick={() => handleDownload(course.resources?.find(r => r.type === 'pdf'))}>
                     下载文档
                   </Button>
                 </div>
@@ -447,16 +439,15 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
           >
             <List
               grid={{ gutter: 16, xs: 1, sm: 2, md: 3 }}
-              dataSource={course.relatedHerbs}
+              dataSource={course.relatedHerbs || []}
               renderItem={herb => (
                 <List.Item>
-                  <Link href={`/herb?name=${herb.name}`}>
+                  <Link href={`/herb?name=${herb}`}>
                     <Card hoverable className="text-center">
                       <div className="mb-2">
                         <Avatar size={64} src="/images/黄连.jpg" />
                       </div>
-                      <Title level={5}>{herb.name}</Title>
-                      <Text type="secondary">{herb.description}</Text>
+                      <Title level={5}>{herb}</Title>
                     </Card>
                   </Link>
                 </List.Item>
@@ -470,7 +461,7 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
             className="mb-6"
           >
             <List
-              dataSource={course.resources}
+              dataSource={course.resources || []}
               renderItem={resource => (
                 <List.Item
                   actions={[
@@ -537,6 +528,8 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
                           src={item.cover} 
                           alt={item.title}
                           fill
+                          sizes="80px"
+                          priority
                           style={{objectFit: 'cover'}}
                           className="rounded"
                         />

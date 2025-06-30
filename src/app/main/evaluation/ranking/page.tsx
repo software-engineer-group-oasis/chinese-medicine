@@ -20,6 +20,9 @@ const { Title, Text, Paragraph } = Typography;
 const { TabPane } = Tabs;
 const { Option } = Select;
 
+// 路径常量/函数
+const HERB_DETAIL_LINK = (name: string) => `/main/herb?id=${name}`;
+const EVALUATION_HOME_LINK = '/main/evaluation/herbs';
 
 // 表格列定义
 const herbColumns = [
@@ -59,7 +62,7 @@ const herbColumns = [
           />
         </div>
         <div>
-          <Link href={`/herb?id=${text}`}>
+          <Link href={HERB_DETAIL_LINK(text)}>
             <Text strong>{text}</Text>
           </Link>
           <div>
@@ -328,7 +331,7 @@ export default function RankingPage() {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <Link href="/evaluation/herbs">
+        <Link href={EVALUATION_HOME_LINK}>
           <Button icon={<ArrowLeftOutlined />}>返回评价主页</Button>
         </Link>
       </div>

@@ -9,7 +9,7 @@ import ReactEcharts from "echarts-for-react"
 import React, {useEffect, useState} from "react"
 import {Table, type TableProps} from "antd";
 import {getHerbsByLocation} from '@/api/HerbInfoApi';
-import {Location} from "@/const/types"
+import {Location} from "@/constTypes/types"
 import Link from "next/link";
 
 const columns:TableProps<Location>['columns'] = [

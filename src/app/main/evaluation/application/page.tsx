@@ -27,6 +27,11 @@ const { Step } = Steps;
 const { TabPane } = Tabs;
 const { Panel } = Collapse;
 
+// 路径常量/函数
+const EVALUATION_HOME_LINK = '/main/evaluation';
+const HERB_DETAIL_LINK = (name: string) => `/main/herb?id=${name}`;
+const TEMPLATE_DOWNLOAD_LINK = (templateId: string) => `/main/evaluation/template/download?id=${templateId}`;
+
 export default function ApplicationPage() {
   // 状态管理
   const [form] = Form.useForm();
@@ -619,7 +624,7 @@ export default function ApplicationPage() {
     <div className="p-6">
       <Breadcrumb className="mb-4">
         <Breadcrumb.Item>
-          <Link href="/evaluation"><ArrowLeftOutlined /> 中药评价与申报</Link>
+          <Link href={EVALUATION_HOME_LINK}><ArrowLeftOutlined /> 中药评价与申报</Link>
         </Breadcrumb.Item>
         <Breadcrumb.Item>申报材料联动</Breadcrumb.Item>
       </Breadcrumb>
