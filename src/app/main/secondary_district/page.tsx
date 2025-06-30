@@ -22,7 +22,7 @@ const columns:TableProps<Location>['columns'] = [
     title: '药材编号',
     dataIndex: 'herbId',
     key: 'herbId',
-    render: (text, record) => <Link href={`/secondary_district/detail?herbId=${text}&herbName=${record.herbName}`}>{text}</Link>
+    render: (text, record) => <Link href={`/main/secondary_district/detail?herbId=${text}&herbName=${record.herbName}`}>{text}</Link>
   },
   {
     title: '数量',

@@ -9,7 +9,7 @@ const useAuthStore = create((set) => (
         //@ts-ignore
         login: (user, token) => {
             set({user, token, isLoggedIn: true})
-
+            console.log('user:', user);
             localStorage.setItem('user', JSON.stringify(user));
             localStorage.setItem('token', token);
         },

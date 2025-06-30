@@ -1,9 +1,11 @@
 import Link from 'next/link';
 import React from 'react';
+import useAuthStore from "@/store/useAuthStore";
 
 const NAVBAR_HEIGHT = 60;
 
 const Navbar: React.FC = () => {
+    const {user} = useAuthStore();
     return (
         <nav style={{
             //width: '100%',
@@ -32,6 +34,7 @@ const Navbar: React.FC = () => {
                 <Link href="/main/research" style={{color: '#fff', textDecoration: 'none', transition: 'color 0.2s', fontWeight: 500}}>中药课题研究</Link>
                 <Link href="/main/training" style={{color: '#fff', textDecoration: 'none', transition: 'color 0.2s', fontWeight: 500}}>中药制作培训管理</Link>
                 <Link href="/main/evaluation" style={{color: '#fff', textDecoration: 'none', transition: 'color 0.2s', fontWeight: 500}}>中药质量评价与申报</Link>
+                <Link href={'/main/user'} >用户信息</Link>
             </div>
         </nav>
     );
