@@ -260,7 +260,7 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
                     poster={course.cover}
                     controls={false}
                   >
-                    <source src={course.videoUrl} type="video/mp4" />
+                    <source src={(course as any).videoUrl || ''} type="video/mp4" />
                     您的浏览器不支持HTML5视频播放。
                   </video>
                   
@@ -360,7 +360,7 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
                   <FileTextOutlined style={{ fontSize: 48 }} className="text-gray-400 mb-4" />
                   <Title level={4}>文档预览</Title>
                   <Paragraph className="mb-4">此处将显示PDF或PPT文档预览</Paragraph>
-                  <Button type="primary" icon={<DownloadOutlined />} onClick={() => handleDownload(course.resources.find(r => r.type === 'pdf'))}>
+                  <Button type="primary" icon={<DownloadOutlined />} onClick={() => handleDownload(course.resources?.find(r => r.type === 'pdf'))}>
                     下载文档
                   </Button>
                 </div>
@@ -443,13 +443,12 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
               dataSource={course.relatedHerbs || []}
               renderItem={herb => (
                 <List.Item>
-                  <Link href={`/herb?name=${herb.name}`}>
+                  <Link href={`/herb?name=${herb}`}>
                     <Card hoverable className="text-center">
                       <div className="mb-2">
                         <Avatar size={64} src="/images/黄连.jpg" />
                       </div>
-                      <Title level={5}>{herb.name}</Title>
-                      <Text type="secondary">{herb.description}</Text>
+                      <Title level={5}>{herb}</Title>
                     </Card>
                   </Link>
                 </List.Item>
