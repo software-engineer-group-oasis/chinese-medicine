@@ -27,11 +27,11 @@ const Navbar: React.FC = () => {
                 <Link href="/">中药智慧平台</Link>
             </div>
             <div style={{display: 'flex', gap: 32}}>
-                <Link href="/herb" style={{color: '#fff', textDecoration: 'none', transition: 'color 0.2s', fontWeight: 500}}>中药百科</Link>
-                <Link href="/course-resource" style={{color: '#fff', textDecoration: 'none', transition: 'color 0.2s', fontWeight: 500}}>中药课程资源</Link>
-                <Link href="/research" style={{color: '#fff', textDecoration: 'none', transition: 'color 0.2s', fontWeight: 500}}>中药课题研究</Link>
-                <Link href="/training" style={{color: '#fff', textDecoration: 'none', transition: 'color 0.2s', fontWeight: 500}}>中药制作培训管理</Link>
-                <Link href="/evaluation" style={{color: '#fff', textDecoration: 'none', transition: 'color 0.2s', fontWeight: 500}}>中药质量评价与申报</Link>
+                <Link href="/main/herb" style={{color: '#fff', textDecoration: 'none', transition: 'color 0.2s', fontWeight: 500}}>中药百科</Link>
+                <Link href="/main/course-resource" style={{color: '#fff', textDecoration: 'none', transition: 'color 0.2s', fontWeight: 500}}>中药课程资源</Link>
+                <Link href="/main/research" style={{color: '#fff', textDecoration: 'none', transition: 'color 0.2s', fontWeight: 500}}>中药课题研究</Link>
+                <Link href="/main/training" style={{color: '#fff', textDecoration: 'none', transition: 'color 0.2s', fontWeight: 500}}>中药制作培训管理</Link>
+                <Link href="/main/evaluation" style={{color: '#fff', textDecoration: 'none', transition: 'color 0.2s', fontWeight: 500}}>中药质量评价与申报</Link>
             </div>
         </nav>
     );

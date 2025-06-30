@@ -1,14 +1,50 @@
 // 展示区县数据，使用表格分条目展示
 // 使用饼状图进行数据聚合统计
 'use client'
-import { useSearchParams } from 'next/navigation'
+import {useSearchParams} from 'next/navigation'
 import {geoJson} from '@/assets/secondaryGeo'
 import axios from 'axios'
 import * as echarts from 'echarts'
 import ReactEcharts from "echarts-for-react"
 import React, {useEffect, useState} from "react"
-import {mockTableData, columns} from "@/mock/data";
-import { Table } from "antd";
+import {Table, type TableProps} from "antd";
+import {getHerbsByLocation} from '@/api/HerbInfoApi';
+import {Location} from "@/const/types"
+import Link from "next/link";
+
+const columns:TableProps<Location>['columns'] = [
+  {
+    title: '药材名称',
+    dataIndex: 'herbName',
+    key: 'herbName'
+  },
+  {
+    title: '药材编号',
+    dataIndex: 'herbId',
+    key: 'herbId',
+    render: (text, record) => <Link href={`/secondary_district/detail?herbId=${text}&herbName=${record.herbName}`}>{text}</Link>
+  },
+  {
+    title: '数量',
+    dataIndex: 'count',
+    key: 'count',
+  },
+  {
+    title: '药材产地',
+    dataIndex: 'streetName',
+    key: 'streetName'
+  },
+  {
+    title: '经度',
+    dataIndex: 'longitude',
+    key: 'longitude'
+  },
+  {
+    title: '纬度',
+    dataIndex: 'latitude',
+    key: 'latitude'
+  }
+]
 
 export default function SecondaryDistrictPage() {
   const searchParams = useSearchParams()
@@ -19,9 +55,10 @@ export default function SecondaryDistrictPage() {
   const value = searchParams.get('value')
 
   useEffect(() => {
-        axios.get(geoJson[name]).then(res => {
+        const geoJsonTyped = geoJson as Record<string, string>;
+        axios.get(geoJsonTyped[name]).then(res => {
           console.log(res.data)
-          echarts.registerMap(name, res.data)
+          echarts.registerMap(name as string, res.data)
           setOption({
             animation: true,
             animationDuration: 2000,
@@ -63,6 +100,13 @@ export default function SecondaryDistrictPage() {
     }
   ,[name, value])
 
+  const [locations, setLocations] = useState<Location []>([]);
+  useEffect(()=> {
+    if (name) {
+      getHerbsByLocation(name).then(res => setLocations(res.data.locations))
+    }
+  }, [])
+
 
   return (
     <div className="p-4">
@@ -73,10 +117,11 @@ export default function SecondaryDistrictPage() {
               style={{ width: '100%', height: '100%' }}
           />
       }
-      <Table dataSource={mockTableData} columns={columns}  pagination={{
+      <Table dataSource={locations} columns={columns}  pagination={{
         pageSize: 5,     // 每页显示条数
-        total: mockTableData.length,// 总数据条数
-      }} />
+        total: locations.length,// 总数据条数
+      }}
+      rowKey={'herbId'}/>
     </div>
   )
 }

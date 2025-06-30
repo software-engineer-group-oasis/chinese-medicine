@@ -1,13 +1,8 @@
 "use client"
-import {useSearchParams} from "next/navigation";
-import GrowthTimeline from '@/components/GrowthTimeline';
-import CommentSection from '@/components/CommentSection';
-import React, { useCallback, useState, useMemo } from "react";
-import { Row, Col, Input, Button, Tag, Breadcrumb, Typography, Pagination, Select } from "antd";
-import { SearchOutlined, HomeOutlined, BookOutlined } from "@ant-design/icons";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { herbDetails, HerbDetail as HerbDetailType } from '@/mock/herbData';
+import {useRouter, useSearchParams} from "next/navigation";
+import React, {useMemo, useState} from "react";
+import {Typography} from "antd";
+import {herbDetails} from '@/mock/herbData';
 import HerbHome from '@/components/HerbHome';
 import HerbDetail from '@/components/HerbDetail';
 
