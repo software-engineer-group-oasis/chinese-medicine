@@ -6,7 +6,7 @@ import { Input, Button } from "antd";
 import { UserOutlined,  LockOutlined} from '@ant-design/icons';
 
 interface LoginProps {
-    onLoginSuccess?: (token: string) => void;
+    onLoginSuccess?: (user:object, token: string) => void;
     onLoginError?: (message: string) => void;
 }
 
@@ -35,6 +35,7 @@ const Login = ({ onLoginSuccess, onLoginError }: LoginProps) => {
 
         // 模拟调用验证码
         // TencentCaptcha 使用通过script 标签引入的
+        //@ts-ignore
         if (typeof TencentCaptcha === 'undefined') {
             setError('验证码加载中，请稍候...');
             setLoading(false);
@@ -42,10 +43,11 @@ const Login = ({ onLoginSuccess, onLoginError }: LoginProps) => {
         }
 
         // 初始化验证码
+        //@ts-ignore
         const captcha = new TencentCaptcha(captchaAppId, (res) => {
             if (res.ret === 0) {
                 // 验证码通过，继续登录流程
-                fetch('/api/login', {
+                fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -57,9 +59,9 @@ const Login = ({ onLoginSuccess, onLoginError }: LoginProps) => {
                 })
                     .then(r => r.json())
                     .then(data => {
-                        if (data.success) {
+                        if (data.code === 0) {
                             console.log('data', data)
-                            onLoginSuccess?.(data.token);
+                            onLoginSuccess?.(data.user, data.token);
                         } else {
                             throw new Error(data.message || '登录失败');
                         }
@@ -109,7 +111,7 @@ const Login = ({ onLoginSuccess, onLoginError }: LoginProps) => {
                 </Button>
 
                 {/* 加载验证码 SDK */}
-                <Script src={process.env.NEXT_PUBLIC_TENCENT_CAPTCHA_URL}  strategy="beforeInteractive" />
+                <Script src={process.env.NEXT_PUBLIC_TENCENT_CAPTCHA_URL} />
             </div>
     );
 };
