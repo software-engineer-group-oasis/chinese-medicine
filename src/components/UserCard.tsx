@@ -4,6 +4,7 @@ import {Card, Form, Input, Button, message, List, Typography, Avatar} from 'antd
 import useAuthStore from "@/store/useAuthStore";
 import {useRouter} from "next/navigation";
 import axiosInstance from "@/api/config";
+import Link from "next/link";
 
 const {Text} = Typography;
 
@@ -167,13 +168,20 @@ export default function UserCard ({user}: {user: UserInfo}): React.ReactNode {
                     </Form.Item>
 
                     <Form.Item>
-                        <Button type="primary" htmlType="submit">
-                            更新信息
-                        </Button>
+                        <div className={"flex gap-2"}>
+                            <Button type="primary" htmlType="submit">
+                                更新信息
+                            </Button>
+                            <Button type={'primary'} onClick={handleLogout}>
+                                退出登录
+                            </Button>
+                            <Button type={'dashed'}>
+                                <Link href={'/main/user/reset-password'}>修改密码</Link>
+                            </Button>
+                        </div>
+
                     </Form.Item>
-                    <Button type={'primary'} onClick={handleLogout}>
-                        退出登录
-                    </Button>
+
                 </Form>
 
             </Card>
