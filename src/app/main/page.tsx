@@ -26,17 +26,24 @@ export default function ChongQingMapPage() {
 
     useEffect(() => {
         axiosInstance.get("/herb-info-service/herbs/location/count/districts").then(res => {
-            let max = 0;
-            for (let i = 0; i < res.data.result.length; i++) {
-                if (res.data.result[i].herbCount > max) {
-                    max = res.data.result[i].herbCount;
+            if (res.data.code === 0) {
+                let max = 0;
+                for (let i = 0; i < res.data.result.length; i++) {
+                    if (res.data.result[i].herbCount > max) {
+                        max = res.data.result[i].herbCount;
+                    }
                 }
+                const data = res.data.result.map((item: StatsByDistrict) => ({
+                    name: item.districtName,
+                    value: item.herbCount
+                }))
+                setChongQingMapOption(ChongQingMapOption({data, max}))
+            } else {
+                throw new Error("获取数据失败")
             }
-            const data = res.data.result.map((item: StatsByDistrict) => ({
-                name: item.districtName,
-                value: item.herbCount
-            }))
-            setChongQingMapOption(ChongQingMapOption({data, max}))
+
+        }).catch(err=> {
+            console.error(err.message);
         })
     }, []);
 

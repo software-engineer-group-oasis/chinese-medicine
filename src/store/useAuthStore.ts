@@ -30,6 +30,11 @@ const useAuthStore = create((set) => (
                     isLoggedIn: true,
                 });
             }
+        },
+
+        updateUser: (user:object) => {
+            set({user})
+            localStorage.setItem('user', JSON.stringify(user))
         }
     }
 ))
