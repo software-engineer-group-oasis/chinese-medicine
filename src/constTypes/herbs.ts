@@ -27,3 +27,13 @@ export type Herb = {
     des: string
     herbLinkCategoryList: HerbLinkCategory[]
 }
+
+export type StatsByHerb = {
+    herbName: string,
+    herbNumber: number
+}
+
+export type StatsByDistrict = {
+    districtName: string,
+    herbCount: number
+}

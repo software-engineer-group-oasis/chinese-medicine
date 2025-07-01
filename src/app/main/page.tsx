@@ -1,10 +1,9 @@
 // 首页，展示重庆市地图数据
 "use client"
-import React, {Suspense, useEffect, useRef, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import type {EChartsOption} from 'echarts-for-react';
 import * as echarts from 'echarts';
 import chongQingJson from "@/assets/chongQing.json"
-import {useRouter} from "next/navigation"
 import TreeOrigins from "@/components/TreeOrigins";
 import ChongqingHerbs from "@/components/ChongqingHerbs";
 import IndexDataTable from "@/components/IndexDataTable";
@@ -12,89 +11,18 @@ import IndexPieChart from "@/components/IndexPieChart";
 import axiosInstance from "@/api/config";
 import ChongQingMapOption from "@/config/ChongQingMapOption";
 import ChongQingMap from "@/components/ChongQingMap";
+import {StatsByDistrict, StatsByHerb} from "@/constTypes/herbs";
+import IndexPieOption from "@/config/IndexPieOption";
 
 echarts.registerMap('chongQing', {geoJSON: chongQingJson});
 // console.log(chongQingJson)
-
-const herbPercentageData = [
-    {name: '黄连', value: 35},
-    {name: '川贝母', value: 25},
-    {name: '天麻', value: 15},
-    {name: '杜仲', value: 10},
-    {name: '其他', value: 15}
-];
-
-// 用于滚动表格box-1
-const initialData = [
-    {id: 1, name: '黄连', value: 35},
-    {id: 2, name: '川贝母', value: 25},
-    {id: 3, name: '天麻', value: 15},
-    {id: 4, name: '杜仲', value: 10},
-    {id: 5, name: '其他', value: 15}
-];
-
-const pieOption: echarts.EChartOption = {
-    title: {
-        text: '重庆主要中药材占比',
-        left: 'center',
-        textStyle: {
-            color: '#FFF',
-            fontSize: 24,
-            fontWeight: 'bold'
-        }
-    },
-    tooltip: {
-        trigger: 'item',
-        formatter: '{a} <br/>{b}: {c} ({d}%)',
-        backgroundColor: 'rgba(50, 50, 50, 0.7)',
-        textStyle: {
-            color: '#fff'
-        }
-    },
-    legend: {
-        orient: 'vertical',
-        left: 'left',
-        textStyle: {
-            color: '#FFF'
-        }
-    },
-    series: [
-        {
-            name: '中药材占比',
-            type: 'pie',
-            radius: ['40%', '70%'],
-            avoidLabelOverlap: false,
-            itemStyle: {
-                borderRadius: 10,
-                borderColor: '#fff',
-                borderWidth: 2
-            },
-            label: {
-                show: true,
-                formatter: '{b}: {d}%',
-                color: '#FFF'
-            },
-            emphasis: {
-                label: {
-                    show: true,
-                    fontSize: 16,
-                    fontWeight: 'bold'
-                }
-            },
-            labelLine: {
-                show: true
-            },
-            data: herbPercentageData
-        }
-    ],
-    animation: true,
-    animationEasing: 'elasticOut',
-};
 
 
 export default function ChongQingMapPage() {
 
     const [chongQingMapOption, setChongQingMapOption] = useState<EChartsOption>({});
+    const [pieOption, setPieOption] = useState<EChartsOption>({});
+
 
     useEffect(() => {
         axiosInstance.get("/herb-info-service/herbs/location/count/districts").then(res => {
@@ -104,13 +32,33 @@ export default function ChongQingMapPage() {
                     max = res.data.result[i].herbCount;
                 }
             }
-            const data = res.data.result.map((item: { districtName: string, herbCount: number }) => ({
+            const data = res.data.result.map((item: StatsByDistrict) => ({
                 name: item.districtName,
                 value: item.herbCount
             }))
             setChongQingMapOption(ChongQingMapOption({data, max}))
         })
     }, []);
+
+    useEffect(() => {
+        axiosInstance.get("/herb-info-service/herbs/location/count/topHerbs").then(res => {
+            if (res.data.code === 0) {
+                console.log("统计信息",res.data);
+                const data = res.data.result.map((item:StatsByHerb) => (
+                    {
+                        name: item.herbName,
+                        value: item.herbNumber
+                    }
+                ))
+                setPieOption(IndexPieOption({data}));
+            } else {
+                console.error(res.data.message);
+            }
+        }).catch(err => {
+            console.error(err.message);
+        })
+    }, []);
+
     return (
         <>
             <div id={'chart-container'}
@@ -119,7 +67,7 @@ export default function ChongQingMapPage() {
                      style={{backgroundImage: 'url(/images/index_bg.png)'}}></div>
                 <ChongQingMap option={chongQingMapOption}/>
                 <div id={'data-table'}>
-                    <IndexDataTable initialData={initialData}/>
+                    <IndexDataTable />
                 </div>
                 <div id={'index-pie-chart'}>
                     <IndexPieChart pieOption={pieOption}/>

@@ -13,6 +13,7 @@ export default function LoginPage() {
     useEffect(() => {
         initializeAuth();
         if (isLoggedIn) {
+            toast.success('系统自动登录');
             router.push("/main");
         }
     },[])

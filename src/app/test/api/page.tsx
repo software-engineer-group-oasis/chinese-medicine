@@ -1,7 +1,7 @@
 "use client"
 import {getHerbsByLocation} from '@/api/HerbInfoApi'
 import {useEffect, useState} from "react";
-import {Location} from '@/constTypes/types';
+import {Location} from '@/constTypes/herbs';
 
 export default function TestApi() {
     const [herbs, setHerbs] =  useState<Location []>([]);

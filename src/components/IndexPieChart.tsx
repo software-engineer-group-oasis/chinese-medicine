@@ -1,9 +1,11 @@
 import ReactEcharts from "echarts-for-react";
-import React from "react";
+import React, {useEffect} from "react";
 import echarts from "echarts";
+import axiosInstance from "@/api/config";
+import {StatsByHerb} from "@/constTypes/herbs";
 
 export default function IndexPieChart({pieOption}: {pieOption: echarts.EChartOption}) {
-  return (
+    return (
       <>
           <div id={'pieChart-wrapper'}>
               <div id={'pieChart'}>

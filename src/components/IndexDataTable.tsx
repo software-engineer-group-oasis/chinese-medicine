@@ -1,5 +1,7 @@
-// 实现表格数据的滚动刷新
-import React from 'react';
+"use client"
+import React, {Suspense, useEffect, useState} from 'react';
+import axiosInstance from "@/api/config";
+import {StatsByHerb} from "@/constTypes/herbs";
 
 interface DataRow {
   id: number;
@@ -7,15 +9,33 @@ interface DataRow {
   value: number;
 }
 
-interface ScrollingDataTableProps {
+interface DataTableProps {
   title?: string;
-  initialData: DataRow[];
 }
 
-const IndexDataTable: React.FC<ScrollingDataTableProps> = ({ title = "中药材数据", initialData }) => {
-  const dataRows = initialData;
-
+const IndexDataTable: React.FC<DataTableProps> = ({ title = "中药材数据"}: DataTableProps) => {
+    const [dataRows, setDataRows] = useState<DataRow[]>([]);
+    useEffect(() => {
+        axiosInstance.get("/herb-info-service/herbs/location/count/topHerbs").then(res => {
+            if (res.data.code === 0) {
+                console.log("统计信息",res.data);
+                const data:DataRow[] = res.data.result.map((item:StatsByHerb, index:number) => (
+                    {
+                        id: index + 1,
+                        name: item.herbName,
+                        value: item.herbNumber
+                    }
+                ))
+                setDataRows(data);
+            } else {
+                console.error(res.data.message);
+            }
+        }).catch(err => {
+            console.error(err.message);
+        })
+    }, []);
   return (
+      <Suspense fallback={<div>加载中...</div>}>
           <div id={'box-1'}>
               <div id={'box-1-main'}>
                   <h2 className="text-xl font-bold mb-2">{title}</h2>
@@ -39,29 +59,31 @@ const IndexDataTable: React.FC<ScrollingDataTableProps> = ({ title = "中药材�
                           </tbody>
                       </table>
                   </div>
-          </div>
-      {/* 自定义动画样式 */}
-      <style jsx global>{`
-        #box-1 {
-            background-image: url('/images/box1_bg.png');
-            background-size: contain; // 整张图片显示
-            background-repeat: no-repeat;
-            background-position: center;
-            width: 100%;
-            height: auto;
-            aspect-ratio: 567/343;
-            position: relative;
-        }
+              </div>
+              {/* 自定义动画样式 */}
+              <style jsx global>{`
+                  #box-1 {
+                      background-image: url('/images/box1_bg.png');
+                      background-size: contain; // 整张图片显示
+                      background-repeat: no-repeat;
+                      background-position: center;
+                      width: 100%;
+                      height: auto;
+                      aspect-ratio: 567/343;
+                      position: relative;
+                  }
 
-        #box-1-main {
-            color: #fff;
-            position: absolute;
-            left: 10%;
-            top: 12%;
-        }
-      `}
-      </style>
-    </div>
+                  #box-1-main {
+                      color: #fff;
+                      position: absolute;
+                      left: 10%;
+                      top: 12%;
+                  }
+              `}
+              </style>
+          </div>
+      </Suspense>
+
   );
 };
 

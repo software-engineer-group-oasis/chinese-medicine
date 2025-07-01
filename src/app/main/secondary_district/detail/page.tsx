@@ -3,7 +3,7 @@
 import {useEffect, useState} from "react";
 import {useSearchParams} from "next/navigation";
 import {getHerbLocationsByName} from "@/api/HerbInfoApi";
-import {Location} from "@/constTypes/types";
+import {Location} from "@/constTypes/herbs";
 import { Card, List } from "antd";
 import React from "react";
 import GrowthTimeline from "@/components/GrowthTimeline";
