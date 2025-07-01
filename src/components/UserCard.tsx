@@ -1,6 +1,10 @@
 "use client"
 import React, { useState } from 'react';
-import { Card, Form, Input, Button, message } from 'antd';
+import {Card, Form, Input, Button, message, List, Typography} from 'antd';
+import useAuthStore from "@/store/useAuthStore";
+import {useRouter} from "next/navigation";
+
+const {Text} = Typography;
 
 // 定义用户信息类型
 type UserInfo = {
@@ -13,16 +17,18 @@ type UserInfo = {
 }
 
 export default function UserCard ({user}: {user: UserInfo}): React.ReactNode {
-    // 初始化用户信息状态
-
+    const router = useRouter();
+    // 初始化用户信息
     const [userInfo, setUserInfo] = useState<UserInfo>({
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        phone: user.phone,
-        avatarUrl: user.avatarUrl,
-        role: user.role
+        id: user?.id,
+        username: user?.username,
+        email: user?.email,
+        phone: user?.phone,
+        avatarUrl: user?.avatarUrl,
+        role: user?.role
     });
+
+    const {logout} = useAuthStore();
 
     // 处理表单提交
     const handleUpdate = (values: UserInfo) => {
@@ -33,9 +39,29 @@ export default function UserCard ({user}: {user: UserInfo}): React.ReactNode {
         setUserInfo(values);
     };
 
+    const handleLogout = () => {
+        console.log('退出登录')
+        logout();
+        message.success('退出登录成功');
+        router.push('/login');
+    }
+
+
+
     return (
         <div style={{ maxWidth: 600, margin: 'auto', padding: '2rem' }}>
             <Card title="用户信息" variant={'outlined'}>
+                <List
+                    size={'small'}
+                    dataSource={[
+                        {label: '用户类型', value: userInfo.role}
+                    ]}
+                    renderItem={(item)=> (
+                        <List.Item>
+                            <Text strong>{item.label}: <span className={'ml-2'}>{item.value}</span></Text>
+                        </List.Item>
+                    )}
+                />
                 <Form layout="vertical" initialValues={userInfo} onFinish={handleUpdate}>
                     <Form.Item label="姓名" name="username" rules={[{ required: true, message: '请输入您的姓名!' }]}>
                         <Input />
@@ -54,8 +80,13 @@ export default function UserCard ({user}: {user: UserInfo}): React.ReactNode {
                             更新信息
                         </Button>
                     </Form.Item>
+                    <Button type={'primary'} onClick={handleLogout}>
+                        退出登录
+                    </Button>
                 </Form>
+
             </Card>
+
         </div>
     );
 };

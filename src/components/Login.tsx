@@ -4,6 +4,8 @@ import Script from 'next/script';
 import { useState, useCallback } from 'react';
 import { Input, Button } from "antd";
 import { UserOutlined,  LockOutlined} from '@ant-design/icons';
+import Link from 'next/link';
+import {ArrowRightOutlined} from '@ant-design/icons';
 
 interface LoginProps {
     onLoginSuccess?: (user:object, token: string) => void;
@@ -84,11 +86,12 @@ const Login = ({ onLoginSuccess, onLoginError }: LoginProps) => {
     }, [username, password]);
 
     return (
-            <div className="w-fit h-fit flex flex-col gap-4 py-6 px-10 bg-slate-400/30 rounded-2xl shadow-2xl backdrop-blur-sm"
+            <div className="w-fit h-fit flex flex-col gap-4 py-6 px-10 bg-transparent rounded-2xl shadow-2xl backdrop-blur-md"
                  style={{
                      position: "absolute",
-                     left: "50rem",
-                     top: "5rem"
+                     left: "50%",
+                     top: "50%",
+                     transform: "translate(-50%, -50%)"
             }}>
                 <header className="flex justify-between">
                     <div><img src="/images/草药.svg" alt="logo" width={50} /></div>
@@ -110,6 +113,7 @@ const Login = ({ onLoginSuccess, onLoginError }: LoginProps) => {
                 <Button onClick={handleLogin} disabled={loading}>
                     {loading ? '验证中...' : '登录'}
                 </Button>
+                <Link href="/register" className={'text-sky-500 hover:underline hover:font-bold'}><ArrowRightOutlined />去注册</Link>
 
                 {/* 加载验证码 SDK */}
                 <Script src={process.env.NEXT_PUBLIC_TENCENT_CAPTCHA_URL} />
