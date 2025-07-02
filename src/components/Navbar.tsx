@@ -32,7 +32,7 @@ const Navbar: React.FC = () => {
                 <Link href="/main/herb" style={{color: '#000', textDecoration: 'none', transition: 'color 0.2s', fontWeight: 500}}>中药百科</Link>
                 <Link href="/main/course-resource" style={{color: '#000', textDecoration: 'none', transition: 'color 0.2s', fontWeight: 500}}>中药课程资源</Link>
                 <Link href="/main/research" style={{color: '#000', textDecoration: 'none', transition: 'color 0.2s', fontWeight: 500}}>中药课题研究</Link>
-                <Link href="/main/training" style={{color: '#000', textDecoration: 'none', transition: 'color 0.2s', fontWeight: 500}}>中药制作培训管理</Link>
+                <Link href="/main/training" style={{color: '#000', textDecoration: 'none', transition: 'color 0.2s', fontWeight: 500}}>中药制作培训材料</Link>
                 <Link href="/main/evaluation" style={{color: '#000', textDecoration: 'none', transition: 'color 0.2s', fontWeight: 500}}>中药质量评价与申报</Link>
                 <Link href={'/main/user'} style={{color: '#000', textDecoration: 'none', transition: 'color 0.2s', fontWeight: 500}}>用户信息</Link>
             </div>
