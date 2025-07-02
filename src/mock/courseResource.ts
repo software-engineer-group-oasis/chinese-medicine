@@ -1,38 +1,4 @@
-// 类型声明
-export type ExperimentStep = {
-  title: string;
-  content: string;
-};
-
-export type CourseResource = {
-  name: string;
-  type: 'video' | 'pdf' | 'excel' | string;
-  size: string;
-  url?: string;
-};
-
-export type Course = {
-  id: number;
-  title: string;
-  cover: string;
-  description: string;
-  tags: string[];
-  rating: number;
-  reviews: number;
-  likes: number;
-  category: string;
-  relatedHerbs: string[];
-  createdAt: string;
-  author: string;
-  duration: string;
-  progress: number;
-  experimentSteps: ExperimentStep[];
-  resources?: CourseResource[];
-  viewCount?: number;        // 新增
-  downloadCount?: number;    // 新增
-  authorAvatar?: string;     // 新增
-  authorTitle?: string;      // 新增
-};
+import type { Course } from '@/constTypes/course';
 // 模拟课程数据
 export const mockCourses: Course[] = [
   {
