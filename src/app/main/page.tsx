@@ -13,6 +13,7 @@ import ChongQingMapOption from "@/config/ChongQingMapOption";
 import ChongQingMap from "@/components/ChongQingMap";
 import {StatsByDistrict, StatsByHerb} from "@/constTypes/herbs";
 import IndexPieOption from "@/config/IndexPieOption";
+import SearchHerb from '@/components/SearchHerb';
 
 echarts.registerMap('chongQing', {geoJSON: chongQingJson});
 // console.log(chongQingJson)
@@ -68,6 +69,7 @@ export default function ChongQingMapPage() {
 
     return (
         <>
+            <SearchHerb />
             <div id={'chart-container'}
                  className="my-4 w-[80%] h-[80vh] min-h-[500px] mx-auto rounded-3xl shadow-amber400 shadow-md ">
                 <div className="absolute inset-0 bg-cover bg-center "

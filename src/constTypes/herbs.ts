@@ -37,3 +37,18 @@ export type StatsByDistrict = {
     districtName: string,
     herbCount: number
 }
+
+export type HerbGrowth = {
+    id: number,
+    herbId: number,
+    herbName: string,
+    batchCode: string,
+    wet: number,
+    temperature: number,
+    des: string,
+    longitude: number,
+    latitude: number,
+    userId: number,
+    recordTime: string,
+    imgUrl: string
+}

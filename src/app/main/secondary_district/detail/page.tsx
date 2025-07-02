@@ -17,7 +17,7 @@ export default function HerbDetailPage() {
     useEffect(() => {
         getHerbLocationsByName(herbName as string)
             .then(res => {
-                setLocation(res.data.locations.filter((l:Location) => l.herbId === Number(herbId))[0])
+                setLocation(res.data.locations.filter((l: Location) => l.herbId === Number(herbId))[0])
             })
     }, []);
     return (

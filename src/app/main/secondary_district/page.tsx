@@ -22,7 +22,7 @@ const columns:TableProps<Location>['columns'] = [
     title: '药材编号',
     dataIndex: 'herbId',
     key: 'herbId',
-    render: (text, record) => <Link href={`/main/secondary_district/detail?herbId=${text}&herbName=${record.herbName}`}>{text}</Link>
+    render: (text, record) => <Link href={`/main/trace?herbName=${record.herbName}`}>{text}</Link>
   },
   {
     title: '数量',
@@ -109,19 +109,20 @@ export default function SecondaryDistrictPage() {
 
 
   return (
-    <div className="p-4">
-      <h1 className="text-xl font-bold mb-4">区县数据查询</h1>
-      { option &&
-          <ReactEcharts
-              option={option}
-              style={{ width: '100%', height: '100%' }}
-          />
-      }
-      <Table dataSource={locations} columns={columns}  pagination={{
-        pageSize: 5,     // 每页显示条数
-        total: locations.length,// 总数据条数
-      }}
-      rowKey={'herbId'}/>
-    </div>
+      <div className="p-4">
+        <h1 className="text-xl font-bold mb-4">区县数据查询</h1>
+        {option &&
+            <ReactEcharts
+                option={option}
+                style={{width: '100%', height: '100%'}}
+            />
+        }
+        <Table dataSource={locations} columns={columns} pagination={{
+          pageSize: 5,     // 每页显示条数
+          total: locations.length,// 总数据条数
+        }}
+               rowKey="id"
+        />
+      </div>
   )
 }

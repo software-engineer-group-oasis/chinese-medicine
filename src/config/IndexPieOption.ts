@@ -35,7 +35,7 @@ export default function IndexPieOption({data}:pieOptionProps):echarts.EChartOpti
             {
                 name: '中药材占比',
                 type: 'pie',
-                radius: ['40%', '70%'],
+                radius: ['30%', '50%'],
                 avoidLabelOverlap: false,
                 itemStyle: {
                     borderRadius: 10,

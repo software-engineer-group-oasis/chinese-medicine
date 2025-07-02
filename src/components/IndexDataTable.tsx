@@ -79,6 +79,23 @@ const IndexDataTable: React.FC<DataTableProps> = ({ title = "中药材数据"}: 
                       left: 10%;
                       top: 12%;
                   }
+                  
+                  table {
+                      width: 100%;
+                  }
+                  
+                  th {
+                      background-color: rgba(255, 255, 255, 0.2);
+                  }
+                  
+                  th, td {
+                      padding: 0 2rem;
+                      text-align: left;
+                  }
+                  
+                  tbody tr:nth-child(even) {
+                      background-color: rgba(255, 255, 255, 0.1);
+                  }
               `}
               </style>
           </div>
