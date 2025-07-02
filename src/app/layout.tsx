@@ -23,10 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Navbar />
-        <div style={{ paddingTop: NAVBAR_HEIGHT }}>
-          {children}
-        </div>
+        {children}
       </body>
     </html>
   );
