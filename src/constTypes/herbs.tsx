@@ -11,6 +11,18 @@ export type Location = {
     latitude: number
 }
 
+export type District = {
+    id: number,
+    name: string
+}
+
+export type Street = {
+    streetId: number,
+    districtId: number,
+    streetName: string,
+    districtName: string,
+}
+
 export const locationColumns = [
     {title: "编号", dataIndex: "herbId", key: "herbId"},
     {title: "药材名称", dataIndex: "herbName", key: "herbName"},

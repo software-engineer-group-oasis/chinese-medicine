@@ -1,7 +1,7 @@
 "use client"
 import AdminBreadcrumb from "@/components/AdminBreadcrumb";
 import {useEffect, useState} from "react";
-import {Location, locationColumns} from "@/constTypes/herbs";
+import {Location, locationColumns, District} from "@/constTypes/herbs";
 import {ConfigProvider, Table} from "antd";
 import zhCN from 'antd/lib/locale/zh_CN';
 import useAxios from "@/hooks/useAxios";
@@ -9,6 +9,7 @@ import HerbLocationForm from "@/app/admin/herb/geo/HerbLocationForm";
 
 export default function AdminGeoPage() {
     const [locations, setLocations] = useState<Location[]>([]);
+    const [districts, setDistricts] = useState<District[]>([]);
     const [pagination, setPagination] = useState({
         pageSize: 10,
         current: 1,
@@ -17,8 +18,9 @@ export default function AdminGeoPage() {
     const [selectedLocation, setSelectedLocation] = useState<Location | null>(null)
 
     // 提交更新
-    const handleUpdate = (values)=> {
+    const handleUpdate = (values:Location)=> {
         console.log(values)
+        const address = values.districtName+values.streetName
         // TODO 进行api请求
 
         // 更新本地状态
@@ -43,21 +45,25 @@ export default function AdminGeoPage() {
 
 
 
-    const {data, loading, error} = useAxios("/herb-info-service/herbs/location");
+    const {data:locationsData, loading:locationsLoading, error:locationsError} = useAxios("/herb-info-service/herbs/location");
+    const {data:districtsData, loading:districtsLoading, error:districtError} = useAxios("/herb-info-service/division/district");
 
     useEffect(() => {
         // @ts-ignore
-        if (data && data.locations) {
-            setLocations(data.locations);
+        if (locationsData && locationsData.locations) {
+            setLocations(locationsData.locations);
         }
-    }, [data]);
+        if (districtsData && districtsData.districts) {
+            setDistricts(districtsData.districts);
+        }
+    }, [locationsData, districtsData]);
 
-    if (loading) {
+    if (locationsLoading || districtsLoading) {
         return <div>加载中...</div>
     }
-    if (error) {
+    if (locationsError || districtError) {
         // @ts-ignore
-        return <div>{error.message}</div>
+        return <div>{locationsError?.message || districtsError?.message}</div>
     }
 
     return (
@@ -76,7 +82,7 @@ export default function AdminGeoPage() {
                 <Table
                     columns={locationColumns}
                     dataSource={locations}
-                    loading={loading}
+                    loading={locationsLoading}
                     rowKey={"id"}
                     pagination={{
                         ...pagination,
@@ -96,6 +102,7 @@ export default function AdminGeoPage() {
 
             <HerbLocationForm open={isModalVisible}
                               location={selectedLocation}
+                              districts={districts}
                               onClose={closeModel}
                               onUpdate={handleUpdate} />
         </>
