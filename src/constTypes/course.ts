@@ -35,28 +35,22 @@ export type Course = {
   courseId: number;
   courseName: string;
   coverImageUrl: string;
-  courseType: number;
-  courseObject: number;
+  courseType: string;
+  courseObject: string;
   teacherId: number;
   courseStartTime: string;
   courseEndTime: string;
   courseDes: string;
   courseAverageRating: number;
-  courseRatingCount: number;   
+  courseRatingCount: number;
+  
+  // 可选字段，用于处理后端可能返回的其他数据
+  [key: string]: any;  
 };
 
-export type CourseListProps = {
-  courses: Course[];
-}
 
-export type CourseSearchBarProps = {
-  searchText: string;
-  setSearchText: (v: string) => void;
-  categoryFilter: string;
-  setCategoryFilter: (v: string) => void;
-  targetFilter: string;
-  setTargetFilter: (v: string) => void;
-};
+
+
 
 export type LearningCourse = {
   id: string | number;

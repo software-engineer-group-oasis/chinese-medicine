@@ -17,21 +17,21 @@ export default function CourseHeader({
   return (
     <div className="flex justify-between items-center mb-6">
       <div>
-        <Title level={2} className="mb-2">{course.title}</Title>
-        <div>
-          {course.tags.map(tag => {
-            const tagConf = COURSE_TAGS.find(t => t.value === tag);
+        <Title level={2} className="mb-2">{course.courseName}</Title>
+        {/* <div>
+          {String(course.courseObject).map((courseObject: String) => {
+            const tagConf = COURSE_TAGS.find(t => t.value === courseObject);
             return (
-              <Tag key={tag} color={tagConf?.color || 'default'}>
-                {tagConf?.label || tag}
+              <Tag key={courseObject} color={tagConf?.color || 'default'}>
+                {tagConf?.label || courseObject}
               </Tag>
             );
           })}
           <Text type="secondary" className="ml-2">
             <ClockCircleOutlined className="mr-1" />
-            {course.duration}
+            {course.courseStartTime} - {course.courseEndTime || '进行中'  }S
           </Text>
-        </div>
+        </div> */}
       </div>
       <div className="flex gap-2">
         <Button 

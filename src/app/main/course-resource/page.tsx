@@ -1,7 +1,7 @@
 // 中药课程资源主页面
 "use client"
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect,useMemo } from 'react';
 import { 
   Card, Row, Col, Button, Tag, List, Typography, 
   Rate, Progress, Avatar, Breadcrumb, Divider, Tooltip, Empty
@@ -26,15 +26,23 @@ const { Title} = Typography;
 
 export default function CourseResourcePage() {
   const [searchText, setSearchText] = useState('');
-  const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
+  // const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [targetFilter, setTargetFilter] = useState('all');
   
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(10);
 
+  interface CourseQueryParams {
+  page: number;
+  size: number;
+  keyword?: string;
+  courseType?: string;
+  courseObject?: string;
+}
+
   //组合请求参数
-  const params: any = {
+  const params: CourseQueryParams = {
     page,
     size,
   };
@@ -43,61 +51,55 @@ export default function CourseResourcePage() {
   if (targetFilter !== 'all') params.courseObject = targetFilter;
  const { courses, isLoading, isError } = useCourses(params);
 
-// 搜索和筛选功能
+//筛选
 
-useEffect(() => {
-    let filtered = courses;
-    
-    // 关键词搜索
-    if (searchText) {
-      filtered = filtered.filter((course: Course) => 
-        course.courseName.toLowerCase().includes(searchText.toLowerCase()) ||
-        course.courseDes.toLowerCase().includes(searchText.toLowerCase()) 
-        // course.relatedHerbs.some((herb: string) => herb.toLowerCase().includes(searchText.toLowerCase()))
-      );
-    }
-    
-    // 类别筛选
-    if (categoryFilter !== 'all') {
-      filtered = filtered.filter((course: Course) => 
-        course.courseType === Number(categoryFilter)
-      );
-    }
-    
-    // 对象筛选
-    if (targetFilter !== 'all') {
-      filtered = filtered.filter((course: Course) => {
-        if (Array.isArray(course.courseObject)) {
-          return course.courseObject.includes(targetFilter);
-        }
-        // 是数字，直接比较
-        return String(course.courseObject) === String(targetFilter);
-      });
-    }
-    
-    setFilteredCourses(filtered);
-  }, [searchText, categoryFilter, targetFilter, courses]);
+const filteredCourses = useMemo(() => {
+  console.log('筛选课程，当前数据:', courses);
+  console.log('筛选条件:', { categoryFilter, targetFilter });
   
-  // // 获取课程进度
-  // interface LearningRecord {
-  //   courseId: number;
-  //   progress: number;
-  //   [key: string]: any;
-  // }
-  // // 获取已学习的课程
-  // const getLearningCourses = () => {
-  //   return learningHistory
-  //     .map(record => {
-  //       const course = courses.find(c => c.id === record.courseId);
-  //       if (!course) return null;
-  //       // Ensure id is present and not undefined
-  //       return { ...course, ...record, id: course.id ?? record.courseId };
-  //     })
-  //     .filter((item): item is NonNullable<typeof item> => item !== null);
-  // };
+  return courses.filter(course => {
+    const matchCategory = categoryFilter === 'all' || course.courseType === categoryFilter;
+    const matchTarget = targetFilter === 'all' || course.courseObject === targetFilter;
+    
+    console.log(`课程 ${course.courseName} 匹配结果:`, { matchCategory, matchTarget });
+    return matchCategory && matchTarget;
+  });
+}, [courses, categoryFilter, targetFilter]);
 
-  // if (isLoading) return <div>加载中...</div>;
-  // if (isError) return <div>加载失败</div>;
+
+// useEffect(() => {
+//     let filtered = courses;
+    
+//     // // 关键词搜索
+//     // if (searchText) {
+//     //   filtered = filtered.filter((course: Course) => 
+//     //     course.courseName.toLowerCase().includes(searchText.toLowerCase()) ||
+//     //     course.courseDes.toLowerCase().includes(searchText.toLowerCase()) 
+//     //     // course.relatedHerbs.some((herb: string) => herb.toLowerCase().includes(searchText.toLowerCase()))
+//     //   );
+//     // }
+    
+//     // 类别筛选
+//     if (categoryFilter !== 'all') {
+//       filtered = filtered.filter((course: Course) => 
+//         course.courseType === Number(categoryFilter)
+//       );
+//     }
+    
+//     // 对象筛选
+//     if (targetFilter !== 'all') {
+//       filtered = filtered.filter((course: Course) => {
+//         if (Array.isArray(course.courseObject)) {
+//           return course.courseObject.includes(targetFilter);
+//         }
+//         // 是数字，直接比较
+//         return String(course.courseObject) === String(targetFilter);
+//       });
+//     }
+    
+//     setFilteredCourses(filtered);
+//   }, [searchText, categoryFilter, targetFilter, courses]);
+  
 
   return (
     <div className="p-6 pt-20">
@@ -131,7 +133,7 @@ useEffect(() => {
                 ),
               },
               {
-                href: '/course-resource',
+                href: '/main/course-resource',
                 title: '课程资源',
               },
               ...(categoryFilter !== 'all'
@@ -149,7 +151,7 @@ useEffect(() => {
               <FireOutlined className="mr-2 text-red-500" />
               热门课程
             </Title>
-            <CourseList courses={courses}  />
+            <CourseList courses={filteredCourses}  />
           </div>
         </Col>
         
@@ -157,7 +159,7 @@ useEffect(() => {
         <Col xs={24} lg={6}>
           {/* <LearningProgressPanel learningCourses={getLearningCourses()} /> */}
           <CourseCategoryPanel
-            courses={filteredCourses}
+            courses={courses}
             COURSE_CATEGORIES={COURSE_CATEGORIES}
             COURSE_TARGETS={COURSE_TARGETS}
           />

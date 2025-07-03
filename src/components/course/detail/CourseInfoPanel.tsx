@@ -14,22 +14,22 @@ export default function CourseInfoPanel(course : Course) {
             <Row gutter={[24, 24]}>
               <Col xs={24} md={16}>
                 <Title level={4} className="mb-4">课程简介</Title>
-                <Paragraph>{course.description}</Paragraph>
+                <Paragraph>{course.courseDes}</Paragraph>
                 
                 <Divider />
                 
                 <Descriptions title="基本信息" column={{ xs: 1, sm: 2, md: 3 }}>
-                  <Descriptions.Item label="创建时间">{course.createdAt}</Descriptions.Item>
-                  <Descriptions.Item label="课程时长">{course.duration}</Descriptions.Item>
+                  <Descriptions.Item label="创建时间">{course.courseStartTime}</Descriptions.Item>
+                  <Descriptions.Item label="课程时长">{course.courseEndTime} - {course.courseStartTime}</Descriptions.Item>
                   <Descriptions.Item label="适用对象">
                     {COURSE_TARGETS
-                      .filter(target => course.tags.includes(target.value))
+                      .filter(target => String(course.courseObject).includes(target.value))
                       .map(target => target.label)
                       .join('、') || '无'}
                   </Descriptions.Item>
-                  <Descriptions.Item label="课程类别">{course.category}</Descriptions.Item>
-                  <Descriptions.Item label="观看次数">{course.viewCount}</Descriptions.Item>
-                  <Descriptions.Item label="下载次数">{course.downloadCount}</Descriptions.Item>
+                  <Descriptions.Item label="课程类别">{course.courseType}</Descriptions.Item>
+                  {/* <Descriptions.Item label="观看次数">{course.viewCount}</Descriptions.Item>
+                  <Descriptions.Item label="下载次数">{course.downloadCount}</Descriptions.Item> */}
                 </Descriptions>
               </Col>
               

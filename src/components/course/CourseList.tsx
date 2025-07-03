@@ -1,10 +1,14 @@
+//课程展示
 import { Row, Col, Card, Tag, Typography, Rate, Progress, Empty } from 'antd';
 import Link from 'next/link';
 import Image from 'next/image';
 import { COURSE_TAGS } from '@/constants/course';
-import type { CourseListProps } from '@/constTypes/course';
+import type { Course } from '@/constTypes/course';
 const { Title, Paragraph, Text } = Typography;
 
+type CourseListProps = {
+  courses: Course[];
+}
 export default function CourseList({ courses }: CourseListProps) {
   if (!courses || courses.length === 0) return <Empty description="未找到相关课程" />;
   return (
@@ -44,24 +48,21 @@ export default function CourseList({ courses }: CourseListProps) {
                         </Tag>
                       );
                     })} */}
-                    {Array.isArray(course.courseType)
-                      ? course.courseType.map(tag => {
-                          const tagConf = COURSE_TAGS.find(t => t.value === tag);
-                          return (
-                            <Tag key={tag} color={tagConf?.color || 'default'}>
-                              {tagConf?.label || tag}
-                            </Tag>
-                          );
-                        })
-                      : (
-                        <Tag
-                          key={course.courseType}
-                          color={COURSE_TAGS.find(t => String(t.value) === String(course.courseType))?.color || 'default'}
-                        >
-                          {COURSE_TAGS.find(t => String(t.value) === String(course.courseType))?.label || course.courseType}
-                        </Tag>
-                      )
-                    }
+                    {/* 课程类型标签 */}
+                    <Tag
+                      key={course.courseType}
+                      color={COURSE_TAGS.find(t => t.value === course.courseType)?.color || 'default'}
+                    >
+                      {course.courseType}
+                    </Tag>
+                    
+                    {/* 课程对象标签 */}
+                    <Tag
+                      key={course.courseObject}
+                      color={COURSE_TAGS.find(t => t.value === course.courseObject)?.color || 'blue'}
+                    >
+                      {course.courseObject}
+                    </Tag>
                   </div>
                   <Paragraph ellipsis={{ rows: 2 }} className="text-gray-500 mb-2">
                     {course.courseDes}

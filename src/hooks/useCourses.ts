@@ -2,7 +2,7 @@
 // import useSWR from 'swr';
 import { useEffect, useState } from 'react'
 import useAuthStore from "@/store/useAuthStore";
-
+import type { Course } from '@/constTypes/course';
 import axiosInstance from '@/api/config';
 
 // const fetcher = (url: string, params: any) => axiosInstance.get(url, { params }).then(res => {
@@ -28,8 +28,32 @@ import axiosInstance from '@/api/config';
 //     isError: error
 //   };
 // };
+
+//数据映射
+function adaptCourseFromServer(raw: any): Course {
+  console.log('原始课程数据:', raw);
+  
+  // 确保类型字段是字符串
+  const adaptedCourse = {
+    courseId: raw.courseId,
+    courseName: raw.courseName,
+    coverImageUrl: raw.coverImageUrl || 'https://example.com/default-cover.jpg',
+    courseType: String(raw.courseTypeName || '未分类'),
+    courseObject: String(raw.courseObjectName || '通用'),
+    teacherId: raw.teacherId,
+    courseStartTime: raw.courseStartTime || '',
+    courseEndTime: raw.courseEndTime || '',
+    courseDes: raw.courseDes || '',
+    courseAverageRating: Number(raw.courseAverageRating || 0),
+    courseRatingCount: Number(raw.courseRatingCount || 0),
+  };
+  
+  console.log('适配后的课程数据:', adaptedCourse);
+  return adaptedCourse;
+}
+
 export const useCourses = (params: any) => {
-  const [courses, setCourses] = useState([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
@@ -38,11 +62,15 @@ useEffect(() => {
     setIsLoading(true);
     setIsError(false);
 
+    console.log('发起课程请求，参数:', params);
     axiosInstance.get('/herb-teaching-service/courses', { params })
       .then(res => {
         if (res.data?.data) {
-          setCourses(res.data.data.list || []);
+          const rawList = res.data.data.list || [];
+          const adaptedCourses = rawList.map(adaptCourseFromServer);
+          setCourses(adaptedCourses);
           setTotal(res.data.data.total || 0);
+          console.log('获取到的课程数据:', adaptedCourses);
         } else {
           console.error('接口格式异常', res);
           setIsError(true);
@@ -61,23 +89,5 @@ useEffect(() => {
     isLoading,
     isError
   }
-
-// useEffect(() => {
-//   const token = useAuthStore.getState().token;
-//   fetch('http://localhost:8090/herb-teaching-service/courses?page=1&size=10', {
-//     method: 'GET',
-//     headers: {
-//       'Authorization': `Bearer ${token}`,
-//       'Content-Type': 'application/json'
-//     }
-//   })
-//     .then(res => res.json())
-//     .then(data => {
-//       console.log('fetch 成功获取数据:', data);
-//     })
-//     .catch(err => {
-//       console.error('fetch 请求失败:', err);
-//     });
-// }, []);
 
 }

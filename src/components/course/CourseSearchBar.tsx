@@ -1,8 +1,14 @@
 import { Row, Col, Input, Button, Typography } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { COURSE_CATEGORIES, COURSE_TARGETS } from '@/constants/course';
-import type { CourseSearchBarProps } from '@/constTypes/course';
-
+type CourseSearchBarProps = {
+  searchText: string;
+  setSearchText: (v: string) => void;
+  categoryFilter: string;
+  setCategoryFilter: (v: string) => void;
+  targetFilter: string;
+  setTargetFilter: (v: string) => void;
+};
 export default function CourseSearchBar({
   searchText,
   setSearchText,
@@ -19,7 +25,8 @@ export default function CourseSearchBar({
           enterButton={<Button type="primary" icon={<SearchOutlined />}>搜索</Button>}
           size="large"
           value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
+          // onChange={(e) => setSearchText(e.target.value)}
+          onSearch={(value) => setSearchText(value.trim())}
         />
       </Col>
       <Col xs={24} md={12} lg={16}>
