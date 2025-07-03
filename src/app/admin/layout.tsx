@@ -5,7 +5,11 @@ import UseAuthStore from "@/store/useAuthStore";
 import AdminHeader from "@/components/AdminHeader";
 import AdminSidebar from "@/components/AdminSidebar";
 
-export default function AdminLayout({children}:{children:React.ReactNode}) {
+export type LayoutProps = {
+    children: React.ReactNode
+}
+
+export default function AdminLayout({children}: LayoutProps) {
     useProtectedRoute();
     // @ts-ignore
     const {initializeAuth} = UseAuthStore();

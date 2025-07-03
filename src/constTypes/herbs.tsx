@@ -11,6 +11,22 @@ export type Location = {
     latitude: number
 }
 
+export const locationColumns = [
+    {title: "编号", dataIndex: "herbId", key: "herbId"},
+    {title: "药材名称", dataIndex: "herbName", key: "herbName"},
+    {title: "数量", dataIndex: "count", key: "count"},
+    {title: "行政区", dataIndex: "districtName", key: "districtName"},
+    {title: "街道", dataIndex: "streetName", key: "streetName"},
+    {title: "经纬度", dataIndex: "coordinates", key: "coordinates",
+        render: (_: any, record:Location) => (
+            <span>
+                [{record.longitude},{record.latitude}]
+            </span>
+        )
+    },
+
+]
+
 export type HerbLinkCategory = {
     id: number,
     herbId: number,

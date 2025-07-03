@@ -8,7 +8,7 @@ export default function Page() {
     useEffect(() => {
         setTimeout(() => {
             router.push('/login');
-        }, 3000);
+        }, 1000);
     }, []);
     return (
         <>正在重定向到登录页面</>
