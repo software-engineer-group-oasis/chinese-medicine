@@ -31,6 +31,8 @@ const useAxios = (url:string, method="get", body=null, params=null) => {
                 setData(result.data)
                 console.log("from useAxios: ", result.data);
             } else {
+                // @ts-ignore
+                console.error(result.message)
                 throw new Error(`请求${url}失败, method: ${method}`)
             }
         }).catch(error => {

@@ -13,10 +13,13 @@ console.log('axiosInstance baseURL:', axiosInstance.defaults.baseURL);
 axiosInstance.interceptors.request.use(config => {
     // @ts-ignore
     const token = useAuthStore.getState().token;
+    // @ts-ignore
+    const userId = useAuthStore.getState().user.id;
     console.log("Authorization:", token);
     console.log("请求 config:", config);
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+        config.headers.userId = userId;
     }
     return config;
 })
