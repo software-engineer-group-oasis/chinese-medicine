@@ -4,7 +4,8 @@ import {useEffect, useState} from "react";
 import {Location, locationColumns} from "@/constTypes/herbs";
 import {ConfigProvider, Table} from "antd";
 import zhCN from 'antd/lib/locale/zh_CN';
-import useAxios from "@/hooks/useAxios"; // 基础语言包
+import useAxios from "@/hooks/useAxios";
+import HerbLocationForm from "@/app/admin/herb/geo/HerbLocationForm";
 
 export default function AdminGeoPage() {
     const [locations, setLocations] = useState<Location[]>([]);
@@ -12,9 +13,36 @@ export default function AdminGeoPage() {
         pageSize: 10,
         current: 1,
     })
+    const [isModalVisible, setIsModelVisible] = useState(false);
+    const [selectedLocation, setSelectedLocation] = useState<Location | null>(null)
+
+    // 提交更新
+    const handleUpdate = (values)=> {
+        console.log(values)
+        // TODO 进行api请求
+
+        // 更新本地状态
+        setLocations((prev) => (
+            prev.map((loc) => loc.id === values.id ? values : loc)
+        ))
+    }
+
+    // 打开模态框
+    const showModel = (record: Location)=> {
+        setSelectedLocation(record)
+        setIsModelVisible(true)
+    }
+
+    const closeModel = ()=> {
+        setIsModelVisible(false);
+    }
+
     const handleTableChange = (newPagination: any)=> {
         setPagination(newPagination);
     }
+
+
+
     const {data, loading, error} = useAxios("/herb-info-service/herbs/location");
 
     useEffect(() => {
@@ -58,9 +86,18 @@ export default function AdminGeoPage() {
                         showTotal: (total) => `共${total}条`,
                     }}
                     onChange={handleTableChange}
+                    onRow={(record, rowIndex) => ({
+                        onClick: (event) => {
+                            showModel(record)
+                        },
+                    })}
                 />
             </ConfigProvider>
 
+            <HerbLocationForm open={isModalVisible}
+                              location={selectedLocation}
+                              onClose={closeModel}
+                              onUpdate={handleUpdate} />
         </>
 
     )
