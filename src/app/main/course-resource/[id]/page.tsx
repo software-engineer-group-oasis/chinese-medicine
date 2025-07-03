@@ -15,7 +15,8 @@ import RecommendCoursesPanel from '@/components/course/detail/RecommendCoursesPa
 import CourseHeader from '@/components/course/detail/CourseHeader';
 // import { mockCourses, mockVideoProgress } from '@/mock/courseResource';
 import type{Course} from '@/constTypes/course';
-import useCourses from '@/hooks/useCourses';
+import { useCourses } from '@/hooks/useCourses';
+import { COURSE_TAGS } from '@/constants/course';
 const { Title} = Typography;
 
 // 格式化时间（秒转为时:分:秒）
@@ -45,11 +46,10 @@ const parseTimeToSeconds = (timeStr: string) => {
 };
 
 export default function CourseDetailPage({ params }: { params: { id: string } }) {
+  const { course, loading,error } = useCourses({id: params.id});
+  
   const router = useRouter();
   const searchParams = useSearchParams();
-  // const courseId = parseInt(params.id, 10);
-  // const course = mockCourses.find(c => c.id === courseId);
-  const [course , setCourse] = useState<Course>();
   const [activeTab, setActiveTab] = useState('video');
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -168,6 +168,12 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
     message.success('链接已复制，可以分享给他人');
   };
   
+  if(loading) {
+    return <div>加载中...</div>;
+  }
+  if(error) {
+    return <div>加载失败，请稍后重试</div>;
+  }
   if (!course) {
     return (
       <div className="p-6 pt-20 text-center">
@@ -191,9 +197,9 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
       {/* 课程标题 */}
       <CourseHeader
         course={course}
-        isFavorite={false}
-        handleFavorite={() => {}}
-        COURSE_TAGS={[]} // 传你的标签常量
+        isFavorite={isFavorite}
+        handleFavorite={handleFavorite}
+        COURSE_TAGS={COURSE_TAGS}
       />
 
       
@@ -206,9 +212,24 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             videoProps={{
-              videoPlayer: (
-                <video src={course.videoUrl} controls width="100%" />
-              )
+              // videoPlayer: (
+              //   <video src={course.videoUrl} controls width="100%" />
+              // )
+              videoRef,
+              handleTimeUpdate,
+              handleLoadedMetadata,
+              isPlaying,
+              setIsPlaying,
+              currentTime,
+              duration,
+              volume,
+              quality,
+              handlePlayPause,
+              handleVolumeChange,
+              handleQualityChange,
+              handleFullscreen,
+              handleSeek,
+              formatTime
             }}
             handleDownload={handleDownload}
           />
@@ -217,10 +238,10 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
           <CourseInfoPanel course={course} />
           
           {/* 关联药材 */}
-          <RelatedHerbsPanel relatedHerbs={course.relatedHerbs} />
+          <RelatedHerbsPanel herbs={course.herbs || []} />
 
-          {/* 资源下载 */}
-          <ResourceDownloadPanel resources={course.resources || []} onDownload={handleDownload} />
+          {/* 资源下载 - 已在CourseTabs中集成 */}
+          {/* <ResourceDownloadPanel resources={course.resources || []} onDownload={handleDownload} /> */}
           {/* 评论区 */}
           <Card 
             title={<span><CommentOutlined className="mr-2" />评论区</span>}
@@ -232,10 +253,10 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
         
         {/* 右侧推荐课程与评分 */}
         <Col xs={24} lg={6}>
-            {/* 课程推荐 */}
-            <CourseRatingPanel rating={course.rating} reviews={course.reviews} />
             {/* 课程评分 */}
-            <RecommendCoursesPanel courses={recommendCourses} />
+            <CourseRatingPanel rating={course.rating || 0} reviews={[]} />
+            {/* 课程推荐 */}
+            {/* <RecommendCoursesPanel courses={recommendCourses} /> */}
 
         </Col>
       </Row>

@@ -2,7 +2,7 @@ import {useEffect, useState} from "react";
 import axiosInstance from "@/api/config";
 import {message} from "antd";
 
-const useAxios = (url:string, method="get", body=null, params=null) => {
+const useAxios = (url:string, method="get", body=null, params:any) => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);

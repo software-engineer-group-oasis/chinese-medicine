@@ -18,20 +18,18 @@ export default function CourseHeader({
     <div className="flex justify-between items-center mb-6">
       <div>
         <Title level={2} className="mb-2">{course.courseName}</Title>
-        {/* <div>
-          {String(course.courseObject).map((courseObject: String) => {
-            const tagConf = COURSE_TAGS.find(t => t.value === courseObject);
-            return (
-              <Tag key={courseObject} color={tagConf?.color || 'default'}>
-                {tagConf?.label || courseObject}
-              </Tag>
-            );
-          })}
+        <div>
+          <Tag color="blue">
+            {COURSE_TAGS.find(t => t.value === course.courseType)?.label || course.courseType}
+          </Tag>
+          <Tag color="green">
+            {COURSE_TAGS.find(t => t.value === course.courseObject)?.label || course.courseObject}
+          </Tag>
           <Text type="secondary" className="ml-2">
             <ClockCircleOutlined className="mr-1" />
-            {course.courseStartTime} - {course.courseEndTime || '进行中'  }S
+            {course.courseStartTime} - {course.courseEndTime || '进行中'}
           </Text>
-        </div> */}
+        </div>
       </div>
       <div className="flex gap-2">
         <Button 

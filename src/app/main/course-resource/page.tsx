@@ -43,6 +43,7 @@ export default function CourseResourcePage() {
   courseObject?: string;
 }
 
+
   //组合请求参数
   const params: CourseQueryParams = {
     page,
@@ -51,9 +52,10 @@ export default function CourseResourcePage() {
   if (searchText) params.keyword = searchText;
   if (categoryFilter !== 'all') params.courseType = categoryFilter;
   if (targetFilter !== 'all') params.courseObject = targetFilter;
- const { courses, isLoading, isError } = useCourses(params);
-
-//筛选
+  
+  //筛选
+const { courses, total, loading,error } = useCourses({params});
+  
 
 const filteredCourses = useMemo(() => {
   console.log('筛选课程，当前数据:', courses);
@@ -69,41 +71,9 @@ const filteredCourses = useMemo(() => {
 }, [courses, categoryFilter, targetFilter]);
 
 
-// useEffect(() => {
-//     let filtered = courses;
-    
-//     // // 关键词搜索
-//     // if (searchText) {
-//     //   filtered = filtered.filter((course: Course) => 
-//     //     course.courseName.toLowerCase().includes(searchText.toLowerCase()) ||
-//     //     course.courseDes.toLowerCase().includes(searchText.toLowerCase()) 
-//     //     // course.relatedHerbs.some((herb: string) => herb.toLowerCase().includes(searchText.toLowerCase()))
-//     //   );
-//     // }
-    
-//     // 类别筛选
-//     if (categoryFilter !== 'all') {
-//       filtered = filtered.filter((course: Course) => 
-//         course.courseType === Number(categoryFilter)
-//       );
-//     }
-    
-//     // 对象筛选
-//     if (targetFilter !== 'all') {
-//       filtered = filtered.filter((course: Course) => {
-//         if (Array.isArray(course.courseObject)) {
-//           return course.courseObject.includes(targetFilter);
-//         }
-//         // 是数字，直接比较
-//         return String(course.courseObject) === String(targetFilter);
-//       });
-//     }
-    
-//     setFilteredCourses(filtered);
-//   }, [searchText, categoryFilter, targetFilter, courses]);
-  
-
-  return (
+if (loading) return <div>加载中...</div>;
+if (error) return <div>加载失败，请稍后重试</div>;
+return (
     <div className="p-6 pt-20">
       <Title level={2} className="mb-6">中药课程资源</Title>
       
@@ -174,5 +144,5 @@ const filteredCourses = useMemo(() => {
         </Col>
       </Row>
     </div>
-  );
+);
 }

@@ -12,26 +12,6 @@ export type CourseResource = {
 };
 
 export type Course = {
-  // id: number;
-  // title: string;
-  // cover: string;
-  // description: string;
-  // tags: string[];
-  // rating: number;
-  // reviews: number;
-  // likes: number;
-  // category: string;
-  // relatedHerbs: string[];
-  // createdAt: string;
-  // author: string;
-  // duration: string;
-  // progress: number;
-  // experimentSteps: ExperimentStep[];
-  // resources?: CourseResource[];
-  // viewCount?: number;        
-  // downloadCount?: number;    
-  // authorAvatar?: string;     
-  // authorTitle?: string;  
   courseId: number;
   courseName: string;
   coverImageUrl: string;
@@ -43,6 +23,19 @@ export type Course = {
   courseDes: string;
   courseAverageRating: number;
   courseRatingCount: number;
+  
+  // 课程详情页面需要的字段
+  labs?: any[];
+  resources?: any[];
+  herbs?: any[];
+  
+  // 兼容旧UI组件的字段
+  author?: string;
+  authorAvatar?: string;
+  authorTitle?: string;
+  rating?: number;
+  viewCount?: number;
+  downloadCount?: number;
   
   // 可选字段，用于处理后端可能返回的其他数据
   [key: string]: any;  

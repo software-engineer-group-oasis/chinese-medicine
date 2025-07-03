@@ -1,4 +1,4 @@
-import { Card, Dropdown, Menu,Tabs, Typography, Button,Slider }from 'antd';
+import { Card, Dropdown, Menu, Tabs, Typography, Button, Slider } from 'antd';
 import { FileTextOutlined, ExperimentOutlined, FullscreenOutlined, SoundOutlined,SettingOutlined,PauseCircleOutlined,PlayCircleOutlined, DownloadOutlined } from '@ant-design/icons';
 import type { Course } from '@/constTypes/course';
 const { Title, Paragraph } = Typography;
@@ -19,7 +19,7 @@ export default function CourseTabs({
   videoProps: any;
   handleDownload: (resource: any) => void;
 }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  // 使用传入的videoRef而不是创建新的
 
   return (
     <Card className="mb-6">
@@ -31,17 +31,17 @@ export default function CourseTabs({
                 <div id="video-container" className="relative bg-black rounded-lg overflow-hidden mb-4">
                   {/* 视频播放器 */}
                   <video
-                    ref={videoRef}
+                    ref={videoProps.videoRef}
                     className="w-full aspect-video"
-                    onTimeUpdate={handleTimeUpdate}
-                    onLoadedMetadata={handleLoadedMetadata}
-                    onPlay={() => setIsPlaying(true)}
-                    onPause={() => setIsPlaying(false)}
-                    onEnded={() => setIsPlaying(false)}
-                    poster={course.cover}
+                    onTimeUpdate={videoProps.handleTimeUpdate}
+                    onLoadedMetadata={videoProps.handleLoadedMetadata}
+                    onPlay={() => videoProps.setIsPlaying(true)}
+                    onPause={() => videoProps.setIsPlaying(false)}
+                    onEnded={() => videoProps.setIsPlaying(false)}
+                    poster={course.coverImageUrl}
                     controls={false}
                   >
-                    <source src={(course as any).videoUrl || ''} type="video/mp4" />
+                    <source src={course.videoUrl || ''} type="video/mp4" />
                     您的浏览器不支持HTML5视频播放。
                   </video>
                   
@@ -51,14 +51,14 @@ export default function CourseTabs({
                       {/* 播放/暂停按钮 */}
                       <Button 
                         type="text" 
-                        icon={isPlaying ? <PauseCircleOutlined className="text-white text-xl" /> : <PlayCircleOutlined className="text-white text-xl" />} 
-                        onClick={handlePlayPause}
+                        icon={videoProps.isPlaying ? <PauseCircleOutlined className="text-white text-xl" /> : <PlayCircleOutlined className="text-white text-xl" />} 
+                        onClick={videoProps.handlePlayPause}
                         className="text-white"
                       />
                       
                       {/* 时间显示 */}
                       <div className="text-xs">
-                        {formatTime(currentTime)} / {formatTime(duration)}
+                        {videoProps.formatTime(videoProps.currentTime)} / {videoProps.formatTime(videoProps.duration)}
                       </div>
                       
                       {/* 音量控制 */}
@@ -71,11 +71,11 @@ export default function CourseTabs({
                                 <Slider 
                                   min={0}
                                   max={100}
-                                  value={volume}
-                                  onChange={handleVolumeChange}
+                                  value={videoProps.volume}
+                                  onChange={videoProps.handleVolumeChange}
                                 />
                               </div>
-                              <div className="ml-2 w-8 text-center">{volume}%</div>
+                              <div className="ml-2 w-8 text-center">{videoProps.volume}%</div>
                             </div>
                           </Card>
                         } 
@@ -93,10 +93,10 @@ export default function CourseTabs({
                       <Dropdown 
                         overlay={
                           <Menu>
-                            <Menu.Item key="1080p" onClick={() => handleQualityChange('1080p')}>1080p</Menu.Item>
-                            <Menu.Item key="720p" onClick={() => handleQualityChange('720p')}>720p</Menu.Item>
-                            <Menu.Item key="480p" onClick={() => handleQualityChange('480p')}>480p</Menu.Item>
-                            <Menu.Item key="360p" onClick={() => handleQualityChange('360p')}>360p</Menu.Item>
+                            <Menu.Item key="1080p" onClick={() => videoProps.handleQualityChange('1080p')}>1080p</Menu.Item>
+                            <Menu.Item key="720p" onClick={() => videoProps.handleQualityChange('720p')}>720p</Menu.Item>
+                            <Menu.Item key="480p" onClick={() => videoProps.handleQualityChange('480p')}>480p</Menu.Item>
+                            <Menu.Item key="360p" onClick={() => videoProps.handleQualityChange('360p')}>360p</Menu.Item>
                           </Menu>
                         } 
                         placement="top"
@@ -106,7 +106,7 @@ export default function CourseTabs({
                           icon={<SettingOutlined className="text-white" />} 
                           className="text-white"
                         >
-                          {quality}
+                          {videoProps.quality}
                         </Button>
                       </Dropdown>
                       
@@ -114,7 +114,7 @@ export default function CourseTabs({
                       <Button 
                         type="text" 
                         icon={<FullscreenOutlined className="text-white" />} 
-                        onClick={handleFullscreen}
+                        onClick={videoProps.handleFullscreen}
                         className="text-white"
                       />
                     </div>
@@ -122,11 +122,11 @@ export default function CourseTabs({
                     {/* 进度条 */}
                     <div 
                       className="h-1 bg-gray-600 rounded cursor-pointer"
-                      onClick={handleSeek}
+                      onClick={videoProps.handleSeek}
                     >
                       <div 
                         className="h-full bg-blue-500 rounded"
-                        style={{ width: `${(currentTime / duration) * 100}%` }}
+                        style={{ width: `${(videoProps.currentTime / videoProps.duration) * 100}%` }}
                       />
                     </div>
                   </div>
@@ -140,10 +140,30 @@ export default function CourseTabs({
                 <div className="bg-gray-100 p-4 rounded-lg text-center h-[400px] flex flex-col items-center justify-center">
                   <FileTextOutlined style={{ fontSize: 48 }} className="text-gray-400 mb-4" />
                   <Title level={4}>文档预览</Title>
-                  <Paragraph className="mb-4">此处将显示PDF或PPT文档预览</Paragraph>
-                  <Button type="primary" icon={<DownloadOutlined />} onClick={() => handleDownload(course.resources?.find(r => r.type === 'pdf'))}>
-                    下载文档
-                  </Button>
+                  
+                  {course.resources && course.resources.length > 0 ? (
+                    <>
+                      <Paragraph className="mb-4">课程相关文档资源</Paragraph>
+                      {course.resources.map((resource: { resourceName?: string }, index: number) => (
+                        <Button 
+                          key={index} 
+                          type="primary" 
+                          icon={<DownloadOutlined />} 
+                          onClick={() => handleDownload(resource)}
+                          className="mb-2"
+                        >
+                          下载{resource.resourceName || `资源${index + 1}`}
+                        </Button>
+                      ))}
+                    </>
+                  ) : (
+                    <>
+                      <Paragraph className="mb-4">暂无课程相关文档</Paragraph>
+                      <Button type="primary" icon={<DownloadOutlined />} disabled>
+                        下载文档
+                      </Button>
+                    </>
+                  )}
                 </div>
               </TabPane>
               
@@ -152,23 +172,29 @@ export default function CourseTabs({
                 key="experiment"
               >
                 <div className="bg-white p-4 rounded-lg">
-                  <Title level={4} className="mb-4">实验步骤指导</Title>
-                  
-                  {course.experimentSteps.map((step, index) => (
-                    <div key={index} className="mb-6">
-                      <div className="flex items-center mb-2">
-                        <div className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center mr-2">
-                          {index + 1}
+                  <Title level={4} className="mb-4">实验步骤指导</Title>                  
+                  {course.labs && course.labs.length > 0 ? (
+                    course.labs.map((lab: { labId?: 
+                      string; labOrder?: number; labName: string; labSteps: string }, 
+                      index:number) => (
+                      <div key={lab.labId || index} className="mb-6">
+                        <div className="flex items-center mb-2">
+                          <div className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center mr-2">
+                            {lab.labOrder || index + 1}
+                          </div>
+                          <Title level={5} className="mb-0">{lab.labName}</Title>
                         </div>
-                        <Title level={5} className="mb-0">{step.title}</Title>
+                        <div className="ml-8">
+                          {lab.labSteps.split('\n').map((line, i) => (
+                            <Paragraph key={i} className="mb-1">{line}</Paragraph>
+                          ))}
+                        </div>
                       </div>
-                      <div className="ml-8">
-                        {step.content.split('\n').map((line, i) => (
-                          <Paragraph key={i} className="mb-1">{line}</Paragraph>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <Paragraph className="text-center text-gray-500">暂无实验步骤</Paragraph>
+                  )
+                }
                 </div>
               </TabPane>
             </Tabs>
