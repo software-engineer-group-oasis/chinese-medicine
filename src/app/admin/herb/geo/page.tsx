@@ -18,6 +18,7 @@ export default function AdminGeoPage() {
     const {data, loading, error} = useAxios("/herb-info-service/herbs/location");
 
     useEffect(() => {
+        // @ts-ignore
         if (data && data.locations) {
             setLocations(data.locations);
         }
@@ -27,6 +28,7 @@ export default function AdminGeoPage() {
         return <div>加载中...</div>
     }
     if (error) {
+        // @ts-ignore
         return <div>{error.message}</div>
     }
 
