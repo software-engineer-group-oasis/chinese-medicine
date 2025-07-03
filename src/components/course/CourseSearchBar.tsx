@@ -25,8 +25,8 @@ export default function CourseSearchBar({
           enterButton={<Button type="primary" icon={<SearchOutlined />}>搜索</Button>}
           size="large"
           value={searchText}
-          // onChange={(e) => setSearchText(e.target.value)}
-          onSearch={(value) => setSearchText(value.trim())}
+          onChange={(e) => setSearchText(e.target.value)}
+          // onSearch={(value) => setSearchText(value.trim())}
         />
       </Col>
       <Col xs={24} md={12} lg={16}>

@@ -3,7 +3,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Card, Row, Col, Button, Typography, Tabs, message} from 'antd';
-import { CommentOutlined} from '@ant-design/icons';
+import { CommentOutlined,ArrowLeftOutlined} from '@ant-design/icons';
 import { useRouter, useSearchParams } from 'next/navigation';
 import CommentSection from '@/components/CommentSection';
 import CourseTabs from '@/components/course/detail/CourseTabs';
@@ -13,7 +13,9 @@ import ResourceDownloadPanel from '@/components/course/detail/ResourceDownloadPa
 import CourseRatingPanel from '@/components/course/detail/CourseRatingPanel'; 
 import RecommendCoursesPanel from '@/components/course/detail/RecommendCoursesPanel';
 import CourseHeader from '@/components/course/detail/CourseHeader';
-import { mockCourses, mockVideoProgress } from '@/mock/courseResource';
+// import { mockCourses, mockVideoProgress } from '@/mock/courseResource';
+import type{Course} from '@/constTypes/course';
+import useCourses from '@/hooks/useCourses';
 const { Title} = Typography;
 
 // 格式化时间（秒转为时:分:秒）
@@ -45,9 +47,9 @@ const parseTimeToSeconds = (timeStr: string) => {
 export default function CourseDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const courseId = parseInt(params.id, 10);
-  const course = mockCourses.find(c => c.id === courseId);
-  
+  // const courseId = parseInt(params.id, 10);
+  // const course = mockCourses.find(c => c.id === courseId);
+  const [course , setCourse] = useState<Course>();
   const [activeTab, setActiveTab] = useState('video');
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -59,29 +61,25 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
   const [isFavorite, setIsFavorite] = useState(false);
   
   const videoRef = useRef<HTMLVideoElement>(null);
-  
-  // 初始化视频播放位置
-  useEffect(() => {
-    if (!course) return;
+
+
+  //   const timeParam = searchParams.get('t');
+  //   let startTime = 0;
     
-    // 从URL参数获取时间点
-    const timeParam = searchParams.get('t');
-    let startTime = 0;
+  //   if (timeParam) {
+  //     // 如果URL中有时间参数，优先使用
+  //     startTime = parseTimeToSeconds(timeParam);
+  //   } else if (mockVideoProgress[courseId as keyof typeof mockVideoProgress]) {
+  //     // 否则使用保存的进度
+  //     startTime = mockVideoProgress[courseId as keyof typeof mockVideoProgress];
+  //   }
     
-    if (timeParam) {
-      // 如果URL中有时间参数，优先使用
-      startTime = parseTimeToSeconds(timeParam);
-    } else if (mockVideoProgress[courseId as keyof typeof mockVideoProgress]) {
-      // 否则使用保存的进度
-      startTime = mockVideoProgress[courseId as keyof typeof mockVideoProgress];
-    }
-    
-    // 设置视频开始时间
-    if (videoRef.current && startTime > 0) {
-      videoRef.current.currentTime = startTime;
-      setCurrentTime(startTime);
-    }
-  }, [courseId, searchParams]);
+  //   // 设置视频开始时间
+  //   if (videoRef.current && startTime > 0) {
+  //     videoRef.current.currentTime = startTime;
+  //     setCurrentTime(startTime);
+  //   }
+  // }, [courseId, searchParams]);
   
   // 视频事件处理
   const handleTimeUpdate = () => {
@@ -193,11 +191,8 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
       {/* 课程标题 */}
       <CourseHeader
         course={course}
-        isLiked={false}
         isFavorite={false}
-        handleLike={() => {}}
         handleFavorite={() => {}}
-        handleShare={() => {}}
         COURSE_TAGS={[]} // 传你的标签常量
       />
 

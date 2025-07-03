@@ -4,7 +4,8 @@
 import { useState, useEffect,useMemo } from 'react';
 import { 
   Card, Row, Col, Button, Tag, List, Typography, 
-  Rate, Progress, Avatar, Breadcrumb, Divider, Tooltip, Empty
+  Rate, Progress, Avatar, Breadcrumb, Divider, Tooltip, Empty,
+  Pagination
 } from 'antd';
 import { 
   FireOutlined, BookOutlined, ClockCircleOutlined,
@@ -18,6 +19,7 @@ import CourseSearchBar from '@/components/course/CourseSearchBar';
 import CourseList from '@/components/course/CourseList';
 import LearningProgressPanel from '@/components/course/LearningProgressPanel';
 import CourseCategoryPanel from '@/components/course/CourseCategoryPanel';
+import CoursePagination from '@/components/common/Pagination';
 import type { Course , LearningCourse} from '@/constTypes/course';
 import axiosInstance from '@/api/config';
 import { useCourses } from '@/hooks/useCourses';
@@ -153,6 +155,12 @@ const filteredCourses = useMemo(() => {
             </Title>
             <CourseList courses={filteredCourses}  />
           </div>
+          {/* <CoursePagination
+            current={page}
+            total={filteredCourses.length}
+            pageSize={pageSize}
+            onChange={handlePageChange}
+          /> */}
         </Col>
         
         {/* 右侧学习进度区域 */}

@@ -40,14 +40,6 @@ export default function CourseList({ courses }: CourseListProps) {
                     {course.courseName}
                   </Title>
                   <div className="mb-2">
-                    {/* {course.courseType.map(tag => {
-                      const tagConf = COURSE_TAGS.find(t => t.value === tag);
-                      return (
-                        <Tag key={tag} color={tagConf?.color || 'default'}>
-                          {tagConf?.label || tag}
-                        </Tag>
-                      );
-                    })} */}
                     {/* 课程类型标签 */}
                     <Tag
                       key={course.courseType}
