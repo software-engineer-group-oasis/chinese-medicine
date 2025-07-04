@@ -1,11 +1,13 @@
 "use client"
 import AdminBreadcrumb from "@/components/AdminBreadcrumb";
-import {useEffect, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import {Location, locationColumns, District} from "@/constTypes/herbs";
-import {ConfigProvider, Table} from "antd";
+import {Button, ConfigProvider, Input, message, Table} from "antd";
 import zhCN from 'antd/lib/locale/zh_CN';
 import useAxios from "@/hooks/useAxios";
 import HerbLocationForm from "@/app/admin/herb/geo/HerbLocationForm";
+import axiosInstance from "@/api/config";
+import Link from "next/link";
 
 export default function AdminGeoPage() {
     const [locations, setLocations] = useState<Location[]>([]);
@@ -16,12 +18,28 @@ export default function AdminGeoPage() {
     })
     const [isModalVisible, setIsModelVisible] = useState(false);
     const [selectedLocation, setSelectedLocation] = useState<Location | null>(null)
+    const [searchTerm, setSearchTerm] = useState<string>("")
 
     // 提交更新
     const handleUpdate = (values:Location)=> {
         console.log(values)
-        const address = values.districtName+values.streetName
-        // TODO 进行api请求
+        axiosInstance.put(`/herb-info-service/herbs/location/${values.id}`, {
+            ...values,
+            name: values.herbName,
+            street: values.streetName,
+            district: values.districtName,
+        })
+            .then(res => {
+                if (res.data.code === 0) {
+                    message.success("更新成功")
+                } else {
+                    throw new Error("更新失败")
+                }
+            })
+            .catch(err => {
+                message.error(err.message)
+                console.error(err.message)
+            })
 
         // 更新本地状态
         setLocations((prev) => (
@@ -43,6 +61,33 @@ export default function AdminGeoPage() {
         setPagination(newPagination);
     }
 
+    // 过滤数据
+    const filteredLocations = useMemo(()=> { // useMemo提高性能
+        if (!searchTerm.trim()) return locations;
+        const lowerCaseSearch = searchTerm.toLowerCase();
+        return locations.filter(loc => loc.herbName?.toLowerCase().includes(lowerCaseSearch));
+    }, [locations, searchTerm])
+
+    const handleDelete = (id:string) => {
+
+        axiosInstance.delete(`herb-info-service/herbs/location/${id}`)
+            .then(res => {
+                if (res.data.code === 0) {
+                    message.success("删除成功")
+                    setIsModelVisible(false);
+
+                } else {
+                    throw new Error(res.data?.message || "删除失败")
+                }
+            })
+            .catch(err => {
+                message.error(err.message)
+            })
+
+        setLocations((prev:Location[])=> {
+            return prev.filter((loc:Location) => String(loc.id) !== String(id))
+        })
+    }
 
 
     const {data:locationsData, loading:locationsLoading, error:locationsError} = useAxios("/herb-info-service/herbs/location");
@@ -72,6 +117,15 @@ export default function AdminGeoPage() {
                 {title: "中药信息管理", href: "/admin/herb"},
                 {title: "地理位置信息"}
             ]} />
+            <div className={"my-2 flex gap-2"}>
+                <Button><Link href="/admin/herb/geo/add">添加信息</Link></Button>
+                <Input.Search
+                    placeholder="按药材名搜索"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    style={{ width: 300 }}
+                ></Input.Search>
+            </div>
             <ConfigProvider locale={{
                 ...zhCN,
                 Pagination:{
@@ -81,14 +135,14 @@ export default function AdminGeoPage() {
             }}>
                 <Table
                     columns={locationColumns}
-                    dataSource={locations}
+                    dataSource={filteredLocations}
                     loading={locationsLoading}
                     rowKey={"id"}
                     pagination={{
                         ...pagination,
                         showSizeChanger: true,
                         pageSizeOptions: ['10', '20', '50'],
-                        total: locations.length,
+                        total: filteredLocations.length,
                         showTotal: (total) => `共${total}条`,
                     }}
                     onChange={handleTableChange}
@@ -104,7 +158,9 @@ export default function AdminGeoPage() {
                               location={selectedLocation}
                               districts={districts}
                               onClose={closeModel}
-                              onUpdate={handleUpdate} />
+                              onUpdate={handleUpdate}
+                              onDelete={handleDelete}
+            />
         </>
 
     )
