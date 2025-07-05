@@ -39,6 +39,11 @@ export const locationColumns = [
 
 ]
 
+export type HerbCategory = {
+    id: number,
+    name: string,
+}
+
 export type HerbLinkCategory = {
     id: number,
     herbId: number,
