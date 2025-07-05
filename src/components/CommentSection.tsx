@@ -1,6 +1,21 @@
 "use client"
 import React, { useState } from 'react';
 
+// type Comment = {
+//   commentId: number,
+//   userId: number,
+//   userName: string,
+//   userAvatar: null,
+//   content: string,
+//   parentId: number,
+//   rootId: number,
+//   likeCount: number,
+//   createTime: string,
+//   children: Comment[],
+//   liked: boolean,
+//   mine: boolean
+// }
+
 interface Comment {
     id: number;
     user: string;
@@ -9,7 +24,6 @@ interface Comment {
     time: string;
     replies: Comment[];
 }
-
 const mockComments: Comment[] = [
     {
         id: 1,

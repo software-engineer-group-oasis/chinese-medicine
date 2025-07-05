@@ -178,6 +178,12 @@ export default function UserCard ({user}: {user: UserInfo}): React.ReactNode {
                             <Button type={'dashed'}>
                                 <Link href={'/main/user/reset-password'}>修改密码</Link>
                             </Button>
+                            <Button type={'dashed'}>
+                                <Link href={'/main/user/favorite-course'}>我的收藏</Link>
+                            </Button>
+                            <Button type={'dashed'}>
+                                <Link href={'/main/user/my-course'}>我的课程</Link>
+                            </Button>
                         </div>
 
                     </Form.Item>

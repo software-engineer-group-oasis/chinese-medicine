@@ -10,13 +10,15 @@ import CourseTabs from '@/components/course/detail/CourseTabs';
 import CourseInfoPanel from '@/components/course/detail/CourseInfoPanel';
 import RelatedHerbsPanel from '@/components/course/detail/RelatedHerbsPanel';
 import ResourceDownloadPanel from '@/components/course/detail/ResourceDownloadPanel';
-import CourseRatingPanel from '@/components/course/detail/CourseRatingPanel'; 
-import RecommendCoursesPanel from '@/components/course/detail/RecommendCoursesPanel';
+import CourseRatingPanel from '@/components/course/detail/CourseRatingPanelShow'; 
 import CourseHeader from '@/components/course/detail/CourseHeader';
+import RatingPanel from '@/components/course/detail/RatingPanel';
 // import { mockCourses, mockVideoProgress } from '@/mock/courseResource';
 import type{Course} from '@/constTypes/course';
 import { useCourses } from '@/hooks/useCourses';
+import { useFavoriteCourses } from '@/hooks/useFavoriteCourses';
 import { COURSE_TAGS } from '@/constants/course';
+import CourseRatingPanelShow from '@/components/course/detail/CourseRatingPanelShow';
 const { Title} = Typography;
 
 // 格式化时间（秒转为时:分:秒）
@@ -45,8 +47,9 @@ const parseTimeToSeconds = (timeStr: string) => {
   return 0;
 };
 
-export default function CourseDetailPage({ params }: { params: { id: string } }) {
-  const { course, loading,error } = useCourses({id: params.id});
+export default function CourseDetailPage({ params }: { params: { id: number } }) {
+  const { course, loading, error } = useCourses({id: params.id});
+  const { isFavorite, toggleFavorite } = useFavoriteCourses();
   
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -57,8 +60,6 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
   const [volume, setVolume] = useState(80);
   const [quality, setQuality] = useState('720p');
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
   
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -146,15 +147,15 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
     videoRef.current.currentTime = newTime;
     setCurrentTime(newTime);
   };
+
   
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    message.success(isLiked ? '已取消点赞' : '已点赞');
-  };
-  
-  const handleFavorite = () => {
-    setIsFavorite(!isFavorite);
-    message.success(isFavorite ? '已取消收藏' : '已收藏到我的课程');
+  const handleFavorite = async () => {
+    try {
+      await toggleFavorite(params.id);
+      message.success(isFavorite(params.id) ? '已取消收藏' : '已收藏到我的课程');
+    } catch (error) {
+      message.error('操作失败，请稍后重试');
+    }
   };
   
   const handleDownload = (resource: any) => {
@@ -197,7 +198,7 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
       {/* 课程标题 */}
       <CourseHeader
         course={course}
-        isFavorite={isFavorite}
+        isFavorite={isFavorite(params.id)}
         handleFavorite={handleFavorite}
         COURSE_TAGS={COURSE_TAGS}
       />
@@ -242,6 +243,15 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
 
           {/* 资源下载 - 已在CourseTabs中集成 */}
           {/* <ResourceDownloadPanel resources={course.resources || []} onDownload={handleDownload} /> */}
+          
+          {/* 个人评分 */}
+          <RatingPanel 
+            courseId={params.id}
+            onRatingSubmit={(rating) => {
+              message.success(`您的评分 ${rating} 星已提交`);
+            }}
+          />
+          
           {/* 评论区 */}
           <Card 
             title={<span><CommentOutlined className="mr-2" />评论区</span>}
@@ -254,7 +264,7 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
         {/* 右侧推荐课程与评分 */}
         <Col xs={24} lg={6}>
             {/* 课程评分 */}
-            <CourseRatingPanel rating={course.rating || 0} reviews={[]} />
+            <CourseRatingPanelShow rating={course.rating || 0} reviews={[]} />
             {/* 课程推荐 */}
             {/* <RecommendCoursesPanel courses={recommendCourses} /> */}
 

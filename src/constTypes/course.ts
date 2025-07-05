@@ -28,14 +28,15 @@ export type Course = {
   labs?: any[];
   resources?: any[];
   herbs?: any[];
-  
-  // 兼容旧UI组件的字段
   author?: string;
   authorAvatar?: string;
   authorTitle?: string;
-  rating?: number;
+  //课程评分
+  ratingValue?: number;
+  //暂未用
   viewCount?: number;
   downloadCount?: number;
+  
   
   // 可选字段，用于处理后端可能返回的其他数据
   [key: string]: any;  

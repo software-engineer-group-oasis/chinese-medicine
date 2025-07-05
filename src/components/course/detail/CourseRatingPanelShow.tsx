@@ -3,7 +3,7 @@ import { StarOutlined } from '@ant-design/icons';
 import type { Course } from '@/constTypes/course';
 const { Text, Title } = Typography;
 
-export default function CourseRatingPanel(course : any) {
+export default function CourseRatingPanelShow(course : any) {
   return (
         <Card title={<span><StarOutlined className="mr-2 text-yellow-500" />课程评分</span>}>
             <div className="text-center mb-4">

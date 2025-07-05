@@ -1,9 +1,12 @@
 //课程模块数据请求逻辑集中管理
+//hooks/useCourses.ts
 // import useSWR from 'swr';
 import { useEffect, useState } from 'react'
 import useAxios from './useAxios';
 import type { Course } from '@/constTypes/course';
 import axiosInstance from '@/api/config';
+import { message } from 'antd';
+import { exp } from 'three/tsl';
 
 
 
@@ -103,3 +106,52 @@ return {
 }
 
 }
+
+//提交评分
+//GET
+export const fetchUserRating = async (courseId: number) => {
+  const url = `/herb-teaching-service/courses/${courseId}/ratings/user`;
+  try {
+    const res = await axiosInstance.get(url);
+    if (res.data.code === 0) {
+      console.log('获取用户评分成功:', res.data);
+      return { 
+        hasRated: true,
+        ratingValue: res.data.rating.ratingValue || 0 // 返回评分值
+       }; // 返回评分状态
+    } else {
+      return { hasRated: false, ratingValue: 0 }; // 没有评分
+    }
+  } catch (error) {
+    console.error('获取用户评分错误:', error);
+    // message.error('获取用户评分失败，请稍后重试');
+    throw error;
+  }
+}
+      
+//POST（自主获取，不用useAxios）
+export const submitRating = async (courseId: number, ratingValue: number) => {
+ const url = `/herb-teaching-service/courses/${courseId}/ratings`;
+ try {
+    const payload = {
+      // courseId,
+      ratingValue,
+    };
+const res=axiosInstance.post(url, payload)
+.then(res => {
+  if(res.data.code === 0) {
+      console.log('评分提交成功:', res.data);
+      return res.data;
+  }
+})
+  .catch(err => {
+    throw new Error(`评分提交失败: ${err.message}`);
+  });
+} catch (error) {
+    console.error('评分提交错误:', error);
+    message.error('评分提交失败，请稍后重试');
+    throw error;
+  }
+  
+};
+
