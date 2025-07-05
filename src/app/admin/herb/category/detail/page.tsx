@@ -6,6 +6,8 @@ import axiosInstance from "@/api/config";
 import {Form, Input, message} from "antd";
 import {Herb} from "@/constTypes/herbs";
 
+
+
 export default function AdminHerbCategoryDetailPage() {
     const params =  useSearchParams();
     const name = params.get("name") || "";
@@ -17,6 +19,7 @@ export default function AdminHerbCategoryDetailPage() {
     useEffect(() => {
         axiosInstance.get(`/herb-info-service/herbs/info/${name}`)
             .then(res => {
+                //console.log(res.data)
                 if (res.data.code === 0) {
                     setHerb(res.data.herb)
                 } else {
@@ -50,6 +53,7 @@ export default function AdminHerbCategoryDetailPage() {
                     {/*    <Input />*/}
                     {/*</Form.Item>*/}
                 </Form>
+
             </div>
         </div>
     )

@@ -57,7 +57,7 @@ export default function SearchHerb() {
         size="large"
         allowClear
         prefix={<SearchOutlined />}
-        placeholder="请输入药材名称"
+        placeholder="输入药材名称获取溯源信息"
         value={searchTerm}
         onChange={handleSearch}
         style={{ marginBottom: 8 }}

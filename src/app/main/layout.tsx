@@ -14,7 +14,7 @@ export default function RootLayout({children}: Readonly<{children: React.ReactNo
     return (
         <>
             <Navbar />
-            <div style={{ paddingTop: NAVBAR_HEIGHT }}>
+            <div>
                 {children}
             </div>
         </>
