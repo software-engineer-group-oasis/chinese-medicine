@@ -69,9 +69,9 @@ export default function ChongQingMapPage() {
 
     return (
         <>
-            <div className="mt-4">
+            <div>
                 <div id={'chart-container'}
-                     className="my-4 w-[80%] h-[80vh] min-h-[500px] mx-auto rounded-3xl shadow-amber400 shadow-md ">
+                     className="my-4 w-full h-[80vh] min-h-[500px] shadow-amber400 shadow-md ">
                     <div className="absolute inset-0 bg-cover bg-center "
                          style={{backgroundImage: 'url(/images/index_bg.png)'}}></div>
                     <ChongQingMap option={chongQingMapOption}/>
