@@ -1,6 +1,6 @@
 "use client";
 import {Suspense, useEffect, useState} from "react";
-import { Input, Select, Card, List} from "antd";
+import {Input, Select, Card, List, Button, message, Modal} from "antd";
 import Link from "next/link";
 import axiosInstance from "@/api/config";
 import {Material} from "@/constTypes/materials";
@@ -8,17 +8,36 @@ import { TbUserEdit } from "react-icons/tb";
 import { GiHerbsBundle } from "react-icons/gi";
 import { BiCategoryAlt } from "react-icons/bi";
 import { CiTimer } from "react-icons/ci";
+import {liveRoom} from "@/constTypes/training";
+import { Typography } from "antd";
+import useAuthStore from "@/store/useAuthStore";
+import { IoMdClose } from "react-icons/io";
+
 
 const { Search } = Input;
 const { Option } = Select;
+const { Paragraph } = Typography
 
 export default function TrainingPage() {
     // 状态管理
     const [searchText, setSearchText] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("all");
     const [defaultMaterials, setDefaultMaterials] = useState<Material[]>([]);
+    const [showLiveStreamBox, setShowLiveStreamBox] = useState(false);
+    const [liveRoom, setLiveRoom] = useState({
+        id: -1, streamUrl: "", streamKey: ""
+    })
+    const [inputTitle, setInputTitle] = useState("");
+    const [isTitleModalVisible, setIsTitleModalVisible] = useState(false);
     // 获取所有唯一类别
     const categories = ["all", ...Array.from(new Set(defaultMaterials.map(item => item.type)))];
+    const {token, initializeAuth} =  useAuthStore();
+    useEffect(()=> {
+        if (!token) {
+            initializeAuth();
+        }
+    }, [])
+   
 
     useEffect(() => {
         axiosInstance.get("/herb-training-service/material/all")
@@ -57,8 +76,89 @@ export default function TrainingPage() {
         return matchesCategory && matchesSearch;
     });
 
+    const handleStartLiveStream = async ()=> {
+        setIsTitleModalVisible(true);
+    }
+
+    const handleConfirm = async ()=> {
+        if (!inputTitle.trim()) {
+            message.error('请输入直播间标题');
+            return;
+        }
+        
+        try {
+            const res = await axiosInstance.post("/herb-training-service/live/room", {
+                title: inputTitle,
+                coverUrl: "/images/green-bg.jpg"
+            });
+            const data = res.data;
+            console.log(data);
+            if (data.code === 0) {
+                setLiveRoom({...(data.liveRoom)})
+                setShowLiveStreamBox(true);
+            }
+        } catch (e) {
+            message.error("服务器错误")
+        } finally {
+            setIsTitleModalVisible(false);
+            setInputTitle('');
+        }
+    } 
+
     return (
         <>
+            {/*直播按键*/}
+            <div className="fixed right-8 bottom-8 z-999">
+                <div className="relative inline-flex  group">
+                    <div
+                        className="absolute transitiona-all duration-1000 opacity-70 -inset-px bg-gradient-to-r from-[#44BCFF] via-[#FF44EC] to-[#FF675E] rounded-xl blur-lg group-hover:opacity-100 group-hover:-inset-1 group-hover:duration-200 animate-tilt">
+                    </div>
+                    <button title="开启直播"
+                        onClick={handleStartLiveStream}
+                       className="relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white transition-all duration-200 bg-gray-900 font-pj rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900"
+                       role="button">开启直播
+                    </button>
+                </div>
+            </div>
+            {/*直播提示框*/}
+            {
+                isTitleModalVisible && (
+                <Modal
+                    title="创建直播间"
+                    open={isTitleModalVisible}
+                    onOk={handleConfirm}
+                    onCancel={() => setIsTitleModalVisible(false)}
+                    okText="确定"
+                    cancelText="取消"
+                >
+                    <Input
+                        placeholder="请输入直播间标题"
+                        value={inputTitle}
+                        onChange={(e) => setInputTitle(e.target.value)}
+                    />
+                </Modal>
+                )
+            }
+            {
+                showLiveStreamBox &&
+                <div className="fixed top-1/2 left-1/2 z-999 transform -translate-x-1/2 -translate-y-1/2
+                bg-white px-4 py-6 rounded-md">
+                    <div className="relative">
+                        <div className="absolute right-3 top-3 hover:text-red-600" onClick={()=> setShowLiveStreamBox(prev => !prev)}><IoMdClose /></div>
+                        <div>直播间ID: </div>
+                        <Paragraph>{liveRoom.id}</Paragraph>
+                        <div>直播间密钥:</div>
+                        <Paragraph copyable>{liveRoom.streamKey}</Paragraph>
+                        <div>直播间服务器链接:</div>
+                        <Paragraph copyable>{liveRoom.streamUrl}</Paragraph>
+                        <Button type="link">
+                            <a target="_blank" rel="noopener noreferrer" href={`${process.env.NEXT_PUBLIC_HOST}/live-stream.html?roomId=${liveRoom.id}&token=${token}`}>前往直播间</a>
+                        </Button>
+                        
+                    </div> 
+                </div>
+            }
+
             <Suspense fallback={<div>加载中...</div>}>
                 <video src={'/中药制作.mp4'} autoPlay muted loop onError={() => <></>}
                        width={"100%"} style={{
@@ -102,17 +202,17 @@ export default function TrainingPage() {
                     {/* 右侧筛选结果列表 */}
                     <div className="flex-1">
                         <List
-                            grid={{ gutter: 16, column: 3 }}
+                            grid={{gutter: 16, column: 3}}
                             dataSource={filteredData}
                             renderItem={(item) => (
                                 <List.Item>
                                     <Card
-                                        style = {{
+                                        style={{
                                             backgroundImage: "linear-gradient(to right bottom , oklch(75% 0.183 55.934), oklch(85.2% 0.199 91.936) )"
                                         }}
                                         hoverable
                                         className="h-full"
-                                        title={"培训材料: "+item.title}
+                                        title={"培训材料: " + item.title}
                                         extra={(<div className={"flex gap-4"}>
                                             <div>观看次数: {item.count}</div>
                                             <Link href={`/main/training/detail?key=${item.id}`}>
@@ -124,20 +224,24 @@ export default function TrainingPage() {
                                             </Link>
                                         </div>)}>
                                         <div className={'flex gap-2 my-2'}>
-                                            <div className={"flex gap-2  border-2  rounded-md px-2 py-1 items-center m-tag"}>
-                                                <GiHerbsBundle /><span>{item.herbName}</span>
+                                            <div
+                                                className={"flex gap-2  border-2  rounded-md px-2 py-1 items-center m-tag"}>
+                                                <GiHerbsBundle/><span>{item.herbName}</span>
                                             </div>
-                                            <div className={"flex gap-2  border-2 rounded-md px-2 py-1 items-center m-tag"}>
-                                                <BiCategoryAlt /><span>{item.type}</span>
+                                            <div
+                                                className={"flex gap-2  border-2 rounded-md px-2 py-1 items-center m-tag"}>
+                                                <BiCategoryAlt/><span>{item.type}</span>
                                             </div>
-                                            <div className={"flex gap-2  border-2  rounded-md px-2 py-1 items-center m-tag"}>
-                                                <TbUserEdit /><span>{item.username}</span>
+                                            <div
+                                                className={"flex gap-2  border-2  rounded-md px-2 py-1 items-center m-tag"}>
+                                                <TbUserEdit/><span>{item.username}</span>
                                             </div>
-                                            <div className={"flex gap-2  border-2  rounded-md px-2 py-1 items-center m-tag"}>
-                                                <CiTimer /><span>{new Date(item.time).toLocaleDateString()}</span>
+                                            <div
+                                                className={"flex gap-2  border-2  rounded-md px-2 py-1 items-center m-tag"}>
+                                                <CiTimer/><span>{new Date(item.time).toLocaleDateString()}</span>
                                             </div>
                                         </div>
-                                        <Card.Meta description={item.des} />
+                                        <Card.Meta description={item.des}/>
                                     </Card>
                                 </List.Item>
                             )}
@@ -148,16 +252,17 @@ export default function TrainingPage() {
                     </div>
 
                     <style jsx>{`
-                    .m-tag {
-                        color: #000;
-                        background-color: #fff;
-                        transition: all 0.3s ease-in-out;
-                    }
-                    .m-tag:hover {
-                        color: #fff;
-                        background-color: #000;
-                    }
-                `}</style>
+                        .m-tag {
+                            color: #000;
+                            background-color: #fff;
+                            transition: all 0.3s ease-in-out;
+                        }
+
+                        .m-tag:hover {
+                            color: #fff;
+                            background-color: #000;
+                        }
+                    `}</style>
                 </div>
             </div>
         </>

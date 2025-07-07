@@ -23,7 +23,7 @@ export default function ForgetPassword() {
 
     return (
         <>
-            <div className="container h-screen w-full">
+            <div className="h-screen w-full">
                 <div className="w-[100%] flex justify-center">
                     <Card className="bg-white min-w-[300px] w-1/3 top-40"
                           title={
