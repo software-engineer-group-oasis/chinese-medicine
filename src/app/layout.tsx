@@ -16,10 +16,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   // @ts-ignore
-  const {initializeAuth} = UseAuthStore();
-  useEffect(() => {
-    initializeAuth();
-  }, []);
+  // const {initializeAuth} = UseAuthStore();
+  // useEffect(() => {
+  //   initializeAuth();
+  // }, []);
   return (
     <html lang="en">
       <body>

@@ -39,6 +39,18 @@ export const locationColumns = [
 
 ]
 
+export const growthColumns = [
+    {title: "记录编号", dataIndex: "id", key: "id"},
+    {title: "批次号", dataIndex: "batchCode", key: "batchCode"},
+    {title: "药材编号", dataIndex: "herbId", key: "herbId"},
+    {title: "药材名", dataIndex: "herbName", key: "herbName"},
+    {title: "描述", dataIndex: "des", key: "des"},
+    {title: "温度", dataIndex: "temperature", key: "temperature"},
+    {title: "湿度", dataIndex: "wet", key: "wet"},
+    {title: "记录者编号", dataIndex: "userId", key: "userId"},
+    {title: "操作", dataIndex: "action", key: "action"},
+]
+
 export type HerbCategory = {
     id: number,
     name: string,

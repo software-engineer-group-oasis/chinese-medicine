@@ -97,7 +97,7 @@ export default function HerbLocationEditModal({open, location, districts, onClos
 
     return (
         <Modal
-            title="编辑地理位置信息"
+            title="药材地理信息"
             open={open}
             onCancel={onClose}
             footer={null}

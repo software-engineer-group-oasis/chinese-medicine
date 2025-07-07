@@ -7,7 +7,7 @@ import { CiRoute } from "react-icons/ci";
 
 const routes = [
     {name: "地理信息", value: "/admin/herb/geo", icon: ()=> <BsGeoAlt />},
-    {name: "中药类别", value: "/admin/herb/category", icon: ()=> <TbCategoryPlus />},
+    {name: "中药详情", value: "/admin/herb/category", icon: ()=> <TbCategoryPlus />},
     {name: "药材溯源", value: "/admin/herb/growth", icon: ()=> <CiRoute />}
 ]
 
