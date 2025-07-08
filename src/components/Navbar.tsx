@@ -38,7 +38,7 @@ const Navbar: React.FC = () => {
 
             <style jsx>{
                 `
-                .link {
+                .link-my {
                     color: #000;
                     text-decoration: none;
                     transition: color 0.2s ease-in;

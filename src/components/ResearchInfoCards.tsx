@@ -1,3 +1,4 @@
+import { Team } from "@/constTypes/research";
 import { Card } from "antd";
 import ReactECharts from "echarts-for-react";
 
@@ -50,13 +51,13 @@ const barChartOption = {
     }]
 };
 
-export default function ResearchInfoCards() {
+export default function ResearchInfoCards({team}: {team:Team}) {
     return (
         <>
             <div className={'wrapper'}>
                 <video src={'/科学数据.mp4'} autoPlay muted loop id={'video'}></video>
                 <div id={'info-cards'} className={'flex flex-col items-center'}>
-                    <h1 className={'text-4xl text-white font-bold py-4'}>xxx课题组的数据汇交</h1>
+                    <h1 className={'text-4xl text-white font-bold py-4'}>{team.teamName}团队的数据汇交</h1>
 
                     {/* 卡片展示 */}
                     <div className={'flex gap-8 mb-12'}>
