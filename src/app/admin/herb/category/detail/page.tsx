@@ -3,7 +3,7 @@ import {useSearchParams} from "next/navigation";
 import AdminBreadcrumb from "@/components/AdminBreadcrumb";
 import React, {useEffect, useState} from "react";
 import axiosInstance from "@/api/config";
-import {Button, Form, Input, message} from "antd";
+import {Button, Form, Input, message, UploadProps} from "antd";
 import {Herb} from "@/constTypes/herbs";
 import { Upload } from "antd";
 import {UploadOutlined} from "@ant-design/icons";
