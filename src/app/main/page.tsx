@@ -69,25 +69,25 @@ export default function ChongQingMapPage() {
 
     return (
         <>
-            <SearchHerb />
-            <div id={'chart-container'}
-                 className="my-4 w-[80%] h-[80vh] min-h-[500px] mx-auto rounded-3xl shadow-amber400 shadow-md ">
-                <div className="absolute inset-0 bg-cover bg-center "
-                     style={{backgroundImage: 'url(/images/index_bg.png)'}}></div>
-                <ChongQingMap option={chongQingMapOption}/>
-                <div id={'data-table'}>
-                    <IndexDataTable />
+            <div>
+                <div id={'chart-container'}
+                     className="my-4 w-full h-[80vh] min-h-[500px] shadow-amber400 shadow-md ">
+                    <div className="absolute inset-0 bg-cover bg-center "
+                         style={{backgroundImage: 'url(/images/index_bg.png)'}}></div>
+                    <ChongQingMap option={chongQingMapOption}/>
+                    <div id={'data-table'}>
+                        <IndexDataTable />
+                    </div>
+                    <div id={'index-pie-chart'}>
+                        <IndexPieChart pieOption={pieOption}/>
+                    </div>
                 </div>
-                <div id={'index-pie-chart'}>
-                    <IndexPieChart pieOption={pieOption}/>
-                </div>
-            </div>
 
-            <TreeOrigins/>
-            <ChongqingHerbs/>
+                <TreeOrigins/>
+                <ChongqingHerbs/>
 
 
-            <style jsx>{`
+                <style jsx>{`
                 #chart-container {
                     position: relative;
                     overflow: hidden;
@@ -141,10 +141,12 @@ export default function ChongQingMapPage() {
                     }
                 }
             `}
-            </style>
+                </style>
 
 
+            </div>
         </>
+
     )
 
 }

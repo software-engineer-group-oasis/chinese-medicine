@@ -84,6 +84,7 @@
     // 初始化播放器
     function initPlayer() {
         const roomId = getQueryParam('roomId');
+        const token = getQueryParam('token');
         if (!roomId) {
             alert('请指定直播间ID');
             return;
@@ -92,7 +93,7 @@
         // 获取直播间信息
         fetch(`http://localhost:8090/herb-training-service/live/room/${roomId}`, {
         headers: {
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHVkZW50IiwidXNlckNhdGVnb3J5IjoxLCJpYXQiOjE3NTE0NDgxNjQsImV4cCI6MTc1MTcwNzM2NH0.UchRxdEk2yrFpPPBpyduiM74D43PY2-xlpBB8roe1xc', // 替换为你的 Token
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
         }
 })
@@ -153,7 +154,7 @@
                 fetch(`http://localhost:8090/herb-training-service/live/room/${roomId}/view`, {
                     method: 'POST',
                     headers: {
-                        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHVkZW50IiwidXNlckNhdGVnb3J5IjoxLCJpYXQiOjE3NTE0NDgxNjQsImV4cCI6MTc1MTcwNzM2NH0.UchRxdEk2yrFpPPBpyduiM74D43PY2-xlpBB8roe1xc', // 替换为你的 Token
+                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     }
                 });

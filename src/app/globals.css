@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  --background: oklch(92.2% 0 0);
   --foreground: #171717;
 }
 
@@ -28,4 +28,11 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.text-gradient {
+  background-image: linear-gradient(to left, #4f46e5, #06b6d4); /* 紫色到青色 */
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }

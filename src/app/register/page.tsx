@@ -6,7 +6,7 @@ export default function RegisterPage() {
     return (
         <div style={{
             backgroundImage: `url(/images/login-bg.avif)`,
-            height: "100vh",
+            height: "120vh",
             backgroundSize: "cover",
             backgroundRepeat: "no-repeat",
             backgroundPosition: "center",

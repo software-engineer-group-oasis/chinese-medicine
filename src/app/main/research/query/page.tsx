@@ -2,8 +2,13 @@
 
 import {useSearchParams} from "next/navigation";
 import { LikeOutlined, MessageOutlined, StarOutlined } from '@ant-design/icons';
-import { Avatar, List, Space } from 'antd';
-import React from "react";
+import {Avatar, List, message, Space, Typography} from 'antd';
+import React, {useEffect, useState} from "react";
+import {Topic} from "@/constTypes/research";
+import {parseMergedHandlers} from "@use-gesture/core";
+import axiosInstance from "@/api/config";
+import axios from "axios";
+const { Title, Paragraph, Text, Link } = Typography;
 
 const data = Array.from({ length: 23 }).map((_, i) => ({
     href: 'https://ant.design',
@@ -24,6 +29,29 @@ const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (
 
 export default function QueryPage() {
     const params = useSearchParams()
+    const query = params.get("query")
+    const [topics, setTopics] = useState<Topic[]>([])
+    const [loading, setLoading] = useState(false)
+    const fetchTopics = async()=> {
+        setLoading(true);
+        try {
+            const res = await axiosInstance.get("/herb-research-service/topics/search?query="+query)
+            const data = res.data;
+            if (data.code === 0) {
+                setTopics(data.topics);
+                console.log("topics:", data.topics)
+            }
+            else throw new Error(data.message || "请求数据失败")
+        } catch (err) {
+            message.error(err.message)
+        } finally {
+            setLoading(false);
+        }
+
+    }
+    useEffect(() => {
+        fetchTopics();
+    }, [query]);
     return (
         <>
             <div className={'py-15 px-10 flex flex-col gap-10 items-center'}>
@@ -38,35 +66,44 @@ export default function QueryPage() {
                         },
                         pageSize: 3,
                     }}
-                    dataSource={data}
+                    dataSource={topics}
                     footer={
                         <div>
                             <img src={'/images/草药.svg'} className={'w-4 aspect-square'}/>
                             <b>中药智慧平台</b>
                         </div>
                     }
-                    renderItem={(item) => (
+                    renderItem={(topic:Topic) => (
                         <List.Item
-                            key={item.title}
-                            actions={[
-                                <IconText icon={StarOutlined} text="156" key="list-vertical-star-o" />,
-                                <IconText icon={LikeOutlined} text="156" key="list-vertical-like-o" />,
-                                <IconText icon={MessageOutlined} text="2" key="list-vertical-message" />,
-                            ]}
-                            extra={
-                                <img
-                                    width={272}
-                                    alt="logo"
-                                    src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
-                                />
-                            }
+                            key={topic.topicId}
+                            // actions={[
+                            //     <IconText icon={StarOutlined} text="156" key="list-vertical-star-o" />,
+                            //     <IconText icon={LikeOutlined} text="156" key="list-vertical-like-o" />,
+                            //     <IconText icon={MessageOutlined} text="2" key="list-vertical-message" />,
+                            // ]}
+                            // extra={
+                            //     <img
+                            //         width={272}
+                            //         alt="logo"
+                            //         src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
+                            //     />
+                            // }
                         >
-                            <List.Item.Meta
-                                avatar={<Avatar src={item.avatar} />}
-                                title={<a href={item.href}>{item.title}</a>}
-                                description={item.description}
-                            />
-                            {item.content}
+                            {/*<List.Item.Meta*/}
+                            {/*    avatar={<Avatar src={item.avatar} />}*/}
+                            {/*    title={<a href={item.href}>{item.title}</a>}*/}
+                            {/*    description={item.description}*/}
+                            {/*/>*/}
+                            {/*{topic.topicName}*/}
+                            <Typography>
+                                <Link href={`/main/research/query/detail?topicId=${topic.topicId}`}>
+                                    <Title>{topic.topicName}</Title>
+                                </Link>
+                                <Paragraph>
+                                    <pre>简述：{topic.topicDes}</pre>
+                                    <pre>时间：{new Date(topic.topicStartTime).toLocaleDateString()}-{new Date(topic.topicEndTime).toLocaleDateString()}</pre>
+                                </Paragraph>
+                            </Typography>
                         </List.Item>
                     )}
                 />

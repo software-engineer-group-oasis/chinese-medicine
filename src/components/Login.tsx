@@ -86,16 +86,20 @@ const Login = ({ onLoginSuccess, onLoginError }: LoginProps) => {
     }, [username, password]);
 
     return (
-            <div className="w-fit h-fit flex flex-col gap-4 py-6 px-10 bg-transparent rounded-2xl shadow-2xl backdrop-blur-md"
+            <div className="w-fit h-fit flex flex-col gap-4 py-6 px-10 bg-transparent rounded-2xl shadow-2xl backdrop-blur-sm"
                  style={{
                      position: "absolute",
                      left: "50%",
                      top: "50%",
-                     transform: "translate(-50%, -50%)"
+                     transform: "translate(-50%, -80%)"
             }}>
-                <header className="flex justify-between">
+                <header className="flex justify-between gap-6">
                     <div><img src="/images/草药.svg" alt="logo" width={50} /></div>
-                    <p>中草药信息系统登录</p>
+                    <div className="text-4xl font-bold">
+                        <p className="text-gradient">中草药智慧系统</p>
+                        <p className="text-gradient">登录</p>
+                    </div>
+
                 </header>
                 {error && <div style={{ color: 'red' }}>{error}</div>}
                 <Input size="large" placeholder="用户名" prefix={<UserOutlined />}
@@ -114,7 +118,7 @@ const Login = ({ onLoginSuccess, onLoginError }: LoginProps) => {
                     {loading ? '验证中...' : '登录'}
                 </Button>
                 <Link href="/register" className={'text-sky-500 hover:underline hover:font-bold'}><ArrowRightOutlined />去注册</Link>
-
+                <Link href="/forget-password" className={'text-sky-500 hover:underline hover:font-bold'}><ArrowRightOutlined />忘记密码</Link>
                 {/* 加载验证码 SDK */}
                 <Script src={process.env.NEXT_PUBLIC_TENCENT_CAPTCHA_URL} />
             </div>

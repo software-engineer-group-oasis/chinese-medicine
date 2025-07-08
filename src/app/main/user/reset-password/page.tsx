@@ -40,7 +40,7 @@ const ResetPasswordPage: React.FC  = () => {
         <>
             <div className="flex justify-center items-center min-h-screen bg-gray-100">
                 <div className="w-full max-w-md p-8 bg-white rounded shadow-md">
-                    <h2 className="text-2xl font-bold text-center mb-6">重置密码</h2>
+                    <h2 className="text-2xl font-bold text-center mb-6">修改密码</h2>
                     <Form
                         initialValues={userInfo}
                         layout="vertical"

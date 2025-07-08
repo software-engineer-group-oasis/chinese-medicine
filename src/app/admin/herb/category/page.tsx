@@ -167,7 +167,7 @@ export default function AdminHerbCategoryPage() {
                         <div key={index} className="flex justify-between border-1 border-white rounded-md px-4 py-2 card">
                             <div>
                                 <Tooltip title="点击编辑更多信息">
-                                    <div className="font-bold text-lg link"><Link href={`/admin/herb/category/detail?name=${herb.name}`}>{herb.name}</Link></div>
+                                    <div className="font-bold text-lg link"><Link href={`/admin/herb/category/detail?name=${herb.name}&id=${herb.id}`}>{herb.name}</Link></div>
                                 </Tooltip>
                                 <div className="flex gap-4">
                                     {

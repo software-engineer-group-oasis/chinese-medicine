@@ -11,7 +11,7 @@ export default function ResearchPage() {
     const router = useRouter()
     const handleSearch = (value:string) => {
         value = value.trim();
-        if (value) router.push(`/research/query?query=${value}`)
+        if (value) router.push(`/main/research/query?query=${value}`)
     }
     return (
         <>
