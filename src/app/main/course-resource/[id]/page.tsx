@@ -49,7 +49,6 @@ const parseTimeToSeconds = (timeStr: string) => {
 
 export default function CourseDetailPage({ params }: { params: { id: number } }) {
   const { course, loading, error } = useCourses({id: params.id});
-  const { isFavorite, toggleFavorite } = useFavoriteCourses();
   
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -149,25 +148,13 @@ export default function CourseDetailPage({ params }: { params: { id: number } })
   };
 
   
-  const handleFavorite = async () => {
-    try {
-      await toggleFavorite(params.id);
-      message.success(isFavorite(params.id) ? '已取消收藏' : '已收藏到我的课程');
-    } catch (error) {
-      message.error('操作失败，请稍后重试');
-    }
-  };
   
   const handleDownload = (resource: any) => {
     message.success(`开始下载: ${resource.name}`);
     // 实际项目中这里需要处理文件下载逻辑
   };
   
-  const handleShare = () => {
-    // 复制当前页面链接
-    navigator.clipboard.writeText(window.location.href);
-    message.success('链接已复制，可以分享给他人');
-  };
+
   
   if(loading) {
     return <div>加载中...</div>;
@@ -198,8 +185,8 @@ export default function CourseDetailPage({ params }: { params: { id: number } })
       {/* 课程标题 */}
       <CourseHeader
         course={course}
-        isFavorite={isFavorite(params.id)}
-        handleFavorite={handleFavorite}
+        // collected={collected}
+        // handleFavorite={handleFavorite}
         COURSE_TAGS={COURSE_TAGS}
       />
 
@@ -257,7 +244,7 @@ export default function CourseDetailPage({ params }: { params: { id: number } })
             title={<span><CommentOutlined className="mr-2" />评论区</span>}
             className="mb-6"
           >
-            <CommentSection />
+            <CommentSection targetType="course" targetId={params.id} />
           </Card>
         </Col>
         

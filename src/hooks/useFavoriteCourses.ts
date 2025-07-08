@@ -11,20 +11,21 @@ export function useFavoriteCourses() {
 
   // 获取收藏的课程列表
   const fetchFavoriteCourses = async () => {
-    if (!user?.id) return;
-    
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      setError(null);
-      // 步骤1: 调用获取收藏课程列表的API
-      const response = await axiosInstance.get(`/api/users/${user.id}/favorite-courses`);
+      const response = await axiosInstance.get('/herb-teaching-service/courses/collections', {
+        params: {
+          pageNum: 1,
+          pageSize: 10
+        }
+      });
       if (response.data.code === 0) {
-        setCourses(response.data.data);
+        setCourses(response.data.data.list || []);
       } else {
         throw new Error(response.data.message || '获取收藏课程失败');
       }
     } catch (err) {
-      console.error('获取收藏课程失败:', err);
       setError(err instanceof Error ? err.message : '获取收藏课程失败');
       setCourses([]);
     } finally {
@@ -32,50 +33,63 @@ export function useFavoriteCourses() {
     }
   };
 
-  // 收藏/取消收藏课程
-  const toggleFavorite = async (courseId: number) => {
-    if (!user?.id) return;
-    
+  // 判断课程是否已收藏
+  const checkFavorite = async (courseId: number) => {
     try {
-      // 步骤2: 调用收藏/取消收藏课程的API
-      const response = await axiosInstance.post(`/api/users/${user.id}/favorite-courses`, {
-        courseId,
-        action: courses.some(course => course.courseId === courseId) ? 'unfavorite' : 'favorite'
-      });
-      
+      const response = await axiosInstance.get(`/herb-teaching-service/courses/${courseId}/collections/user`);
       if (response.data.code === 0) {
-        // 更新本地收藏课程列表
-        await fetchFavoriteCourses();
-        return true;
-      } else {
-        throw new Error(response.data.message || '操作失败');
+        return response.data.hasCollected;
       }
-    } catch (err) {
-      console.error('收藏操作失败:', err);
-      throw err;
+      return false;
+    } catch {
+      return false;
     }
   };
 
-  // 检查课程是否已收藏
+  // 添加收藏
+  const addFavorite = async (courseId: number) => {
+    try {
+      const response = await axiosInstance.post(`/herb-teaching-service/courses/${courseId}/collections`);
+      if (response.data.code === 0) {
+        await fetchFavoriteCourses();
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  };
+ // 移除收藏
+  const removeFavorite = async (courseId: number) => {
+    try {
+      const response = await axiosInstance.delete(`/herb-teaching-service/courses/${courseId}/collections`);
+      if (response.data.code === 0) {
+        await fetchFavoriteCourses(); // 更新收藏列表
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  };
+
+  // 本地判断是否已收藏
   const isFavorite = (courseId: number) => {
     return courses.some(course => course.courseId === courseId);
   };
 
   useEffect(() => {
-    if (user?.id) {
-      fetchFavoriteCourses();
-    } else {
-      setCourses([]);
-      setLoading(false);
-    }
+    fetchFavoriteCourses();
   }, [user?.id]);
 
   return {
     courses,
     loading,
     error,
-    toggleFavorite,
-    isFavorite,
-    refresh: fetchFavoriteCourses
+    fetchFavoriteCourses,
+    addFavorite,
+    removeFavorite,
+    checkFavorite,
+    isFavorite
   };
 }

@@ -7,17 +7,19 @@ import { useFavoriteCourses } from "@/hooks/useFavoriteCourses";
 
 export default function FavoriteCoursePage() {
   const { courses, loading, error } = useFavoriteCourses();
-  const { user } = useAuthStore();
+  const { user ,initializeAuth} = useAuthStore();
 
   if (loading) {
-    return <div className="flex justify-center items-center h-[200px]"><Spin /></div>;
+    return <div className="flex justify-center items-center h-[200px]">加载中</div>;
   }
 
   if (error) {
-    return <div className="flex justify-center items-center h-[200px] text-red-500">{error}</div>;
+    console.error("加载收藏课程失败:", error);
+    return <Empty description="加载收藏课程失败，请稍后重试" />;
   }
 
   if (!user) {
+    initializeAuth();
     return <Empty description="请先登录" />;
   }
 
