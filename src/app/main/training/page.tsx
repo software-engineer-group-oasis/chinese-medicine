@@ -32,9 +32,9 @@ export default function TrainingPage() {
     const [isTitleModalVisible, setIsTitleModalVisible] = useState(false);
     // 获取所有唯一类别
     const categories = ["all", ...Array.from(new Set(defaultMaterials.map(item => item.type)))];
-    const {token, initializeAuth} =  useAuthStore();
+    const {user, initializeAuth} =  useAuthStore();
     useEffect(()=> {
-        if (!token) {
+        if (!user) {
             initializeAuth();
         }
     }, [])
@@ -109,15 +109,17 @@ export default function TrainingPage() {
     return (
         <>
             {/*直播按键*/}
-            <div className="fixed right-8 bottom-8 z-999">
-                <GlimmeringButton
-                    title="开启直播"
-                    onClick={handleStartLiveStream}
-                    role="button"
-                    >
-                    开启直播
-                </GlimmeringButton>
-            </div>
+            {user && user.role === '教师' && (
+                <div className="fixed right-8 bottom-8 z-999">
+                    <GlimmeringButton
+                        title="开启直播"
+                        onClick={handleStartLiveStream}
+                        role="button"
+                        >
+                        开启直播
+                    </GlimmeringButton>
+                </div>
+            )}
             {/*直播提示框*/}
             {
                 isTitleModalVisible && (
