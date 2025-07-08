@@ -8,15 +8,16 @@ const { Title, Paragraph, Text } = Typography;
 
 type CourseListProps = {
   courses: Course[];
+  href: string;
 }
-export default function CourseList({ courses }: CourseListProps) {
+export default function CourseList({ courses, href }: CourseListProps) {
   if (!courses || courses.length === 0) return <Empty description="未找到相关课程" />;
   return (
     <Row gutter={[16, 16]}>
       {courses.map(course => {
         return (
           <Col xs={24} sm={12} md={8} key={course.courseId}>
-            <Link href={`/main/course-resource/${course.courseId}`}>
+            <Link href={`${href}/${course.courseId}`} className="block">
               <Card
                 hoverable
                 className="h-full"

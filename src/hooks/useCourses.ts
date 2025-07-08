@@ -5,9 +5,18 @@ import { useEffect, useState } from 'react'
 import useAxios from './useAxios';
 import type { Course } from '@/constTypes/course';
 import axiosInstance from '@/api/config';
+import useRequest from './useRequest';
 import { message } from 'antd';
-import { exp } from 'three/tsl';
+// import { exp } from 'three/tsl';
 
+//后续可封装 api/course.ts 或 const/api.ts
+const COURSE_API = {
+  LIST: '/herb-teaching-service/courses',
+  DETAIL: (id: number | string) => `/herb-teaching-service/courses/${id}`,
+  CREATE: '/herb-teaching-service/courses',
+  UPDATE: (id: number | string) => `/herb-teaching-service/courses/${id}`,
+  DELETE: (id: number | string) => `/herb-teaching-service/courses/${id}`
+};
 
 
 //数据映射
@@ -68,7 +77,7 @@ export const useCourses = ({ id, params }: UseCoursesOptions) => {
   const url = isDetail
     ? `/herb-teaching-service/courses/${id}`
     : `/herb-teaching-service/courses`;
-
+  const { post, put, del } = useRequest();
   const { data, loading, error} = useAxios(url, "get", null, isDetail ? null : params );
   const [course, setCourse] = useState<Course>();//单个
   const [labs, setLabs] = useState<any[]>([]);//实验
@@ -97,19 +106,8 @@ useEffect(() => {
     }
   }, [data]);
 
-return {
-    course,
-    courses,
-    total,
-    loading,
-    error
-}
-
-}
-
 //提交评分
-//GET
-export const fetchUserRating = async (courseId: number) => {
+  const fetchUserRating = async (courseId: number) => {
   const url = `/herb-teaching-service/courses/${courseId}/ratings/user`;
   try {
     const res = await axiosInstance.get(url);
@@ -128,9 +126,8 @@ export const fetchUserRating = async (courseId: number) => {
     throw error;
   }
 }
-      
 //POST（自主获取，不用useAxios）
-export const submitRating = async (courseId: number, ratingValue: number) => {
+const submitRating = async (courseId: number, ratingValue: number) => {
  const url = `/herb-teaching-service/courses/${courseId}/ratings`;
  try {
     const payload = {
@@ -154,4 +151,61 @@ const res=axiosInstance.post(url, payload)
   }
   
 };
+//编辑课程
+// 新增课程
+  const createCourse = async (courseData: any) => {
+    const res = await post(COURSE_API.CREATE, courseData);
+    if (res) {
+      message.success('课程新增成功');
+    }
+    return res;
+  };
+
+  // 编辑课程
+  const updateCourse = async (id: number | string, courseData: any) => {
+    const res = await put(COURSE_API.UPDATE(id), courseData);
+    if (res) {
+      message.success('课程更新成功');
+    }
+    return res;
+  };
+  const deleteCourse = async (id: number | string) => {
+    const res = await del(COURSE_API.DELETE(id));
+    if (res) message.success('课程删除成功');
+    return res;
+  };
+  const refetchCourses = async () => {
+    try {
+      const res = await axiosInstance.get(COURSE_API.LIST, { params });
+      if (res.data.code === 0) {
+        const rawList = res.data.data.list || [];
+        const adaptedCourses = rawList.map(adaptCourseFromServer);
+        setCourses(adaptedCourses);
+        setTotal(res.data.data.total || 0);
+        console.log('重新获取课程列表数据:', adaptedCourses);
+      }
+    } catch (error) {
+      console.error('重新获取课程列表错误:', error);
+      message.error('获取课程列表失败，请稍后重试');
+    }
+  };
+
+
+return {
+    course,
+    courses,
+    total,
+    loading,
+    error,
+    fetchUserRating,
+    submitRating,
+    createCourse, updateCourse, deleteCourse,
+    refetchCourses
+}
+
+};
+
+
+
+
 

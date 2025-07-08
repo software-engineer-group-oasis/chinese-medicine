@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { 
   Typography, Tabs, Button, Modal, Form, Input, 
   Select, DatePicker, message, Table, Tag, Space, Tooltip, Empty
@@ -19,67 +19,32 @@ import axiosInstance from '@/api/config';
 import { COURSE_CATEGORIES, COURSE_TARGETS } from '@/constants/course';
 import type { Course } from '@/constTypes/course';
 import { userPermission } from '@/hooks/usePermission';
-
+import useRequest from '@/hooks/useRequest';
+import {useCourses} from '@/hooks/useCourses';
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 const { Option } = Select;
 const { confirm } = Modal;
 
+
+
 export default function MyCoursesPage() {
+
   const [activeTab, setActiveTab] = useState('1');
-  const [myCourses, setMyCourses] = useState<Course[]>([]);
-  const [loading, setLoading] = useState(true);
+  // const [myCourses, setMyCourses] = useState<Course[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [form] = Form.useForm();
   const { user } = useAuthStore();
   const permission = userPermission();
-  
+  const { courses, loading, createCourse, updateCourse, deleteCourse ,refetchCourses} = useCourses({});
+  const myCourses = courses.filter(course => course.teacherId === user.id);
+
   // 检查是否有教师权限
   const isTeacher = permission?.hasRole('教师');
   const canCreateCourse = permission?.hasPermission('course:create');
   const canUpdateCourse = permission?.hasPermission('course:update');
   const canDeleteCourse = permission?.hasPermission('course:delete');
-
-  // 获取我的课程列表
-  const fetchMyCourses = async () => {
-    if (!user) return;
-    
-    try {
-      setLoading(true);
-      const response = await axiosInstance.get(`/herb-teaching-service/courses/teacher/${user.id}`);
-      if (response.data.code === 0) {
-        // 适配课程数据格式
-        const adaptedCourses = response.data.data.list.map((course: any) => ({
-          courseId: course.courseId,
-          courseName: course.courseName,
-          coverImageUrl: course.coverImageUrl || 'https://example.com/images/cover_zydx.jpg',
-          courseType: course.courseTypeName || '未分类',
-          courseObject: course.courseObjectName || '通用',
-          teacherId: course.teacherId,
-          courseStartTime: course.courseStartTime || '',
-          courseEndTime: course.courseEndTime || '',
-          courseDes: course.courseDes || '',
-          courseAverageRating: Number(course.courseAverageRating || 0),
-          courseRatingCount: Number(course.courseRatingCount || 0),
-        }));
-        setMyCourses(adaptedCourses);
-      } else {
-        message.error('获取课程列表失败');
-      }
-    } catch (error) {
-      console.error('获取课程列表错误:', error);
-      message.error('获取课程列表失败，请稍后重试');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (user) {
-      fetchMyCourses();
-    }
-  }, [user]);
 
   // 打开创建/编辑课程模态框
   const showModal = (course: Course | null = null) => {
@@ -109,8 +74,8 @@ export default function MyCoursesPage() {
       // 准备提交的数据
       const courseData = {
         courseName: values.courseName,
-        courseType: values.courseType,
-        courseObject: values.courseObject,
+        courseType: Number(values.courseType),
+        courseObject: Number(values.courseObject),
         courseDes: values.courseDes,
         courseStartTime: values.courseStartTime?.format('YYYY-MM-DDTHH:mm:ss'),
         courseEndTime: values.courseEndTime?.format('YYYY-MM-DDTHH:mm:ss'),
@@ -120,25 +85,14 @@ export default function MyCoursesPage() {
       
       if (editingCourse) {
         // 更新课程
-        const response = await axiosInstance.put(`/herb-teaching-service/courses/${editingCourse.courseId}`, courseData);
-        if (response.data.code === 0) {
-          message.success('课程更新成功');
-          fetchMyCourses(); // 刷新课程列表
-        } else {
-          message.error('课程更新失败');
-        }
+        await updateCourse(editingCourse.courseId, courseData);
       } else {
         // 创建新课程
-        const response = await axiosInstance.post('/herb-teaching-service/courses', courseData);
-        if (response.data.code === 0) {
-          message.success('课程创建成功');
-          fetchMyCourses(); // 刷新课程列表
-        } else {
-          message.error('课程创建失败');
-        }
+        await createCourse(courseData);
       }
       
       setIsModalVisible(false);
+      refetchCourses(); // 刷新课程列表
     } catch (error) {
       console.error('表单验证或提交错误:', error);
     }
@@ -155,19 +109,14 @@ export default function MyCoursesPage() {
       cancelText: '取消',
       onOk: async () => {
         try {
-          const response = await axiosInstance.delete(`/herb-teaching-service/courses/${courseId}`);
-          if (response.data.code === 0) {
-            message.success('课程删除成功');
-            fetchMyCourses(); // 刷新课程列表
-          } else {
-            message.error('课程删除失败');
-          }
+          await deleteCourse(courseId);
         } catch (error) {
           console.error('删除课程错误:', error);
           message.error('删除课程失败，请稍后重试');
         }
       },
     });
+    refetchCourses(); // 刷新课程列表
   };
 
   // 业绩申请状态列
@@ -241,8 +190,11 @@ export default function MyCoursesPage() {
     },
   ];
 
+
+
   return (
     <div className="p-6">
+      {/*我的课程*/}
       <div className="flex justify-between items-center mb-6">
         <Title level={2}>我的课程</Title>
         {isTeacher && canCreateCourse && (
@@ -262,8 +214,13 @@ export default function MyCoursesPage() {
             <div>加载中...</div>
           ) : myCourses.length > 0 ? (
             <div>
-              <CourseList courses={myCourses} />
-              
+              <CourseList courses={myCourses} href="/main/user/my-courses" />
+            </div>
+          ) : (
+            <Empty description="暂无课程" />
+          )}
+        </TabPane>
+        <TabPane tab="课程管理" key="2">
               {/* 课程管理操作 */}
               {isTeacher && (
                 <div className="mt-6">
@@ -336,20 +293,15 @@ export default function MyCoursesPage() {
                   />
                 </div>
               )}
-            </div>
-          ) : (
-            <Empty description="暂无课程" />
-          )}
         </TabPane>
-        
-        <TabPane tab="业绩申请" key="2">
+        <TabPane tab="业绩申请" key="3">
           <div className="mb-4">
-            <PerformanceApply courses={myCourses} onSuccess={() => setActiveTab('3')} />
+            <PerformanceApply courses={courses} onSuccess={() => setActiveTab('3')} />
           </div>
           <PerformanceStatus />
         </TabPane>
         
-        <TabPane tab="业绩状态" key="3">
+        <TabPane tab="业绩状态" key="4">
           <PerformanceStatus />
         </TabPane>
       </Tabs>

@@ -123,7 +123,7 @@ return (
               <FireOutlined className="mr-2 text-red-500" />
               热门课程
             </Title>
-            <CourseList courses={filteredCourses}  />
+            <CourseList courses={filteredCourses} href="/main/course-resource" />
           </div>
           {/* <CoursePagination
             current={page}
