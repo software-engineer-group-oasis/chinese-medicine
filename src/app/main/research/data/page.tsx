@@ -14,37 +14,59 @@ import TeamContentsTable from "@/components/research/TeamContentsTable";
 
 export default function ResearchData() {
   const [team, setTeam] = useState<Team>();
-  const [topics, setTopics] = useState<Topic[]>([])
-  const [members, setMembers] = useState<TeamMember[]>([])
-  const [contents, setContents] = useState<Content[]>([])
+  const [topics, setTopics] = useState<Topic[]>([]);
+  const [members, setMembers] = useState<TeamMember[]>([]);
+  const [contents, setContents] = useState<Content[]>([]);
   const params = useSearchParams();
   const teamId = params.get("teamId") || "";
   const { data: teamData, loading: teamLoading } = useAxios(
     `/herb-research-service/teams/${teamId}`
   );
 
-  const {data: membersData, loading: membersLoading} = useAxios(`/herb-research-service/teams/${teamId}/member/all`)
-  const {data:contentsData, loading: contentsLoading} =  useAxios(`/herb-research-service/contents/team/${teamId}`)
+  const { data: membersData, loading: membersLoading } = useAxios(
+    `/herb-research-service/teams/${teamId}/member/all`
+  );
+  const { data: contentsData, loading: contentsLoading } = useAxios(
+    `/herb-research-service/contents/team/${teamId}`
+  );
 
-  const fetchTopics = async ()=> {
+  const fetchTopics = async () => {
     try {
-        const res = await axiosInstance.get(`/herb-research-service/topics/team/${teamId}`)
-        const data = res.data
-        console.log(data);
-        if (data.code !== 0) {
-            message.error(data.message || "API请求失败")
-        } else {
-            setTopics(data.topics)
-        }
-    } catch(e) {
-        message.error("服务器错误")
+      const res = await axiosInstance.get(
+        `/herb-research-service/topics/team/${teamId}`
+      );
+      const data = res.data;
+      console.log(data);
+      if (data.code !== 0) {
+        message.error(data.message || "API请求失败");
+      } else {
+        setTopics(data.topics);
+      }
+    } catch (e) {
+      message.error("服务器错误");
     }
-    
-  }
+  };
 
-  useEffect(()=> {
+  const fetchMembers = async () => {
+    try {
+      const res = await axiosInstance.get(
+        `/herb-research-service/teams/${teamId}/member/all`
+      );
+      const data = res.data;
+      console.log(data);
+      if (data.code !== 0) {
+        message.error(data.message || "API请求失败");
+      } else {
+        setMembers(data.teamMembers);
+      }
+    } catch (e) {
+      message.error("服务器错误");
+    }
+  };
+
+  useEffect(() => {
     fetchTopics();
-  },[])
+  }, []);
 
   useEffect(() => {
     if (teamData && teamData.team) {
@@ -53,17 +75,17 @@ export default function ResearchData() {
     }
   }, [teamData]);
 
-  useEffect(()=> {
+  useEffect(() => {
     if (membersData && membersData.teamMembers) {
-        //console.log(membersData.teamMembers);
-        setMembers(membersData.teamMembers);
+      //console.log(membersData.teamMembers);
+      setMembers(membersData.teamMembers);
     }
 
     if (contentsData && contentsData.contents) {
-        console.log("contents:", contentsData.contents)
-        setContents(contentsData.contents)
+      console.log("contents:", contentsData.contents);
+      setContents(contentsData.contents);
     }
-  }, [membersData, contentsData])
+  }, [membersData, contentsData]);
 
   if (teamLoading || membersLoading || contentsLoading) {
     return <Skeleton active />;
@@ -78,11 +100,10 @@ export default function ResearchData() {
 
         {/* <button onClick={fetchTopics}>fetchTopics</button> */}
         <div className="flex flex-col items-center justify-center gap-16 mt-20">
-            <TeamMembers members={members} />
-            <TopicsTable topics={topics}/>
-            <TeamContentsTable contents={contents}/>
+          <TeamMembers members={members} onUpdate={fetchMembers}/>
+          <TopicsTable topics={topics} />
+          <TeamContentsTable contents={contents} />
         </div>
-        
       </>
     );
   }
