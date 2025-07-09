@@ -33,7 +33,8 @@ export default function UserLayout({ children }: { children: ReactNode }) {
     if (isTeacher) {
       baseItems.push(
         { key: "course", label: "我的课程", path: "/main/user/my-courses" },
-        { key: "performance", label: "我的业绩", path: "/main/user/my-performances" }
+        { key: "performance", label: "我的业绩", path: "/main/user/my-performances" },
+        { key: "invite", label: "注册邀请码", path: "/main/user/invite"}
       );
     }
 

@@ -14,3 +14,16 @@ export const userColumns = [
 ]
 
 export const roleOptions = ["普通用户", "教师", "学生", "管理员", "超级管理员"]
+
+
+export interface InvitationCode {
+    codeId: number,
+    code: string,
+    categoryId: number,
+    createUserId: number,
+    inviteSchool: string,
+    inviteName: string,
+    codeIsUsed: boolean,
+    codeExpireTime: string,
+
+}

@@ -8,12 +8,12 @@ import { exportToExcel } from "@/utils/exportToExcel";
 
 const columns = [
   { title: "学校", dataIndex: "schoolName" },
-  { title: "学生", dataIndex: "userName" },
+  { title: "姓名", dataIndex: "userName" },
 ];
 
 const invCodeCols = [
   { title: "学校", dataIndex: "inviteSchool" },
-  { title: "学生", dataIndex: "inviteName" },
+  { title: "姓名", dataIndex: "inviteName" },
   { title: "邀请码", dataIndex: "code" },
   {
     title: "过期时间",
