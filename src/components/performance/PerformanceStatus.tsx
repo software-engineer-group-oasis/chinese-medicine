@@ -58,21 +58,23 @@ export default function PerformanceStatus() {
 const [isEditModalVisible, setIsEditModalVisible] = useState(false);
 const [editingPerformance, setEditingPerformance] = useState<Performance | null>(null);
 
-  const { user } = useAuthStore();
+  const { user } = useAuthStore() as any;
   const {get}=useRequest()
   const Performance_API = {
     GET_PERFORMANCES: (page: number, size: number) =>
       `/performance-service/performances/my?page=${page}&size=${size}`,
     GET_PerformanceDetail: (performanceId: number) => 
       `/performance-service/performances/${performanceId}`,
+    DELETE_Performance: (performanceId: number) => 
+      `/performance-service/performances/${performanceId}`,
   };
   // 获取业绩申请列表
   const fetchPerformances = async () => {
-    if (!user) return;
+    if (!(user as any)) return;
     try {
       setLoading(true); // 加载中
 
-      const res = await get(Performance_API.GET_PERFORMANCES(pagination.current, pagination.pageSize));
+      const res = await get(Performance_API.GET_PERFORMANCES(pagination.current, pagination.pageSize)) as any;
       if (res && res.code === 0) {
         console.log('拿到 performances:', res.data?.list); 
         setPerformances(res.data?.list || []); // 设置数据
@@ -81,10 +83,10 @@ const [editingPerformance, setEditingPerformance] = useState<Performance | null>
       }
     } catch (error) {
       console.error('获取业绩列表失败:', error);
-    message.error('加载业绩数据失败');
-  } finally {
-    setLoading(false); // 结束加载
-  }
+      message.error('加载业绩数据失败');
+    } finally {
+      setLoading(false); // 结束加载
+    }
   };
 
   useEffect(() => {
@@ -183,15 +185,19 @@ const handleEditSuccess = () => {
         let icon = null;
 
         switch (record.performStatus) {
-          case  0:// 审核中
+          case 0:// 草稿
+            color = 'default';
+            icon = <FileTextOutlined />;
+            break;
+          case 1:// 审核中
             color = 'processing';
             icon = <ClockCircleOutlined />;
             break;
-          case 1:// 已通过
+          case 2:// 已通过
             color = 'success';
             icon = <CheckCircleOutlined />;
             break;
-          case 2:// 已拒绝
+          case 3:// 已拒绝
             color = 'error';
             icon = <ExclamationCircleOutlined />;
             break;
@@ -225,14 +231,42 @@ const handleEditSuccess = () => {
             />
           </Tooltip>
     {record.performStatus === 0 && (
-      <Tooltip title="编辑草稿">
-        <Button 
-          type="link" 
-          onClick={() => editDraft(record.performId)}
-        >
-          编辑
-        </Button>
-      </Tooltip>
+      <>
+        <Tooltip title="编辑草稿">
+          <Button 
+            type="link" 
+            onClick={() => editDraft(record.performId)}
+          >
+            编辑
+          </Button>
+        </Tooltip>
+        <Tooltip title="删除草稿">
+          <Button 
+            type="link" 
+            danger
+            onClick={() => {
+              Modal.confirm({
+                title: '确认删除该草稿？',
+                content: '删除后不可恢复，是否继续？',
+                okText: '删除',
+                okType: 'danger',
+                cancelText: '取消',
+                onOk: async () => {
+                  try {
+                    await axiosInstance.delete(Performance_API.DELETE_Performance(record.performId));
+                    message.success('删除成功');
+                    fetchPerformances();
+                  } catch (err) {
+                    message.error('删除失败');
+                  }
+                }
+              });
+            }}
+          >
+            删除
+          </Button>
+        </Tooltip>
+      </>
     )}
         </Space>
       ),
@@ -291,11 +325,11 @@ const handleEditSuccess = () => {
                   
 
                 switch (currentPerformance.performStatus) {
-                  case 0:
+                  case 0:// 草稿
                     color = 'default';
                     icon = <FileTextOutlined />;
                     break;
-                  case  1:// 审核中
+                  case 1:// 审核中
                     color = 'processing';
                     icon = <ClockCircleOutlined />;
                     break;
@@ -361,6 +395,15 @@ const handleEditSuccess = () => {
           </div>
         )}
       </Modal>
+
+      {/* 编辑业绩草稿弹窗 */}
+      <PerformanceApply 
+        courses={[]} // 这里需要传入实际的courses数据
+        visible={isEditModalVisible} 
+        initialData={editingPerformance} 
+        onCancel={() => setIsEditModalVisible(false)} 
+        onSuccess={handleEditSuccess} 
+      />
     </div>
   );
 }
