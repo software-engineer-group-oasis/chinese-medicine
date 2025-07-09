@@ -83,10 +83,10 @@ const [editingPerformance, setEditingPerformance] = useState<Performance | null>
       }
     } catch (error) {
       console.error('获取业绩列表失败:', error);
-      message.error('加载业绩数据失败');
-    } finally {
-      setLoading(false); // 结束加载
-    }
+    message.error('加载业绩数据失败');
+  } finally {
+    setLoading(false); // 结束加载
+  }
   };
 
   useEffect(() => {
@@ -232,14 +232,14 @@ const handleEditSuccess = () => {
           </Tooltip>
     {record.performStatus === 0 && (
       <>
-        <Tooltip title="编辑草稿">
-          <Button 
-            type="link" 
-            onClick={() => editDraft(record.performId)}
-          >
-            编辑
-          </Button>
-        </Tooltip>
+      <Tooltip title="编辑草稿">
+        <Button 
+          type="link" 
+          onClick={() => editDraft(record.performId)}
+        >
+          编辑
+        </Button>
+      </Tooltip>
         <Tooltip title="删除草稿">
           <Button 
             type="link" 

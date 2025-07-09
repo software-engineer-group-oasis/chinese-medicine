@@ -17,7 +17,7 @@ export default function RelatedHerbsPanel({ herbs }: { herbs: any[] }) {
         dataSource={herbs}
         renderItem={herb => (
           <List.Item>
-            <Link href={`/main/herb-resource/${herb.herbId}`}>
+            <Link href={`/main/herb?id=${herb.herbName}`}>
               <Card hoverable className="text-center">
                 <div className="mb-2">
                   <Avatar size={64} src={herb.herbImageUrl || "/images/黄连.jpg"} />

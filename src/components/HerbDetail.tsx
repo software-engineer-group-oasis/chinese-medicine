@@ -83,7 +83,7 @@ export default function HerbDetail({ herbId, allHerbs = [] }: { herbId: string, 
             <div>
               <h1 className="text-2xl font-bold mb-2 text-[#355C3A]">{detail.name}</h1>
               <ul className="text-base text-gray-700 leading-7">
-                <li><b>学名</b>：{detail.scientificName || '-'}</li>
+                {/* <li><b>学名</b>：{detail.scientificName || '-'}</li> */}
                 <li><b>产地代表</b>：{detail.origin || '-'}</li>
                 <li><b>简介</b>：{detail.des || '-'}</li>
                 {/* 你可以根据后端返回字段补充更多 */}
@@ -140,7 +140,7 @@ export default function HerbDetail({ herbId, allHerbs = [] }: { herbId: string, 
             <h3 className="text-base font-semibold text-[#355C3A] mb-2">🔗 相似药材词条</h3>
             <ul className="text-sm text-gray-700 space-y-1">
               {relatedHerbs.map(h => (
-                <li key={h.id}><a href={`/herb?id=${encodeURIComponent(h.name)}`} className="hover:underline text-[#5B8FF9]">{h.name}</a></li>
+                <li key={h.id}><a href={`/main/herb?id=${encodeURIComponent(h.name)}`} className="hover:underline text-[#5B8FF9]">{h.name}</a></li>
               ))}
             </ul>
           </div>

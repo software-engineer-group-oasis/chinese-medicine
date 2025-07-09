@@ -83,7 +83,7 @@ export default function PerformanceApply({
   
   const API = {
     POST_File: (performanceId: number) =>
-      `/performance-service/files/performances/${performanceId}/url`,
+    `/performance-service/files/performances/${performanceId}/url`,
     POST_Performance: `/performance-service/performances`,
     PUT_Performance: (performanceId: number) => `/performance-service/performances/${performanceId}`,
     SUBMIT_Performance: (performanceId: number) => `/performance-service/performances/${performanceId}/submit`,
@@ -148,7 +148,7 @@ export default function PerformanceApply({
       
       setUploading(true);
       
-      const performanceData = {
+        const performanceData = {
         performTypeId: values.performTypeId,
         performName: values.performName,
         performContent: values.performContent,
@@ -187,7 +187,7 @@ export default function PerformanceApply({
         if (onSuccess) {
           onSuccess();
         } else {
-          setIsModalVisible(false);
+        setIsModalVisible(false);
         }
       } else {
         message.error(response?.message || '提交失败');
@@ -197,31 +197,31 @@ export default function PerformanceApply({
       if (!initialData && response?.data?.performId && fileList.length > 0) {
         const performId = response.data.performId;
         
-        const formData = new FormData();
-        fileList.forEach(file => {
-          if (file.originFileObj) {
-            formData.append('upload-file', file.originFileObj);
-          }
-        });
-        
-        // 上传文件到服务器
-        const uploadResponse = await fetch('/api/tencent-cos', {
-          method: 'POST',
-          body: formData,
-        });
-        
-        const uploadResult = await uploadResponse.json();
-        if (uploadResult.status !== 'success') {
-          throw new Error('文件上传失败');
+      const formData = new FormData();
+      fileList.forEach(file => {
+        if (file.originFileObj) {
+          formData.append('upload-file', file.originFileObj);
         }
+      });
+      
+      // 上传文件到服务器
+      const uploadResponse = await fetch('/api/tencent-cos', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      const uploadResult = await uploadResponse.json();
+      if (uploadResult.status !== 'success') {
+        throw new Error('文件上传失败');
+      }
 
         // 提交附件与 performId 绑定
         const attachment = {
-          performFileName: fileList[0].name,
-          performFileDes: '详细的业绩证明材料描述',
-          performFileType: fileList[0].name.split('.').pop()?.toLowerCase() || '',
-          performFileUrl: uploadResult.url,
-          fileSize: fileList[0].size,
+        performFileName: fileList[0].name,
+        performFileDes: '详细的业绩证明材料描述',
+        performFileType: fileList[0].name.split('.').pop()?.toLowerCase() || '',
+        performFileUrl: uploadResult.url,
+        fileSize: fileList[0].size,
         };
 
         const attachRes = await post(API.POST_File(performId), attachment);
@@ -229,12 +229,12 @@ export default function PerformanceApply({
           if (onSuccess) {
             onSuccess();
           } else {
-            setIsModalVisible(false);
+        setIsModalVisible(false);
           }
         } else {
-          message.error(attachRes?.message || '附件提交失败');
+        message.error(attachRes?.message || '附件提交失败');
         }
-      }
+    }
 
     } catch (error) {
       console.error('业绩申请提交错误:', error);

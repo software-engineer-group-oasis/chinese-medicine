@@ -88,7 +88,7 @@ export default function HerbHome({
                 key={herb.name}
                 className="bg-green-50 rounded-2xl p-8 shadow hover:shadow-2xl transition cursor-pointer flex flex-col items-center w-full h-80 justify-center border-2 border-green-100 hover:border-green-300 group"
                 style={{ boxShadow: '0 4px 16px #e0e0e0' }}
-                onClick={() => window.location.href = `/herb?id=${encodeURIComponent(herb.name)}`}
+                onClick={() => window.location.href = `/main/herb?id=${encodeURIComponent(herb.name)}`}
                 title={`查看${herb.name}详情`}
               >
                 <img

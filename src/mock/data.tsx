@@ -59,7 +59,7 @@ export const columns: TableProps<DataType>['columns'] = [
         title: '名称',
         dataIndex: 'name',
         key: 'name',
-        render: (text) => (<Link href={`/herb?id=${text}`}>{text}</Link>)
+        render: (text) => (<Link href={`/main/herb?id=${text}`}>{text}</Link>)
     },
     {
         title: '功效',

@@ -251,7 +251,7 @@ export default function HerbEvaluationPage() {
                           </Avatar>
                         }
                         title={
-                          <Link href={`/herb?id=${item.name}`}>
+                          <Link href={`/main/herb?id=${item.name}`}>
                             {item.name}
                             <Tag color="red" className="ml-2">需求{item.demand}</Tag>
                           </Link>

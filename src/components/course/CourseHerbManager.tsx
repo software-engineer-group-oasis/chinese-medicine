@@ -183,7 +183,7 @@ export default function CourseHerbManager({ courseId }: CourseHerbManagerProps) 
             <Button 
               type="link" 
               icon={<SearchOutlined />} 
-              onClick={() => window.open(`/main/herb/${record.herbId}`, '_blank')}
+              onClick={() => window.open(`/main/herb?id=${record.herbName}`, '_blank')}
             />
           </Tooltip>
           <Tooltip title="取消关联">
