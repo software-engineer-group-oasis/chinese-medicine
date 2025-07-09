@@ -1,5 +1,8 @@
+import axiosInstance from "@/api/config";
 import { TeamMember } from "@/constTypes/research";
-import { Card, Table, Tag } from "antd";
+import useAuthStore from "@/store/useAuthStore";
+import { Button, Card, Form, Input, message, Modal, Table, Tag } from "antd";
+import { useEffect, useState } from "react";
 
 const columns = [
   { title: "用户ID", dataIndex: "userId", key: "userId" },
@@ -20,10 +23,62 @@ const columns = [
   },
 ];
 
-export default function TeamMembers({ members }: { members: TeamMember[] }) {
+export default function TeamMembers({
+  members,
+  onAdd,
+}: {
+  members: TeamMember[];
+  onAdd: () => void;
+}) {
+  const { user, initializeAuth } = useAuthStore(); // 与checkAuth一起用于判断该用户是否为组长
+  const [showAddMemberModal, setShowAddMemberModal] = useState(false);
+
+  const checkCaptain = () => {
+    return members.filter((member: TeamMember) => member.userId === user.id)[0]
+      .teamMemberIsCaptain;
+  };
+
+  const openAddMemberModal = () => {
+    setShowAddMemberModal(true);
+  };
+
+  const closeAddMemberModal = () => {
+    setShowAddMemberModal(false);
+  };
+
+  const addTeamMember = async (values) => {
+    console.log(values);
+    try {
+      const data = (
+        await axiosInstance.post("/herb-research-service/teams/member", values)
+      ).data;
+      if (data.code === 0) {
+        message.success("添加成员成功");
+        onAdd(); // 通知父组件
+        closeAddMemberModal();
+      } else {
+        throw new Error(data.message);
+      }
+    } catch (e) {
+      console.error(e.message);
+      message.error("添加成员失败" + e.message);
+    }
+  };
+
+  useEffect(() => {
+    if (!user) {
+      initializeAuth();
+    }
+  }, []);
+
   return (
     <div className="w-[80%]">
       <Card title={<div className="text-2xl font-bold">团队成员</div>}>
+        {checkCaptain() && (
+          <Button type="primary" onClick={openAddMemberModal}>
+            添加团队成员
+          </Button>
+        )}
         <Table
           dataSource={members}
           columns={columns}
@@ -32,6 +87,45 @@ export default function TeamMembers({ members }: { members: TeamMember[] }) {
           }}
         />
       </Card>
+
+      {/* 添加成员模态框 */}
+      <Modal
+        open={showAddMemberModal}
+        title="添加成员"
+        footer={null}
+        onCancel={closeAddMemberModal}
+      >
+        <Form layout="vertical" onFinish={addTeamMember}>
+          <Form.Item name="teamId" hidden initialValue={members[0].teamId}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="userId" label="用户ID" rules={[{ required: true }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="teamMemberName"
+            label="成员姓名"
+            rules={[{ required: true }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="teamMemberDes"
+            label="成员简介"
+            rules={[{ required: true }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item name="teamMemberIsCaptain" hidden initialValue={false}>
+            <Input />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit">
+              提交
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }
