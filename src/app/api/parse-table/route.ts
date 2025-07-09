@@ -29,11 +29,11 @@ export async function POST(request: Request) {
     // Find required columns
     const headers = data[0] as string[]
     const schoolIndex = headers.findIndex(header => header.trim() === '学校')
-    const nameIndex = headers.findIndex(header => header.trim() === '学生姓名')
+    const nameIndex = headers.findIndex(header => header.trim() === '姓名')
 
     if (schoolIndex === -1 || nameIndex === -1) {
       return NextResponse.json(
-        { error: 'Required columns not found. Need both "学校" and "学生姓名" columns.' },
+        { error: 'Required columns not found. Need both "学校" and "姓名" columns.' },
         { status: 400 }
       )
     }
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     // Verify no extra columns exist
     if (headers.length > 2) {
       return NextResponse.json(
-        { error: 'Table contains extra columns. Only "学校" and "学生姓名" are allowed.' },
+        { error: 'Table contains extra columns. Only "学校" and "姓名" are allowed.' },
         { status: 400 }
       )
     }
