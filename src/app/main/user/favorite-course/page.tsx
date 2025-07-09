@@ -26,7 +26,7 @@ export default function FavoriteCoursePage() {
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-6">我的收藏</h1>
-      <CourseList courses={courses} />
+      <CourseList courses={courses} href="/main/course-resource"/>
     </div>
   );
 }

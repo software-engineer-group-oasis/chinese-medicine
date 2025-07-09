@@ -166,7 +166,7 @@ export default function CourseDetailPage({ params }: { params: { id: number } })
     return (
       <div className="p-6 pt-20 text-center">
         <Title level={4}>课程不存在</Title>
-        <Button type="primary" onClick={() => router.push('/course-resource')}>
+        <Button type="primary" onClick={() => router.push('/main/course-resource')}>
           <ArrowLeftOutlined /> 返回课程列表
         </Button>
       </div>
@@ -177,7 +177,7 @@ export default function CourseDetailPage({ params }: { params: { id: number } })
     <div className="p-6 pt-20">
       {/* 返回按钮 */}
       <div className="mb-4">
-        <Button type="link" onClick={() => router.push('/course-resource')} className="pl-0">
+        <Button type="link" onClick={() => router.push('/main/course-resource')} className="pl-0">
           <ArrowLeftOutlined /> 返回课程列表
         </Button>
       </div>

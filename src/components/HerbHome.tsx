@@ -21,9 +21,11 @@ export default function HerbHome({
   partTags,
   PAGE_SIZE
 }: any) {
+  console.log(herbsToShow);
   return (
     <div className="bg-[#f8f8f5] min-h-screen">
-      <div className="max-w-7xl mx-auto pt-16 pb-8 px-4">
+      <div className="max-w-7xl mx-auto pt-16 pb-8 px-4 " 
+        style={{ paddingTop: 100 }}>
         {/* 面包屑 */}
         <div className="mb-4">
           <Breadcrumb
@@ -83,7 +85,8 @@ export default function HerbHome({
         {/* 网格区 */}
         <div className="bg-white rounded-2xl shadow p-10">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-10">
-            {herbsToShow.map((herb: { name: string; img: string }) => (
+            {herbsToShow.map((herb: { name: string; image: string }) => (
+              
               <div
                 key={herb.name}
                 className="bg-green-50 rounded-2xl p-8 shadow hover:shadow-2xl transition cursor-pointer flex flex-col items-center w-full h-80 justify-center border-2 border-green-100 hover:border-green-300 group"
@@ -92,7 +95,7 @@ export default function HerbHome({
                 title={`查看${herb.name}详情`}
               >
                 <img
-                  src={herb.img}
+                  src={herb.image||"/images/草药.svg"}
                   alt={herb.name}
                   className="w-40 h-40 object-cover aspect-square rounded-xl mb-4 bg-white border-2 border-green-100 group-hover:border-green-300"
                   style={{ transition: 'border 0.2s' }}

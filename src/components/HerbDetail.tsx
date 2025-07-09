@@ -64,7 +64,7 @@ export default function HerbDetail({ herbId, allHerbs = [] }: { herbId: string, 
   return (
     <div className="bg-[#f8f8f5] min-h-screen">
       {/* 顶部花式字体+英文名+3D模型展示区 */}
-      <div className="w-full flex flex-col items-center justify-center py-8 mb-6" style={{background: '#6bb89e', borderRadius: '0 0 32px 32px'}}>
+      <div className="w-full flex flex-col items-center justify-center py-20 mb-20" style={{background: '#6bb89e', borderRadius: '0 0 32px 32px'}}>
         <div style={{ fontFamily: 'STKaiti, KaiTi, cursive', fontSize: 36, color: '#fff', textShadow: '2px 2px 8px #8C6B2F', marginBottom: 8 }}>
           {detail.name}
         </div>
@@ -97,33 +97,20 @@ export default function HerbDetail({ herbId, allHerbs = [] }: { herbId: string, 
           </div>
           {/* 相关链接区 */}
           <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <a href="/course-resource" className="block p-4 rounded-lg border border-[#e0e0d0] bg-[#f9f6ef] hover:bg-[#f3e9d2] transition"><b>相关课程资料</b></a>
-            <a href="/research" className="block p-4 rounded-lg border border-[#e0e0d0] bg-[#f9f6ef] hover:bg-[#f3e9d2] transition"><b>相关课题研究</b></a>
-            <a href="/training" className="block p-4 rounded-lg border border-[#e0e0d0] bg-[#f9f6ef] hover:bg-[#f3e9d2] transition"><b>制作教程</b></a>
+            {courseIds.map(cid => (
+              <a key={cid} href={`/main/course-resource/${cid}`} className="block p-4 rounded-lg border border-[#e0e0d0] bg-[#f9f6ef] hover:bg-[#f3e9d2] transition"><b>相关课程资料</b></a>
+            ))}
+            <a href={`/main/research/query?query=${detail.name}`} className="block p-4 rounded-lg border border-[#e0e0d0] bg-[#f9f6ef] hover:bg-[#f3e9d2] transition"><b>相关课题研究</b></a>
+            <a href={`/main/training?query=${detail.name}`} className="block p-4 rounded-lg border border-[#e0e0d0] bg-[#f9f6ef] hover:bg-[#f3e9d2] transition"><b>制作教程</b></a>
+            {/* {relatedTrainings.length > 0 && relatedTrainings.map((t: any) => (
+              <a key={t.id} href={`/training/${t.id}`} className="block p-4 rounded-lg border border-[#e0e0d0] bg-[#f9f6ef] hover:bg-[#f3e9d2] transition">
+                <b>相关培训：{t.title}</b>
+              </a>
+            ))} */}
           </div>
-          {/* 相关课程 */}
-          {courseIds.length > 0 && (
-            <div className="mb-8">
-              <h2 className="text-lg font-semibold text-[#8C6B2F] mb-2">📚 相关课程</h2>
-              <ul className="flex flex-wrap gap-4">
-                {courseIds.map(cid => (
-                  <li key={cid}><a href={`/course-resource/${cid}`} className="text-blue-600 underline">课程ID: {cid}</a></li>
-                ))}
-              </ul>
-            </div>
-          )}
+
           {/* 相关培训/课题 */}
-          {relatedTrainings.length > 0 && (
-            <div className="mb-8">
-              <h2 className="text-lg font-semibold text-[#8C6B2F] mb-2">🎓 相关培训</h2>
-              <ul className="flex flex-wrap gap-4">
-                {relatedTrainings.map((t: any) => (
-                  <li key={t.id}><a href={`/training/${t.id}`} className="text-blue-600 underline">{t.title}</a></li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {relatedResearches.length > 0 && (
+          {/* {relatedResearches.length > 0 && (
             <div className="mb-8">
               <h2 className="text-lg font-semibold text-[#8C6B2F] mb-2">🔬 相关课题</h2>
               <ul className="flex flex-wrap gap-4">
@@ -132,7 +119,7 @@ export default function HerbDetail({ herbId, allHerbs = [] }: { herbId: string, 
                 ))}
               </ul>
             </div>
-          )}
+          )} */}
         </section>
         {/* 右侧侧边栏 */}
         <aside className="w-72 flex-shrink-0">

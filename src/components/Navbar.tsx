@@ -11,10 +11,10 @@ const NAVBAR_HEIGHT = 60;
 const Navbar: React.FC = () => {
     const {user} = useAuthStore();
     const path = usePathname();
+    // 只在非herb页面保留背景
+    const showBg = !path.startsWith('/main/herb');
     return (
-        <div style={{width: "100%", height: "40vh", backgroundImage: "url(/images/banner02-1.jpg)",
-            backgroundSize:"cover", backgroundPosition: "top"
-        }}>
+        <div style={showBg ? {width: "100%", height: "40vh", backgroundImage: "url(/images/banner02-1.jpg)", backgroundSize:"cover", backgroundPosition: "top"} : {}}>
             <nav className="flex items-center  w-9/10 rounded-lg px-6 py-3 bg-gray-100/75 backdrop-blur-md fixed left-1/2 top-4 transform -translate-x-1/2 z-100">
                 <div style={{fontWeight: 'bold', fontSize: 22, marginRight: 40}} className="flex-1 flex gap-2 text-green-800">
                     <img src='/images/草药.svg' width={20} />
@@ -35,7 +35,6 @@ const Navbar: React.FC = () => {
                     <SearchHerb />
                 </div>
             }
-
             <style jsx>{
                 `
                 .link-my {
@@ -49,7 +48,6 @@ const Navbar: React.FC = () => {
                 `
             }</style>
         </div>
-
     );
 };
 
