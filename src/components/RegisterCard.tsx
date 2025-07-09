@@ -1,5 +1,5 @@
 import {Card, Form, Input, Button, message, Select} from 'antd';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Script from "next/script";
 import useAuthStore from "@/store/useAuthStore";
@@ -7,6 +7,7 @@ import {ArrowRightOutlined} from "@ant-design/icons";
 import Link from "next/link";
 import {devNull} from "node:os";
 import axiosInstance from "@/api/config";
+import axios from 'axios';
 
 const {Option} = Select;
 
@@ -49,6 +50,14 @@ export default function RegisterCard() {
     const {logout,initializeAuth} = useAuthStore();
     const [emailSent, setEmailSent] = useState(false);
 
+    useEffect(()=> {
+        if (emailSent === true) {
+            setTimeout(()=> {
+                setEmailSent(false);
+            }, 500)
+        }
+    }, [emailSent])
+
     const handleRoleChange = (value:string)=> {
         setRole(value)
         if (value !== "学生" && value !== "教师") {
@@ -65,14 +74,16 @@ export default function RegisterCard() {
         try {
             const values = await form.validateFields(['email']);
             const email = values.email;
+            console.log("email:", email);
 
             if (!email) {
                 message.error('请先输入邮箱地址');
                 return;
             }
 
-            const res = await axiosInstance.post(`/auth/register/verify/email/${email}`)
+            const res = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/auth/register/verify/email/${email}`)
             const data = res.data;
+            console.log("邮箱验证:", data);
             if (data.code === 0) {
                 message.success('验证码已发送至您的邮箱');
                 setEmailSent(true);
@@ -82,6 +93,7 @@ export default function RegisterCard() {
                 message.error('发送验证码失败');
             }
         } catch (err) {
+            console.error(err.message)
             message.error('网络异常，请稍后再试');
         }
     };
@@ -127,6 +139,7 @@ export default function RegisterCard() {
                             }
                         })
                         .catch((err) => {
+                            message.error(err.message)
                             setError(err.message || '网络异常');
                         })
                         .finally(() => {
