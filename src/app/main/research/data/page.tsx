@@ -100,7 +100,7 @@ export default function ResearchData() {
 
         {/* <button onClick={fetchTopics}>fetchTopics</button> */}
         <div className="flex flex-col items-center justify-center gap-16 mt-20">
-          <TeamMembers members={members} onAdd={fetchMembers} onTrans={fetchMembers}/>
+          <TeamMembers members={members} onUpdate={fetchMembers}/>
           <TopicsTable topics={topics} />
           <TeamContentsTable contents={contents} />
         </div>
