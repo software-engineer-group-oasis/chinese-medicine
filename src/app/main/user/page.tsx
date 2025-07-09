@@ -4,7 +4,9 @@ import UserCard from "@/components/user/UserCard";
 import useAuthStore from "@/store/useAuthStore";
 
 export default function InfoPage() {
-  const { user } = useAuthStore();
-
+  const { user, initializeAuth } = useAuthStore();
+  if (!user) {
+    initializeAuth();
+  }
   return <UserCard user={user} />;
 }
