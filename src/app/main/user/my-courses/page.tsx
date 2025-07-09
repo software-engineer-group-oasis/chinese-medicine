@@ -10,8 +10,6 @@ import {
   EyeOutlined, CheckCircleOutlined, ClockCircleOutlined,
   ExclamationCircleOutlined
 } from '@ant-design/icons';
-import PerformanceApply from '@/components/course/PerformanceApply';
-import PerformanceStatus from '@/components/course/PerformanceStatus';
 import dayjs from 'dayjs';
 import CourseList from '@/components/course/CourseList';
 import useAuthStore from '@/store/useAuthStore';
@@ -36,10 +34,10 @@ export default function MyCoursesPage() {
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [form] = Form.useForm();
   const { user } = useAuthStore();
-  const permission = userPermission();
+
   const { courses, loading, createCourse, updateCourse, deleteCourse ,refetchCourses} = useCourses({});
   const myCourses = courses.filter(course => course.teacherId === user.id);
-
+  const permission = userPermission();
   // 检查是否有教师权限
   const isTeacher = permission?.hasRole('教师');
   const canCreateCourse = permission?.hasPermission('course:create');
@@ -118,77 +116,6 @@ export default function MyCoursesPage() {
     });
     refetchCourses(); // 刷新课程列表
   };
-
-  // 业绩申请状态列
-  const columns = [
-    {
-      title: '课程名称',
-      dataIndex: 'courseName',
-      key: 'courseName',
-    },
-    {
-      title: '申请时间',
-      dataIndex: 'applyTime',
-      key: 'applyTime',
-    },
-    {
-      title: '状态',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: string) => {
-        let color = 'default';
-        let icon = null;
-        
-        switch (status) {
-          case '审核中':
-            color = 'processing';
-            icon = <ClockCircleOutlined />;
-            break;
-          case '已通过':
-            color = 'success';
-            icon = <CheckCircleOutlined />;
-            break;
-          case '已拒绝':
-            color = 'error';
-            icon = <ExclamationCircleOutlined />;
-            break;
-        }
-        
-        return (
-          <Tag color={color} icon={icon}>
-            {status}
-          </Tag>
-        );
-      },
-    },
-    {
-      title: '操作',
-      key: 'action',
-      render: (_: any, record: any) => (
-        <Space size="middle">
-          <Tooltip title="查看详情">
-            <Button type="link" icon={<EyeOutlined />} size="small" />
-          </Tooltip>
-        </Space>
-      ),
-    },
-  ];
-
-  // 模拟业绩申请数据
-  const performanceData = [
-    {
-      key: '1',
-      courseName: '中药学基础',
-      applyTime: '2023-10-15',
-      status: '已通过',
-    },
-    {
-      key: '2',
-      courseName: '中药鉴定学',
-      applyTime: '2023-11-20',
-      status: '审核中',
-    },
-  ];
 
 
 
@@ -294,16 +221,7 @@ export default function MyCoursesPage() {
                 </div>
               )}
         </TabPane>
-        <TabPane tab="业绩申请" key="3">
-          <div className="mb-4">
-            <PerformanceApply courses={courses} onSuccess={() => setActiveTab('3')} />
-          </div>
-          <PerformanceStatus />
-        </TabPane>
-        
-        <TabPane tab="业绩状态" key="4">
-          <PerformanceStatus />
-        </TabPane>
+
       </Tabs>
 
       {/* 创建/编辑课程模态框 */}

@@ -7,19 +7,40 @@ import {
   UploadOutlined, FileTextOutlined, 
   CheckCircleOutlined, SendOutlined
 } from '@ant-design/icons';
+import axios from 'axios';
 import type { UploadFile, UploadProps } from 'antd/es/upload/interface';
 import axiosInstance from '@/api/config';
 import useAuthStore from '@/store/useAuthStore';
 import type { Course } from '@/constTypes/course';
+import useRequest from '@/hooks/useRequest';
 
 const { Option } = Select;
 const { TextArea } = Input;
 const { Title, Text } = Typography;
 
+interface PerformanceAttachment {
+  performId: number;
+  performFileId: number;
+  performFileDes: string;
+  performFileType: string;
+  performFileUrl: string;
+  performFileIsvalid: boolean;
+  performName: string;
+  uploadTime: string; 
+}
+
 interface PerformanceApplyProps {
   courses: Course[];
+//   performanceAttachments?: PerformanceAttachment[]; 
   onSuccess: () => void;
 }
+const performanceTypes = [
+  { id: 1, name: '教学成果' },
+  { id: 2, name: '科研成果' },
+  { id: 3, name: '社会服务' },
+  { id: 4, name: '学术交流' },
+  { id: 5, name: '其他业绩' },
+];
 
 export default function PerformanceApply({ courses, onSuccess }: PerformanceApplyProps) {
   const [form] = Form.useForm();
@@ -27,7 +48,12 @@ export default function PerformanceApply({ courses, onSuccess }: PerformanceAppl
   const [uploading, setUploading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { user } = useAuthStore();
-
+  const { post } = useRequest();
+  const API={
+    POST_File:(performanceId: number) =>
+    `/performance-service/files/performances/${performanceId}/url`,
+    POST_Performance:`/performance-service/performances`,
+}
   // 处理文件上传
   const handleUploadChange: UploadProps['onChange'] = ({ fileList }) => {
     setFileList(fileList);
@@ -65,52 +91,81 @@ export default function PerformanceApply({ courses, onSuccess }: PerformanceAppl
       const values = await form.validateFields();
       
       if (fileList.length === 0) {
-        message.warning('请上传业绩证明材料');
-        return;
+        message.info('您未上传证明材料，将仅提交业绩内容');
       }
       
       setUploading(true);
       
-      // 先上传文件
+      
+
+        //POST创建业绩
+        const performanceData = {
+        performTypeId: values.performTypeId,
+        performName: values.performName,
+        performContent: values.performContent,
+        performTime: values.performTime.toISOString(),
+        };
+      
+      const  createResponse = await post(API.POST_Performance,performanceData)
+      if (createResponse.code === 0) {
+        setIsModalVisible(false);
+        onSuccess(); // 通知父组件刷新列表
+      } else {
+        message.error(createResponse.message || '业绩申请提交失败');
+      }
+      const performId = createResponse.data.performId;
+    if (!performId) throw new Error('未获取到 performId');
+
+    // 先上传文件
+    if (fileList.length > 0) {
       const formData = new FormData();
       fileList.forEach(file => {
         if (file.originFileObj) {
-          formData.append('files', file.originFileObj);
+          formData.append('upload-file', file.originFileObj);
         }
       });
       
       // 上传文件到服务器
-      const uploadResponse = await fetch('/api/upload-performance-files', {
+      const uploadResponse = await fetch('/api/tencent-cos', {
         method: 'POST',
         body: formData,
       });
       
       const uploadResult = await uploadResponse.json();
-      
+    //   const uploadResult = await axios.post('/api/tencent-cos', formData, {
+    //     headers: {
+    //         'Content-Type': 'multipart/form-data',
+    //     },
+    // });
       if (uploadResult.status !== 'success') {
         throw new Error('文件上传失败');
       }
-      
-      // 提交业绩申请
-      const performanceData = {
-        teacherId: user?.id,
-        courseId: values.courseId,
-        performanceType: values.performanceType,
-        performanceTitle: values.performanceTitle,
-        performanceDescription: values.performanceDescription,
-        performanceDate: values.performanceDate.format('YYYY-MM-DD'),
-        attachmentUrls: uploadResult.fileUrls,
-      };
-      
-      const response = await axiosInstance.post('/performance-service/performances', performanceData);
-      
-      if (response.data.code === 0) {
-        message.success('业绩申请提交成功');
+
+      //提交附件与 performId 绑定
+        // const attachment = uploadResult.files.map(file => ({
+        // performFileName: file.performFileName,
+        // performFileDes: '详细的业绩证明材料描述',
+        // performFileType: file.performFileName.split('.').pop()?.toLowerCase() || '',
+        // performFileUrl: file.performFileUrl,
+        // fileSize: file.fileSize,
+        // }));
+        const attachment = {
+        performFileName: fileList[0].name,
+        performFileDes: '详细的业绩证明材料描述',
+        performFileType: fileList[0].name.split('.').pop()?.toLowerCase() || '',
+        performFileUrl: uploadResult.url,
+        fileSize: fileList[0].size,
+        };
+
+        const attachRes = await post(API.POST_File(performId), attachment);
+        if (attachRes && attachRes.code === 0) {
         setIsModalVisible(false);
-        onSuccess(); // 通知父组件刷新列表
-      } else {
-        message.error(response.data.message || '业绩申请提交失败');
-      }
+        onSuccess();
+        } else {
+        message.error(attachRes?.message || '附件提交失败');
+        }
+    }
+
     } catch (error) {
       console.error('业绩申请提交错误:', error);
       message.error('业绩申请提交失败，请稍后重试');
@@ -148,34 +203,21 @@ export default function PerformanceApply({ courses, onSuccess }: PerformanceAppl
           layout="vertical"
         >
           <Form.Item
-            name="courseId"
-            label="选择课程"
-            rules={[{ required: true, message: '请选择课程' }]}
+            name="performTypeId"
+            label="业绩类型"
+            rules={[{ required: true, message: '请选择业绩类型' }]}
           >
-            <Select placeholder="请选择课程">
-              {courses.map(course => (
-                <Option key={course.courseId} value={course.courseId}>
-                  {course.courseName}
-                </Option>
+            <Select placeholder="请选择业绩类型">
+              {performanceTypes.map(type => (
+                <Select.Option key={type.id} value={type.id}>
+                    {type.name}
+                </Select.Option>
               ))}
             </Select>
           </Form.Item>
 
           <Form.Item
-            name="performanceType"
-            label="业绩类型"
-            rules={[{ required: true, message: '请选择业绩类型' }]}
-          >
-            <Select placeholder="请选择业绩类型">
-              <Option value="teaching">教学业绩</Option>
-              <Option value="research">科研业绩</Option>
-              <Option value="innovation">教学创新</Option>
-              <Option value="other">其他业绩</Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item
-            name="performanceTitle"
+            name="performName"
             label="业绩标题"
             rules={[{ required: true, message: '请输入业绩标题' }]}
           >
@@ -183,7 +225,7 @@ export default function PerformanceApply({ courses, onSuccess }: PerformanceAppl
           </Form.Item>
 
           <Form.Item
-            name="performanceDescription"
+            name="performContent"
             label="业绩描述"
             rules={[{ required: true, message: '请输入业绩描述' }]}
           >
@@ -191,7 +233,7 @@ export default function PerformanceApply({ courses, onSuccess }: PerformanceAppl
           </Form.Item>
 
           <Form.Item
-            name="performanceDate"
+            name="performTime"
             label="业绩日期"
             rules={[{ required: true, message: '请选择业绩日期' }]}
           >
@@ -200,7 +242,7 @@ export default function PerformanceApply({ courses, onSuccess }: PerformanceAppl
 
           <Form.Item
             label="上传证明材料"
-            required
+            // required
           >
             <Upload
               fileList={fileList}

@@ -2,6 +2,7 @@ import { useState } from "react";
 import axiosInstance from "@/api/config";
 import { message } from "antd";
 
+
 //和useAxios功能类似，但是不是刷新就触发，是手动触发
 interface UseRequestResult<T> {
   data: T | null;
@@ -53,17 +54,17 @@ function useRequest<T = unknown>(): UseRequestResult<T> {
       } else {
         const err = new Error(res.data.message || "请求失败");
         setError(err);
-        message.error(err.message);
+        console.error(err.message);
         return null;
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err);
-        message.error(err.message || "请求出错");
+        console.error(err.message || "请求出错");
       } else {
         const fallbackError = new Error("未知错误");
         setError(fallbackError);
-        message.error("请求出错");
+        console.error("请求出错");
       }
       return null;
     } finally {
