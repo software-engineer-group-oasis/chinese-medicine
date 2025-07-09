@@ -26,18 +26,26 @@ const columns = [
 export default function TeamMembers({
   members,
   onAdd,
+  onTrans
 }: {
   members: TeamMember[];
   onAdd: () => void;
+  onTrans: () => void;
 }) {
   const { user, initializeAuth } = useAuthStore(); // 与checkAuth一起用于判断该用户是否为组长
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
+  const [showTransCaptainModal, setShowTransCaptainModal] = useState(false);
+
+  const captain = ()=> {
+    return members.find((member:TeamMember)=> member.teamMemberIsCaptain)
+  }
 
   const checkCaptain = () => {
     return members.filter((member: TeamMember) => member.userId === user.id)[0]
       .teamMemberIsCaptain;
   };
 
+  // 添加团队成员部分
   const openAddMemberModal = () => {
     setShowAddMemberModal(true);
   };
@@ -65,19 +73,54 @@ export default function TeamMembers({
     }
   };
 
+  // 转移队长部分
+  const openTransCaptainModal = ()=> {
+    setShowTransCaptainModal(true);
+  }
+
+  const closeTransCaptainModal = ()=> {
+    setShowTransCaptainModal(false);
+  };
+
+  const transCaption = async(values)=> {
+    try {
+      const teamMemberId = values.teamMemberId;
+      const data = (
+        await axiosInstance.post(`/herb-research-service/teams/captain/${teamMemberId}`)
+      ).data;
+      if (data.code === 0) {
+        message.success("转让队长成功");
+        onTrans(); // 通知父组件
+        closeTransCaptainModal();
+      } else {
+        throw new Error(data.message);
+      }
+    } catch (e) {
+      console.error(e.message);
+      message.error("转让队长失败" + e.message);
+    }
+  }
+
+
   useEffect(() => {
     if (!user) {
       initializeAuth();
     }
+    //console.log("captain:", captain())
   }, []);
 
   return (
     <div className="w-[80%]">
       <Card title={<div className="text-2xl font-bold">团队成员</div>}>
         {checkCaptain() && (
-          <Button type="primary" onClick={openAddMemberModal}>
-            添加团队成员
-          </Button>
+          <>
+            <Button type="primary" onClick={openAddMemberModal}>
+              添加团队成员
+            </Button>
+            <Button type="primary" onClick={openTransCaptainModal}>
+              转让队长
+            </Button>
+          </>
         )}
         <Table
           dataSource={members}
@@ -117,6 +160,24 @@ export default function TeamMembers({
             <Input />
           </Form.Item>
           <Form.Item name="teamMemberIsCaptain" hidden initialValue={false}>
+            <Input />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit">
+              提交
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+      {/* 转让队长模态框 */}
+      <Modal
+        open={showTransCaptainModal}
+        title="转让队长"
+        footer={null}
+        onCancel={closeTransCaptainModal}
+      >
+        <Form layout="vertical" onFinish={transCaption}>
+          <Form.Item name="teamMemberId" label="新队长的成员ID" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
           <Form.Item>
