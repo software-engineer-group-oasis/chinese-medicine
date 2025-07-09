@@ -259,6 +259,7 @@ export default function UserPage() {
             <div className="text-gray-500">管理系统用户，分配角色和权限</div>
           </div>
           <div>
+            <Button>生成邀请码</Button>
             <Button type="primary" icon={<PlusOutlined />} onClick={handleAddUser} className="mr-2">新增用户</Button>
             <Dropdown menu={{ items: batchActionItems }} disabled={selectedRowKeys.length === 0}>
               <Button>批量操作 {selectedRowKeys.length > 0 ? `(${selectedRowKeys.length})` : ''}</Button>
