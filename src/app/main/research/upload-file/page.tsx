@@ -1,8 +1,8 @@
 "use client"
 
-import { Button, Card, Form, Input, message, Select, Upload } from "antd";
+import { Button, Card, Form, Input, message, Select, Skeleton, Upload } from "antd";
 import { useSearchParams } from "next/navigation"
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import {UploadOutlined} from "@ant-design/icons";
 import axiosInstance from "@/api/config";
 import getFileExtension from "@/utils/getFileExtension";
@@ -10,7 +10,7 @@ import getFileExtension from "@/utils/getFileExtension";
 
 const { Option } = Select;
 
-export default function UploadFilePage() {
+function UploadFilePage() {
     const params = useSearchParams();
     const topicId = params.get("topicId");
     const [documentForm] = Form.useForm();
@@ -90,5 +90,13 @@ export default function UploadFilePage() {
                 </Form>
             </Card>
         </div>
+    )
+}
+
+export default function Page() {
+    return (
+    <Suspense fallback={<Skeleton active/>}>
+        <UploadFilePage />
+    </Suspense>
     )
 }

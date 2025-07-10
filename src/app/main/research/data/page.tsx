@@ -3,7 +3,7 @@
 import ResearchInfoCards from "@/components/ResearchInfoCards";
 import ResearchDataTable from "@/components/ResearchDataTable";
 import useAxios from "@/hooks/useAxios";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Contents, Team, TeamMember, Topic } from "@/constTypes/research";
 import { message, Skeleton, Table } from "antd";
 import { useSearchParams } from "next/navigation";
@@ -13,7 +13,7 @@ import TeamMembers from "@/components/research/TeamMembers";
 import TeamContentsTable from "@/components/research/TeamContentsTable";
 import useAuthStore from "@/store/useAuthStore";
 
-export default function ResearchData() {
+function ResearchData() {
   const [team, setTeam] = useState<Team>();
   const [topics, setTopics] = useState<Topic[]>([]);
   const [members, setMembers] = useState<TeamMember[]>([]);
@@ -131,4 +131,12 @@ export default function ResearchData() {
       </>
     );
   }
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<Skeleton active/>}>
+      <ResearchData />
+    </Suspense>
+  )
 }

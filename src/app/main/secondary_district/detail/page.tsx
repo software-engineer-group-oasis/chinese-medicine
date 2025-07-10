@@ -3,15 +3,15 @@
  */
 "use client"
 
-import {useEffect, useState} from "react";
+import {Suspense, useEffect, useState} from "react";
 import {useSearchParams} from "next/navigation";
 import {getHerbLocationsByName} from "@/api/HerbInfoApi";
 import {Location} from "@/constTypes/herbs";
-import { Card, List } from "antd";
+import { Card, List, Skeleton } from "antd";
 import React from "react";
 import GrowthTimeline from "@/components/GrowthTimeline";
 
-export default function HerbDetailPage() {
+function HerbDetailPage() {
     const params = useSearchParams();
     const herbId = params.get('herbId')
     const herbName = params.get('herbName')
@@ -48,4 +48,12 @@ export default function HerbDetailPage() {
 
         </div>
     );
+}
+
+export default function Page() {
+    return (
+        <Suspense fallback={<Skeleton />}>
+            <HerbDetailPage />
+        </Suspense>
+    )
 }

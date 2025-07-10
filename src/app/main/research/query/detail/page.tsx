@@ -1,6 +1,6 @@
 "use client"
 import {useSearchParams} from "next/navigation";
-import {useEffect, useState} from "react";
+import {Suspense, useEffect, useState} from "react";
 import {Contents, Topic} from "@/constTypes/research";
 import axiosInstance from "@/api/config";
 import {message, Typography, Table, Skeleton, Card} from "antd";
@@ -26,7 +26,7 @@ const columns = [
 
 
 ]
-export default function ResearchQueryDetailPage() {
+function ResearchQueryDetailPage() {
     const params = useSearchParams()
     const topicId = params.get("topicId") || "";
     const [topic, setTopic] = useState<Topic>()
@@ -115,5 +115,13 @@ export default function ResearchQueryDetailPage() {
     </>
     
         
+    )
+}
+
+export default function Page() {
+    return (
+    <Suspense fallback={<Skeleton active/>}>
+        <ResearchQueryDetailPage />
+    </Suspense>
     )
 }

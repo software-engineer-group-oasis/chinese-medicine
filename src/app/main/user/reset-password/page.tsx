@@ -1,6 +1,6 @@
 "use client"
-import {Button, Form, Input, message} from "antd";
-import React, {useEffect, useState} from "react";
+import {Button, Form, Input, message, Skeleton} from "antd";
+import React, {Suspense, useEffect, useState} from "react";
 import axiosInstance from "@/api/config";
 import useAuthStore from "@/store/useAuthStore";
 
@@ -10,15 +10,17 @@ type ResetPasswordFormData = {
     newPassword:string,
 }
 
-const ResetPasswordPage: React.FC  = () => {
+function ResetPasswordPage() {
 //@ts-ignore
     const {user, initializeAuth} = useAuthStore();
-    if (!user) {
-        initializeAuth();
-    }
+    useEffect(()=> {
+        if (!user) {
+            initializeAuth();
+        }
+    }, [])
     console.log(user);
     const userInfo = {
-        username: user.username,
+        username: user?.username,
         oldPassword: "",
         newPassword: ""
     }
@@ -87,4 +89,12 @@ const ResetPasswordPage: React.FC  = () => {
     )
 }
 
-export default ResetPasswordPage;
+
+
+export default function Page() {
+    return (
+        <Suspense fallback={<Skeleton active/>}>
+            <ResetPasswordPage />
+        </Suspense>
+    )
+}

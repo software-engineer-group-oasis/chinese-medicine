@@ -1,10 +1,10 @@
 "use client"
-import {useEffect, useState} from "react";
+import {Suspense, useEffect, useState} from "react";
 import {useRouter, useSearchParams} from "next/navigation";
-import {Button, Card, Form, Input, message} from "antd";
+import {Button, Card, Form, Input, message, Skeleton} from "antd";
 import axios from "axios";
 
-export default function ForgetPasswordValid() {
+function ForgetPasswordValid() {
     const router = useRouter();
     const params =  useSearchParams();
     const token = params.get("token");
@@ -67,5 +67,13 @@ export default function ForgetPasswordValid() {
                 <div>链接已失效，请重新提交忘记密码的申请</div>
             )}
         </div>
+    )
+}
+
+export default function Page () {
+    return (
+        <Suspense fallback={<Skeleton active/>}>
+            <ForgetPasswordValid />
+        </Suspense>
     )
 }

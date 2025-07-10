@@ -1,7 +1,7 @@
 "use client";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useMemo, useState, useEffect } from "react";
-import { Typography, Spin, message } from "antd";
+import React, { useMemo, useState, useEffect, Suspense } from "react";
+import { Typography, Spin, message, Skeleton } from "antd";
 import axiosInstance from "@/api/config";
 import { HERB_API } from "@/api/HerbInfoApi";
 import HerbHome from "@/components/HerbHome";
@@ -18,7 +18,7 @@ const partTags = [
 
 const PAGE_SIZE = 15;
 
-export default function HerbPage() {
+function HerbPage() {
   const searchParam = useSearchParams();
   const herbId = searchParam.get("id");
   const router = useRouter();
@@ -125,4 +125,12 @@ export default function HerbPage() {
   } else {
     return <HerbDetail herbId={herbId} allHerbs={allHerbs} />;
   }
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<Skeleton active/>}>
+      <HerbPage />
+    </Suspense>
+  )
 }

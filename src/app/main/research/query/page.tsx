@@ -2,8 +2,8 @@
 
 import {useSearchParams} from "next/navigation";
 import { LikeOutlined, MessageOutlined, StarOutlined } from '@ant-design/icons';
-import {Avatar, List, message, Space, Typography} from 'antd';
-import React, {useEffect, useState} from "react";
+import {Avatar, List, message, Skeleton, Space, Typography} from 'antd';
+import React, {Suspense, useEffect, useState} from "react";
 import {Topic} from "@/constTypes/research";
 import {parseMergedHandlers} from "@use-gesture/core";
 import axiosInstance from "@/api/config";
@@ -27,7 +27,7 @@ const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (
     </Space>
 );
 
-export default function QueryPage() {
+function QueryPage() {
     const params = useSearchParams()
     const query = params.get("query")
     const [topics, setTopics] = useState<Topic[]>([])
@@ -111,5 +111,13 @@ export default function QueryPage() {
             </div>
 
         </>
+    )
+}
+
+export default function Page() {
+    return (
+    <Suspense fallback={<Skeleton />}>
+        <QueryPage />
+    </Suspense>
     )
 }

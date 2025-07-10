@@ -1,8 +1,10 @@
 "use client"
 import {useSearchParams} from "next/navigation";
 import TraceInfo from "@/components/TraceInfo";
+import { Suspense } from "react";
+import { Skeleton } from "antd";
 
-export default function TracePage() {
+function TracePage() {
     const params =  useSearchParams();
     const herbName = params.get('herbName');
 
@@ -17,5 +19,13 @@ export default function TracePage() {
                 )
             }
         </>
+    )
+}
+
+export default function Page() {
+    return (
+        <Suspense fallback={<Skeleton active/>}>
+            <TracePage />
+        </Suspense>
     )
 }

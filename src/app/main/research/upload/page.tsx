@@ -1,10 +1,11 @@
 "use client"
 import ResearchDataCreate from "@/components/research/ResearchDataCreate";
 import ResearchDataUpload from "@/components/research/ResearchDataUpload";
+import { Skeleton } from "antd";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
-export default function ResearchUpload() {
+ function ResearchUpload() {
     const params = useSearchParams();
     const topicId = params.get("topicId") || "";
     const [contentId, setContentId] = useState<number>();
@@ -21,5 +22,13 @@ export default function ResearchUpload() {
             {current === 1 && <ResearchDataCreate onSuccess={handleCreate} topicId={topicId}/>}
             {current === 2  && contentId && <ResearchDataUpload contentId={contentId}/>}
         </div>
+    )
+}
+
+export default function Page() {
+    return (
+    <Suspense fallback={<Skeleton />}>
+        <ResearchUpload />
+    </Suspense>
     )
 }

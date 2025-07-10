@@ -1,9 +1,9 @@
 "use client";
 import { useSearchParams } from "next/navigation";
 import AdminBreadcrumb from "@/components/AdminBreadcrumb";
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import axiosInstance from "@/api/config";
-import { Button, Form, Input, message, UploadProps } from "antd";
+import { Button, Form, Input, message, Skeleton, UploadProps } from "antd";
 import { Herb } from "@/constTypes/herbs";
 import { Upload } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
@@ -16,7 +16,7 @@ interface HerbResponse {
   herb: Herb;
 }
 
-export default function AdminHerbCategoryDetailPage() {
+function AdminHerbCategoryDetailPage() {
   const params = useSearchParams();
   const name = params.get("name") || "";
   const id = params.get("id") || "";
@@ -164,4 +164,12 @@ export default function AdminHerbCategoryDetailPage() {
       </div>
     </div>
   );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<Skeleton active/>}>
+      <AdminHerbCategoryDetailPage />
+    </Suspense>
+  )
 }

@@ -1,11 +1,11 @@
 "use client"
 import axiosInstance from "@/api/config";
 import { Contents, ContentBlock } from "@/constTypes/research";
-import { Card, message } from "antd";
+import { Card, message, Skeleton } from "antd";
 import { useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
-export default function ContentBlocksPage() {
+function ContentBlocksPage() {
     const params = useSearchParams();
     const contentId = params.get("contentId") || "";
 
@@ -50,5 +50,13 @@ export default function ContentBlocksPage() {
             }
         </Card>
         </div>
+    )
+}
+
+export default function Page() {
+    return (
+    <Suspense fallback={<Skeleton active/>}>
+        <ContentBlocksPage />
+    </Suspense>
     )
 }

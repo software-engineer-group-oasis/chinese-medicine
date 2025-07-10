@@ -1,6 +1,6 @@
 "use client";
 import { Suspense, useEffect, useState } from "react";
-import { Input, Select, Card, List, Button, message, Modal } from "antd";
+import { Input, Select, Card, List, Button, message, Modal, Skeleton } from "antd";
 import Link from "next/link";
 import axiosInstance from "@/api/config";
 import { Material } from "@/constTypes/materials";
@@ -19,7 +19,7 @@ const { Search } = Input;
 const { Option } = Select;
 const { Paragraph } = Typography;
 
-export default function TrainingPage() {
+function TrainingPage() {
   const params = useSearchParams();
   const query = params.get("query") || "";
   // 状态管理
@@ -326,4 +326,12 @@ export default function TrainingPage() {
       </div>
     </>
   );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<Skeleton active/>}>
+      <TrainingPage />
+    </Suspense>
+  )
 }

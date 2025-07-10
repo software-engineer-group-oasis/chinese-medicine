@@ -1,15 +1,15 @@
 // 展示某门培训课程的详细信息
 "use client";
-import {useEffect, useState} from "react";
+import {Suspense, useEffect, useState} from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Card, Rate, Button, Image, Typography, Divider } from "antd";
+import { Card, Rate, Button, Image, Typography, Divider, Skeleton } from "antd";
 import {MaterialContent, MaterialFull} from "@/constTypes/materials";
 import axiosInstance from "@/api/config";
 import Link from "next/link";
 
 const { Title, Paragraph, Text } = Typography;
 
-export default function TrainingDetailPage() {
+function TrainingDetailPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const key = searchParams.get('key') || '1';
@@ -131,4 +131,12 @@ export default function TrainingDetailPage() {
             </Card>
         </div>
     );
+}
+
+export default function Page() {
+    return (
+        <Suspense fallback={<Skeleton active/>}>
+            <TrainingDetailPage />
+        </Suspense>
+    )
 }

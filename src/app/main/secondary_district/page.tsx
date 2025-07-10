@@ -6,8 +6,8 @@ import {geoJson} from '@/assets/secondaryGeo'
 import axios from 'axios'
 import * as echarts from 'echarts'
 import ReactEcharts from "echarts-for-react"
-import React, {useEffect, useState} from "react"
-import {Table, type TableProps} from "antd";
+import React, {Suspense, useEffect, useState} from "react"
+import {Skeleton, Table, type TableProps} from "antd";
 import {getHerbsByLocation} from '@/api/HerbInfoApi';
 import {Location} from "@/constTypes/herbs"
 import Link from "next/link";
@@ -46,7 +46,7 @@ const columns:TableProps<Location>['columns'] = [
   }
 ]
 
-export default function SecondaryDistrictPage() {
+function SecondaryDistrictPage() {
   const searchParams = useSearchParams()
   const [option, setOption] = useState<echarts.EChartOption>();
 
@@ -127,5 +127,13 @@ export default function SecondaryDistrictPage() {
                rowKey="id"
         />
       </div>
+  )
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<Skeleton active/>}>
+      <SecondaryDistrictPage />
+    </Suspense>
   )
 }
