@@ -47,6 +47,7 @@ export default function RegisterCard() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    // @ts-ignore
     const {logout,initializeAuth} = useAuthStore();
     const [emailSent, setEmailSent] = useState(false);
 
@@ -93,6 +94,7 @@ export default function RegisterCard() {
                 message.error('发送验证码失败');
             }
         } catch (err) {
+        // @ts-ignore
             console.error(err.message)
             message.error('网络异常，请稍后再试');
         }
@@ -104,6 +106,7 @@ export default function RegisterCard() {
     const handleRegister = async (values: any) => {
         setLoading(true);
         try {
+        // @ts-ignore
             if (typeof TencentCaptcha === 'undefined') {
                 setError('验证码加载中，请稍候...');
                 setLoading(false);

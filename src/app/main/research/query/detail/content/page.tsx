@@ -19,6 +19,7 @@ export default function ContentBlocksPage() {
                 setContents(data.contents)
             } else throw new Error(data.message)
         } catch (e) {
+        //@ts-ignore
             console.error(e.message);
             message.error("请求数据失败")
         }

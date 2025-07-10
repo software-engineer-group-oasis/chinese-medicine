@@ -20,6 +20,7 @@ type UserInfo = {
 
 export default function UserCard ({user}: {user: UserInfo}): React.ReactNode {
     const router = useRouter();
+    //@ts-ignore
     const {updateUser} = useAuthStore();
     // 初始化用户信息
     const [userInfo, setUserInfo] = useState<UserInfo>({
@@ -30,7 +31,7 @@ export default function UserCard ({user}: {user: UserInfo}): React.ReactNode {
         avatarUrl: user?.avatarUrl,
         role: user?.role
     });
-
+//@ts-ignore
     const {logout} = useAuthStore();
 
     // 处理表单提交

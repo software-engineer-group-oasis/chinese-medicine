@@ -1,7 +1,7 @@
 "use client"
 import {useSearchParams} from "next/navigation";
 import {useEffect, useState} from "react";
-import {Content, Topic} from "@/constTypes/research";
+import {Contents, Topic} from "@/constTypes/research";
 import axiosInstance from "@/api/config";
 import {message, Typography, Table, Skeleton, Card} from "antd";
 import useAxios from "@/hooks/useAxios";
@@ -32,7 +32,7 @@ export default function ResearchQueryDetailPage() {
     const [topic, setTopic] = useState<Topic>()
     const [loading, setLoading] = useState(false)
     const [files, setFiles] = useState<Document[]>([]);
-    const [contents, setContents] = useState<Content[]>([]);
+    const [contents, setContents] = useState<Contents[]>([]);
 
     const fetchTopicByTopicId = async()=> {
         setLoading(true);
@@ -49,8 +49,9 @@ export default function ResearchQueryDetailPage() {
             setLoading(false)
         }
     }
-
+//@ts-ignore
     const {data:FilesData} = useAxios(`/herb-research-service/files/topic/${topicId}/all`)
+    //@ts-ignore
     const {data:ContentsData} = useAxios(`/herb-research-service/contents/topic/${topicId}`)
 
     useEffect(() => {
@@ -58,12 +59,17 @@ export default function ResearchQueryDetailPage() {
     }, [topicId]);
 
     useEffect(()=> {
+    //@ts-ignore
         if (FilesData && FilesData.documents) {
             //console.log(FilesData.documents)
+            //@ts-ignore
             setFiles(FilesData.documents)
         }
+        //@ts-ignore
         if (ContentsData && ContentsData.contents) {
+        //@ts-ignore
             console.log("contents: ", ContentsData.contents)
+            //@ts-ignore
             setContents(ContentsData.contents)
         }
     },[FilesData, ContentsData])

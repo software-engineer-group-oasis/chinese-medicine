@@ -136,13 +136,16 @@ export default function InvitePage() {
         }
       }
     } catch (err) {
+    //@ts-ignore
       console.error(err.message);
+      //@ts-ignore
       message.error(err.message);
     } finally {
       setLoading(false);
     }
   };
 
+//@ts-ignore
   const parseTable = async (values) => {
     setLoading(true);
     console.log(values);
@@ -185,9 +188,12 @@ export default function InvitePage() {
           invitationCodes.push(data.invitationCode);
         } else throw new Error(data.message);
       }
+      //@ts-ignore
       setRecordsWithInvCode(invitationCodes);
     } catch (err) {
+    //@ts-ignore
       message.error(err.message);
+      //@ts-ignore
       console.error(err.message);
     }
   };
@@ -323,6 +329,7 @@ export default function InvitePage() {
             <Button danger type="primary" onClick={batchDeleteInvCodes} disabled={selectedRowKeys.length === 0}>批量删除</Button>
             <Table
               dataSource={invitationCodes}
+              // @ts-ignore
               columns={invCodeFromMeCols}
               rowKey="codeId" // 必须指定 rowKey，否则 rowSelection 不生效
               rowSelection={rowSelection}

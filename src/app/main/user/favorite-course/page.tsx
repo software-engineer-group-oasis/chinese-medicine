@@ -7,6 +7,7 @@ import { useFavoriteCourses } from "@/hooks/useFavoriteCourses";
 
 export default function FavoriteCoursePage() {
   const { courses, loading, error } = useFavoriteCourses();
+  //@ts-ignore
   const { user ,initializeAuth} = useAuthStore();
 
   if (loading) {

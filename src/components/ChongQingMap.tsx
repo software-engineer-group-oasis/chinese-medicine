@@ -9,7 +9,9 @@ const ChongQingMap = ({option}: {
     const router = useRouter();
 
     function handleClick(params:never) {
+    //@ts-ignore
         const encodedName = encodeURIComponent(params.name);
+        //@ts-ignore
         router.push(`/main/secondary_district?name=${encodedName}&value=${params.value || 0}`)
     }
 

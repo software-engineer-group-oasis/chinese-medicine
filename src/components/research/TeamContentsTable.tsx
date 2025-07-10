@@ -1,5 +1,5 @@
 "use client";
-import { Content } from "@/constTypes/research";
+import { Contents } from "@/constTypes/research";
 import { Card, Table, Popover } from "antd";
 import Link from "next/link";
 
@@ -38,7 +38,7 @@ const columns = [
 export default function TeamContentsTable({
   contents,
 }: {
-  contents: Content[];
+  contents: Contents[];
 }) {
   return (
     <div className="w-[80%]">

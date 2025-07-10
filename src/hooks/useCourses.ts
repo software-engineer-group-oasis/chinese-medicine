@@ -96,17 +96,21 @@ export const useCourses = ({ id, params }: UseCoursesOptions) => {
 
 
 useEffect(() => {
+//@ts-ignore
     if(data&&data?.data){
       if (isDetail) {
         // 处理单个课程详情
+        //@ts-ignore
         const adaptedCourse = adaptCourseFromServer(data.data);
         setCourse(adaptedCourse);
         console.log('获取到的单个课程详情:', adaptedCourse);
       } else {
         //处理课程列表
+        //@ts-ignore
       const rawList = data.data.list || [];
       const adaptedCourses = rawList.map(adaptCourseFromServer);
       setCourses(adaptedCourses);
+      //@ts-ignore
       setTotal(data.data.total || 0);
       console.log('获取到的课程列表数据:', adaptedCourses);
       }

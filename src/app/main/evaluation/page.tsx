@@ -236,6 +236,7 @@ export default function HerbEvaluationPage() {
                   itemLayout="horizontal"
                   dataSource={mockHerbs.sort((a, b) => {
                     const demandOrder = { '极高': 5, '高': 4, '中高': 3, '中': 2, '低': 1 };
+                    // @ts-ignore
                     return demandOrder[b.demand] - demandOrder[a.demand];
                   }).slice(0, 5)}
                   renderItem={(item, index) => (

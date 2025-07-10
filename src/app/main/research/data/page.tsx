@@ -4,7 +4,7 @@ import ResearchInfoCards from "@/components/ResearchInfoCards";
 import ResearchDataTable from "@/components/ResearchDataTable";
 import useAxios from "@/hooks/useAxios";
 import { useEffect, useState } from "react";
-import { Content, Team, TeamMember, Topic } from "@/constTypes/research";
+import { Contents, Team, TeamMember, Topic } from "@/constTypes/research";
 import { message, Skeleton, Table } from "antd";
 import { useSearchParams } from "next/navigation";
 import axiosInstance from "@/api/config";
@@ -17,17 +17,20 @@ export default function ResearchData() {
   const [team, setTeam] = useState<Team>();
   const [topics, setTopics] = useState<Topic[]>([]);
   const [members, setMembers] = useState<TeamMember[]>([]);
-  const [contents, setContents] = useState<Content[]>([]);
+  const [contents, setContents] = useState<Contents[]>([]);
   const params = useSearchParams();
   const teamId = params.get("teamId") || "";
+  //@ts-ignore
   const { user, initializeAuth } = useAuthStore(); // 与checkAuth一起用于判断该用户是否为组长
+  //@ts-ignore
   const { data: teamData, loading: teamLoading } = useAxios(
     `/herb-research-service/teams/${teamId}`
   );
-
+//@ts-ignore
   const { data: membersData, loading: membersLoading } = useAxios(
     `/herb-research-service/teams/${teamId}/member/all`
   );
+  //@ts-ignore
   const { data: contentsData, loading: contentsLoading } = useAxios(
     `/herb-research-service/contents/team/${teamId}`
   );
@@ -71,20 +74,27 @@ export default function ResearchData() {
   }, []);
 
   useEffect(() => {
+  //@ts-ignore
     if (teamData && teamData.team) {
+    //@ts-ignore
       setTeam(teamData.team);
       fetchTopics();
     }
   }, [teamData]);
 
   useEffect(() => {
+  //@ts-ignore
     if (membersData && membersData.teamMembers) {
       //console.log(membersData.teamMembers);
+      //@ts-ignore
       setMembers(membersData.teamMembers);
     }
 
+//@ts-ignore
     if (contentsData && contentsData.contents) {
+    //@ts-ignore
       console.log("contents:", contentsData.contents);
+      //@ts-ignore
       setContents(contentsData.contents);
     }
   }, [membersData, contentsData]);

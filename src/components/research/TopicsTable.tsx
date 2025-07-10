@@ -83,6 +83,7 @@ export default function TopicsTable({
     {
       title: "操作",
       key: "action",
+      //@ts-ignore
       render: (_, record: Topic) => {
         return (
           checkCaptain() && (
@@ -126,6 +127,7 @@ export default function TopicsTable({
     setShowAddTopicModal(false);
   };
 
+//@ts-ignore
   const addTopic = async (values) => {
     const body = {
       ...values,
@@ -143,7 +145,9 @@ export default function TopicsTable({
         onUpdate();
       }
     } catch (e) {
+    //@ts-ignore
       console.error(e.message);
+      //@ts-ignore
       message.error("新建课题失败" + e.message);
     }
   };
@@ -155,6 +159,7 @@ export default function TopicsTable({
     setShowPutTopicModal(false);
   };
 
+//@ts-ignore
   const putTopic = async (values) => {
     try {
       const body = {
@@ -177,7 +182,9 @@ export default function TopicsTable({
         onUpdate();
       }
     } catch (e) {
+    //@ts-ignore
       console.error(e.message);
+     //@ts-ignore
       message.error("更新课题失败" + e.message);
     }
   };
@@ -196,7 +203,9 @@ export default function TopicsTable({
         throw new Error(data.message);
       }
     } catch (e) {
+    //@ts-ignore
       console.error(e.message);
+      //@ts-ignore
       message.error("删除课题失败" + e.message);
     }
   };

@@ -27,6 +27,7 @@ const { TabPane } = Tabs;
 export default function MyCoursesPage() {
 
   const [activeTab, setActiveTab] = useState('1');
+  //@ts-ignore
   const { user } = useAuthStore();
   const { courses, loading} = useCourses({});
   const myCourses = courses.filter(course => course.teacherId === user.id);

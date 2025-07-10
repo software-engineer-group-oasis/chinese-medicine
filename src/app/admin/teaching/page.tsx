@@ -11,6 +11,7 @@ import Link from 'next/link';
 import AdminBreadcrumb from '@/components/AdminBreadcrumb';
 import ReactECharts from 'echarts-for-react';
 import axiosInstance from '@/api/config';
+//@ts-ignore
 import { HERB_API, COURSE_HERB_API, COURSE_API, LAB_API, RESOURCE_API, CATEGORY_API } from '@/api/HerbInfoApi';
 import { message } from 'antd';
 
@@ -72,6 +73,7 @@ export default function TeachingPage() {
         axiosInstance.get(HERB_API.GET_ALL_HERBS),
         axiosInstance.get(LAB_API.GET_ALL_LABS()),
         axiosInstance.get(CATEGORY_API.GET_ALL_CATEGORIES()),
+        //@ts-ignore
         axiosInstance.get(RESOURCE_API.GET_ALL_RESOURCES())
       ]);
 

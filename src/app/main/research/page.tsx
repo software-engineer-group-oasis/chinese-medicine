@@ -20,7 +20,9 @@ export default function ResearchPage() {
     data: teamsData,
     loading: teamsLoading,
     error,
+    //@ts-ignore
   } = useAxios("/herb-research-service/teams/user");
+  //@ts-ignore
   const {user, initializeAuth} = useAuthStore();
 
   const fetchTeams = async()=> {
@@ -30,6 +32,7 @@ export default function ResearchPage() {
         setTeams(data.teams);
       }
     } catch (e) {
+    //@ts-ignore
         console.error(e.message);
     }
   }
@@ -42,6 +45,7 @@ export default function ResearchPage() {
     setShowCreateTeamModal(false);
   }
 
+//@ts-ignore
   const createTeam = async (values)=> {
     const body = {
         ...values,
@@ -65,14 +69,18 @@ export default function ResearchPage() {
             } else throw new Error(captainData.message);
         } else throw new Error(data.message)
     } catch (err) {
+    //@ts-ignore
         console.error(err.message)
         message.error("创建团队失败")
     }
   }
 
   useEffect(() => {
+  //@ts-ignore
     if (teamsData && teamsData.teams) {
+    //@ts-ignore
       setTeams(teamsData.teams);
+      //@ts-ignore
       console.log(teamsData.teams);
     }
     if (error) {

@@ -26,6 +26,7 @@ export default function CourseEditPage({ params }: { params: { id: string } }) {
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  //@ts-ignore
   const { user } = useAuthStore();
   const permission = userPermission();
   

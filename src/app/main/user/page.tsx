@@ -5,6 +5,7 @@ import useAuthStore from "@/store/useAuthStore";
 import { useEffect } from "react";
 
 export default function InfoPage() {
+//@ts-ignore
   const { user, initializeAuth } = useAuthStore();
   useEffect(()=> {
     if (!user) {

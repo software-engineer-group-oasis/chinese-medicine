@@ -7,6 +7,7 @@ export function useFavoriteCourses() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  //@ts-ignore
   const { user } = useAuthStore();
 
   // 获取收藏的课程列表

@@ -12,6 +12,7 @@ export default function ResearchDataUpload({contentId}:
     const [count, setCount] = useState<number>(0);
     const [imageUrl, setImageUrl] = useState("");
 
+//@ts-ignore
     const postData = async (url:string, body)=> {
         const res = await axiosInstance.post(url, body)
         const data = res.data;
@@ -20,6 +21,7 @@ export default function ResearchDataUpload({contentId}:
             setCount(prev => prev + 1)
         } else throw new Error(data.message)
     }
+// @ts-ignore
     const uploadData = async(values)=> {
         if (values.contentBlockType === 0) {
             let blocks = [];
@@ -27,6 +29,7 @@ export default function ResearchDataUpload({contentId}:
             try {
                await postData(`/herb-research-service/contents/${contentId}/details`, blocks)
             } catch (e) {
+            // @ts-ignore
                 console.error(e.message)
                 message.error("服务器错误")
             }
@@ -37,6 +40,7 @@ export default function ResearchDataUpload({contentId}:
             try {
                 await postData(`/herb-research-service/contents/${contentId}/details`, blocks)
             } catch (e) {
+            // @ts-ignore
                 console.error(e.message)
                 message.error("服务器错误")
             }

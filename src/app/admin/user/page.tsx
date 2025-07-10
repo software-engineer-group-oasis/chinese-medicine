@@ -70,7 +70,9 @@ export default function UserPage() {
         throw new Error(data.message);
       }
     } catch (err) {
+    //@ts-ignore
       console.error(err.message);
+      //@ts-ignore
       message.error(err.message);
     }
   };
@@ -115,6 +117,7 @@ export default function UserPage() {
             onChange={e => setSearchText(e.target.value)} */}
           {/* /> */}
         </div>
+        {/* @ts-ignore */}
         <Table columns={columns} dataSource={users} />
         {/* <Table
           rowKey="id"

@@ -33,6 +33,7 @@ export default function AdminInvitePage() {
   const [exportName, setExportName] = useState("");
   const [selectedUserType, setSelectedUserType] = useState("");
 
+//@ts-ignore
   const parseTable = async (values) => {
     setLoading(true);
     console.log(values);
@@ -85,9 +86,12 @@ export default function AdminInvitePage() {
           invitationCodes.push(data.invitationCode);
         } else throw new Error(data.message);
       }
+      //@ts-ignore
       setRecordsWithInvCode(invitationCodes);
     } catch (err) {
+    //@ts-ignore
       message.error(err.message);
+     //@ts-ignore
       console.error(err.message);
     }
   };

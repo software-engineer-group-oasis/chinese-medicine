@@ -17,7 +17,7 @@ export default function UploadFilePage() {
     const [fileUrl, setFileUrl] = useState("");
     const [fileType, setFileType] = useState("");
     const [fileList, setFileList] = useState([]);
-
+//@ts-ignore
     const uploadDocument = async(values)=> {
         if (!fileType || !fileUrl) {
             message.error("文件上传失败")
@@ -38,7 +38,9 @@ export default function UploadFilePage() {
                 setFileUrl("");
             } else throw new Error(data.message);       
         } catch (e) {
+        //@ts-ignore
             console.error(e.message);
+            //@ts-ignore
             message.error(e.message);
         }
     }

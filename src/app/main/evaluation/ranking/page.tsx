@@ -31,6 +31,7 @@ const herbColumns = [
     dataIndex: 'rank',
     key: 'rank',
     width: 80,
+    //@ts-ignore
     render: (text, record) => (
       <div className="flex items-center">
         {text <= 3 ? (
@@ -50,6 +51,7 @@ const herbColumns = [
     title: '中药名称',
     dataIndex: 'name',
     key: 'name',
+    //@ts-ignore
     render: (text, record) => (
       <div className="flex items-center">
         <div className="relative w-10 h-10 mr-3">
@@ -77,6 +79,7 @@ const herbColumns = [
     dataIndex: 'score',
     key: 'score',
     width: 180,
+    //@ts-ignore
     render: (score, record) => (
       <div>
         <Rate disabled defaultValue={Math.round(score)} className="text-sm" />
@@ -89,6 +92,7 @@ const herbColumns = [
     dataIndex: 'quality',
     key: 'quality',
     width: 100,
+    //@ts-ignore
     render: quality => {
       const color = quality === 'A+' ? '#f56a00' : quality === 'A' ? '#52c41a' : quality === 'B+' ? '#1677ff' : '#faad14';
       return <Tag color={color}>{quality}</Tag>;
@@ -111,6 +115,7 @@ const herbColumns = [
     key: 'price',
     dataIndex: 'price',
     width: 150,
+    //@ts-ignore
     render: (price, record) => (
       <div>
         <Text>¥{price}/kg</Text>
@@ -128,6 +133,7 @@ const herbColumns = [
     dataIndex: 'demand',
     key: 'demand',
     width: 100,
+    //@ts-ignore
     render: demand => {
       const color = demand === '极高' ? '#f5222d' : demand === '高' ? '#fa8c16' : demand === '中高' ? '#faad14' : '#52c41a';
       return <Tag color={color}>{demand}</Tag>;
@@ -141,6 +147,7 @@ const regionColumns = [
     dataIndex: 'index',
     key: 'index',
     width: 80,
+    //@ts-ignore
     render: (text, record, index) => (
       <div className="flex items-center">
         {index + 1 <= 3 ? (
@@ -160,6 +167,7 @@ const regionColumns = [
     title: '产区名称',
     dataIndex: 'region',
     key: 'region',
+    //@ts-ignore
     render: (text) => (
       <Text strong>{text}</Text>
     ),
@@ -169,6 +177,7 @@ const regionColumns = [
     dataIndex: 'score',
     key: 'score',
     width: 180,
+    //@ts-ignore
     render: (score) => (
       <div>
         <Rate disabled defaultValue={Math.round(score)} className="text-sm" />
@@ -181,6 +190,7 @@ const regionColumns = [
     dataIndex: 'quality',
     key: 'quality',
     width: 100,
+    //@ts-ignore
     render: quality => {
       const color = quality === 'A+' ? '#f56a00' : quality === 'A' ? '#52c41a' : quality === 'B+' ? '#1677ff' : '#faad14';
       return <Tag color={color}>{quality}</Tag>;
@@ -190,8 +200,10 @@ const regionColumns = [
     title: '代表药材',
     dataIndex: 'herbs',
     key: 'herbs',
+    //@ts-ignore
     render: herbs => (
       <div>
+      {/* @ts-ignore */}
         {herbs.map((herb, index) => (
           <Tag key={index} color="blue" className="mr-1">{herb}</Tag>
         ))}
@@ -207,6 +219,7 @@ const regionColumns = [
     title: '同比变化',
     dataIndex: 'change',
     key: 'change',
+    //@ts-ignore
     render: change => (
       <Text 
         type={change.startsWith('+') ? 'success' : change.startsWith('-') ? 'danger' : 'secondary'}

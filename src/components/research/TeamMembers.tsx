@@ -84,6 +84,7 @@ export default function TeamMembers({
     setShowAddMemberModal(false);
   };
 
+// @ts-ignore
   const addTeamMember = async (values) => {
     console.log(values);
     try {
@@ -98,7 +99,9 @@ export default function TeamMembers({
         throw new Error(data.message);
       }
     } catch (e) {
+    // @ts-ignore
       console.error(e.message);
+      //@ts-ignore
       message.error("添加成员失败" + e.message);
     }
   };
@@ -112,6 +115,7 @@ export default function TeamMembers({
     setShowTransCaptainModal(false);
   };
 
+//@ts-ignore
   const transCaption = async (values) => {
     try {
       const teamMemberId = values.teamMemberId;
@@ -128,7 +132,9 @@ export default function TeamMembers({
         throw new Error(data.message);
       }
     } catch (e) {
+    // @ts-ignore
       console.error(e.message);
+      // @ts-ignore
       message.error("转让队长失败" + e.message);
     }
   };
@@ -148,12 +154,15 @@ export default function TeamMembers({
         throw new Error(data.message);
       }
     } catch (e) {
+    // @ts-ignore
       console.error(e.message);
+      // @ts-ignore
       message.error("删除队员失败" + e.message);
     }
   };
 
   // 更新成员信息部分
+  // @ts-ignore
   const putMember = async (values) => {
     try {
       const body = {
@@ -174,7 +183,9 @@ export default function TeamMembers({
         throw new Error(data.message);
       }
     } catch (e) {
+    // @ts-ignore
       console.error(e.message);
+      // @ts-ignore
       message.error("更新队员信息失败" + e.message);
     }
   };

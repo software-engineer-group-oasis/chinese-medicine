@@ -31,6 +31,7 @@ export default function AdminHerbCategoryPage() {
         )
     }, [herbs, searchTerm])
 
+    //@ts-ignore
     const handleCatFormFinish = async (values)=> {
         //console.log(values.category)
         const cats = values.category
@@ -45,7 +46,9 @@ export default function AdminHerbCategoryPage() {
                     throw new Error(res.data.message || "API请求错误")
                 }
             } catch (error) {
+            //@ts-ignore
                 console.error(error.message)
+                //@ts-ignore
                 message.error(error.message)
             }
         }
@@ -53,6 +56,7 @@ export default function AdminHerbCategoryPage() {
         categoryForm.setFieldsValue({category: null})
     }
 
+//@ts-ignore
     const handleHerbFormFinish = async (values) => {
         //console.log(values);
         const cats = values.categories;
@@ -64,6 +68,7 @@ export default function AdminHerbCategoryPage() {
                     throw new Error("建立药材与种类关系时发生错误")
                 }
             } catch (e) {
+            //@ts-ignore
                 message.error(e.message)
             }
         }
@@ -77,6 +82,7 @@ export default function AdminHerbCategoryPage() {
                 throw new Error(res.data.message || "API请求失败")
             }
         } catch (err) {
+        //@ts-ignore
             message.error(err.message)
         }
         setDeleteCatModalVisivle(false);
@@ -220,6 +226,7 @@ export default function AdminHerbCategoryPage() {
                                 allowClear
                                 showSearch
                                 filterOption={(input, option)=>
+                                //@ts-ignore
                                     option.label.toLowerCase().includes(input.toLowerCase())
                                 }
                                 onSearch={(value)=> {

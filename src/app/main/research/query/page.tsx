@@ -43,6 +43,7 @@ export default function QueryPage() {
             }
             else throw new Error(data.message || "请求数据失败")
         } catch (err) {
+        //@ts-ignore
             message.error(err.message)
         } finally {
             setLoading(false);

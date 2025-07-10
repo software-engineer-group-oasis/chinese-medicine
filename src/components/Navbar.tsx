@@ -9,6 +9,7 @@ import {usePathname} from "next/navigation";
 const NAVBAR_HEIGHT = 60;
 
 const Navbar: React.FC = () => {
+//@ts-ignore
     const {user} = useAuthStore();
     const path = usePathname();
     // 只在非herb页面保留背景

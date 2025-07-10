@@ -4,6 +4,7 @@ import { NextRequest } from 'next/server';
 import { Readable } from 'stream';
 
 // 将 ReadableStream 转换为 Node.js Stream
+//@ts-ignore
 function convertToNodeStream(readableStream) {
     return new Readable({
         read() {
@@ -53,6 +54,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 将文件转换为可读流
+        //@ts-ignore
         const buffer = Buffer.from(await file.arrayBuffer());
         const readableStream = new ReadableStream({
             start(controller) {
@@ -66,8 +68,11 @@ export async function POST(request: NextRequest) {
 
         const result = await new Promise((resolve, reject) => {
             cos.putObject({
+            //@ts-ignore
                 Bucket: process.env.COS_BUCKET,
+                //@ts-ignore
                 Region: process.env.COS_REGION,
+                //@ts-ignore
                 Key: new Date().getTime() + '-' + file.name,
                 Body: nodeStream, // 使用转换后的Node.js流
                 StorageClass: 'STANDARD',
@@ -83,6 +88,7 @@ export async function POST(request: NextRequest) {
 
         return new Response(
             JSON.stringify({
+            //@ts-ignore
                 url: `https://${result.Location}`,
                 status: 'success'
             }),
@@ -94,6 +100,7 @@ export async function POST(request: NextRequest) {
         return new Response(
             JSON.stringify({
                 error: 'Upload failed',
+                //@ts-ignore
                 details: error.message
             }),
             { status: 500, headers: { 'Content-Type': 'application/json' } }

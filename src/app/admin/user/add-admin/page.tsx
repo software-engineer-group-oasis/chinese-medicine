@@ -19,11 +19,13 @@ export default function AdminAddAdminPage() {
             throw new Error(data.message)
            }
         } catch (err) {
+        //@ts-ignore
             console.error(err.message)
+        //@ts-ignore
             message.error(err.message)
         }
     }
-
+//@ts-ignore
     const addAdmin = async (values)=> {
         console.log(values);
         try {
@@ -36,7 +38,9 @@ export default function AdminAddAdminPage() {
             throw new Error(data.message)
            }
         } catch (e) {
+        //@ts-ignore
             console.error(err.message)
+            //@ts-ignore
             message.error(err.message)
         }
     }

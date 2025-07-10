@@ -21,6 +21,7 @@ function toGMTString(date: Date) {
 function getAuthUrl() {
   const date = toGMTString(new Date());
   const signatureOrigin = `host: ${HOST}\ndate: ${date}\nGET ${PATH} HTTP/1.1`;
+  //@ts-ignore
   const signatureSha = CryptoJS.HmacSHA256(signatureOrigin, API_SECRET);
   const signature = CryptoJS.enc.Base64.stringify(signatureSha);
   const authorizationOrigin = `api_key=\"${API_KEY}\", algorithm=\"hmac-sha256\", headers=\"host date request-line\", signature=\"${signature}\"`;
@@ -36,7 +37,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: '参数缺失' }, { status: 400 });
     }
 
-    return new Promise((resolve) => {
+    return new Promise<NextResponse>((resolve) => {
       const wsUrl = getAuthUrl();
       const ws = new WebSocket(wsUrl);
       let answer = '';

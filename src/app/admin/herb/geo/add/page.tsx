@@ -12,10 +12,13 @@ export default function AdminGeoAddPage() {
     const [districts, setDistricts] = useState<District[]>([]);
     const [loading, setLoading] = useState(false);
     const [streets, setStreets] = useState<Street[]>([]);
+    //@ts-ignore
     const {data:districtsData, loading:districtsLoading, error:districtError} = useAxios("/herb-info-service/division/district");
 
     useEffect(() => {
+    //@ts-ignore
         if (districtsData && districtsData.districts) {
+            //@ts-ignore
             setDistricts(districtsData.districts);
         }
     }, [districtsData]);
@@ -64,6 +67,7 @@ export default function AdminGeoAddPage() {
     }
 
     // 处理表单提交
+    //@ts-ignore
     const handleFinish = (values)=> {
         axiosInstance.post("/herb-info-service/herbs/location", values)
             .then(res => {

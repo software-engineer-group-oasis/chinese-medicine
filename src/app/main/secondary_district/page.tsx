@@ -56,6 +56,7 @@ export default function SecondaryDistrictPage() {
 
   useEffect(() => {
         const geoJsonTyped = geoJson as Record<string, string>;
+        //@ts-ignore
         axios.get(geoJsonTyped[name]).then(res => {
           console.log(res.data)
           echarts.registerMap(name as string, res.data)
@@ -71,6 +72,7 @@ export default function SecondaryDistrictPage() {
               },
               trigger: 'item',
               formatter: (params) => {
+              //@ts-ignore
                 return `${params.name}<br/>数值：${params.value || 0}`;
               }
             },
@@ -90,6 +92,7 @@ export default function SecondaryDistrictPage() {
               },
               data: [
                 {
+                //@ts-ignore
                   name: name,
                   value: value
                 }

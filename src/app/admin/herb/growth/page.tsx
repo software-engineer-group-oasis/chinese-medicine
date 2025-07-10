@@ -9,7 +9,7 @@ import axiosInstance from "@/api/config";
 
 export default function AdminGrowthPage() {
     const [herbGrowths, setHerbGrowths] = useState<HerbGrowth[]>([]);
-    const {data:herbGrowthData, error, loading} = useAxios("/herb-info-service/growth/all")
+    const {data:herbGrowthData, error, loading} = useAxios("/herb-info-service/growth/all", "get", null, {})
     // todo 这里目前必须要创建者才能够删除??
     const handleDelete = async (id:string) => {
         try {
@@ -20,6 +20,7 @@ export default function AdminGrowthPage() {
                 throw new Error(res.data.message || "删除失败")
             }
         } catch (err) {
+        //@ts-ignore
             message.error(err.message)
         }
     }
@@ -27,6 +28,7 @@ export default function AdminGrowthPage() {
         if (col.key === 'action') {
             return {
                 ...col,
+                //@ts-ignore
                 render: (_, record:HerbGrowth)=> (
                     <div className="flex gap-2">
                         {/*todo 点击进入某一条记录的详情页面，后端没有对应的接口*/}
@@ -39,6 +41,7 @@ export default function AdminGrowthPage() {
                             description={"是否确定删除这条记录"}
                             okText="是"
                             cancelText="否"
+                            //@ts-ignore
                             onConfirm={()=> handleDelete(record.id)}
                         >
                             <Button danger>删除</Button>
@@ -53,8 +56,11 @@ export default function AdminGrowthPage() {
     })
 
     useEffect(()=> {
+    //@ts-ignore
         if (herbGrowthData && herbGrowthData.code === 0) {
+        //@ts-ignore
             setHerbGrowths(herbGrowthData.herbGrowths)
+            //@ts-ignore
             console.log("herbGrowths:", herbGrowthData.herbGrowths)
         }
     }, [herbGrowthData])

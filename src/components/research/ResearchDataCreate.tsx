@@ -11,6 +11,7 @@ export default function ResearchDataCreate({topicId,  onSuccess}:
 }){
     const [createContentForm] = Form.useForm()
     
+    // @ts-ignore
     const createContent = async(values)=> {
         console.log("values:",values);
         try {

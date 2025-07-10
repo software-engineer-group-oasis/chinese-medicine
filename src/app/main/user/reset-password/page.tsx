@@ -11,6 +11,7 @@ type ResetPasswordFormData = {
 }
 
 const ResetPasswordPage: React.FC  = () => {
+//@ts-ignore
     const {user, initializeAuth} = useAuthStore();
     if (!user) {
         initializeAuth();

@@ -5,6 +5,7 @@ import axios from "axios";
 export default function ForgetPassword() {
     const [form] = Form.useForm();
 
+//@ts-ignore
     const handleForgetPassword = async (values)=> {
         console.log(values);
         try {

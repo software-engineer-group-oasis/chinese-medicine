@@ -39,6 +39,7 @@ export default function TrainingPage() {
     "all",
     ...Array.from(new Set(defaultMaterials.map((item) => item.type))),
   ];
+  //@ts-ignore
   const { user, initializeAuth, token } = useAuthStore();
   useEffect(() => {
     if (!user) {

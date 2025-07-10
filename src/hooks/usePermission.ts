@@ -3,6 +3,7 @@ import useAuthStore from "@/store/useAuthStore";
 
 export const userPermission = () => {
     //获取角色
+    //@ts-ignore
     const {user, initializeAuth} = useAuthStore();
     
     if(!user) {

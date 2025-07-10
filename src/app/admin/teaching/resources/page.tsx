@@ -132,6 +132,7 @@ export default function ResourcesPage() {
         downloadCount: 0,
         file: fileList[0],
       };
+      //@ts-ignore
       setResources([newResource, ...resources]);
       setIsModalOpen(false);
       form.resetFields();

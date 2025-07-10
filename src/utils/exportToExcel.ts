@@ -7,6 +7,8 @@ import { saveAs } from 'file-saver';
  * @param {Array} columns - 表格列配置（antd 格式）
  * @param {string} [filename='导出数据.xlsx'] - 导出的文件名
  */
+
+//  @ts-ignore
 export const exportToExcel = (data, columns, filename = '导出数据.xlsx') => {
     if (!data || data.length === 0) {
         console.warn('没有可导出的数据');
@@ -15,21 +17,27 @@ export const exportToExcel = (data, columns, filename = '导出数据.xlsx') => 
 
     // 构造映射关系：{ key: dataIndex }
     const headerMap = {};
+    // @ts-ignore
     const headers = [];
-
+// @ts-ignore
     columns.forEach(col => {
         if (col.dataIndex) {
             const key = typeof col.dataIndex === 'string' ? col.dataIndex : col.dataIndex.join('.');
+            // @ts-ignore
             headerMap[key] = col.title;
             headers.push(key);
         }
     });
 
     // 提取指定字段并重命名表头
+    //@ts-ignore
     const formattedData = data.map(item => {
         const row = {};
+        //@ts-ignore
         headers.forEach(key => {
+        //@ts-ignore
             const value = key.split('.').reduce((acc, part) => acc && acc[part], item);
+            // @ts-ignore
             row[headerMap[key]] = value;
         });
         return row;

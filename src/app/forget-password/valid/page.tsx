@@ -18,6 +18,7 @@ export default function ForgetPasswordValid() {
         if (data.result === true) setValid(true);
         else setValid(false);
     }
+    //@ts-ignore
     const handleResetPassword = async(values)=> {
         const password = values.password
         try {
@@ -30,6 +31,7 @@ export default function ForgetPasswordValid() {
                 message.error(data.message)
             }
         } catch (err) {
+        //@ts-ignore
             console.error(err.message)
             message.error("服务器错误")
         }

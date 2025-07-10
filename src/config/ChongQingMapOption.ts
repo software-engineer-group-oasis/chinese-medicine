@@ -17,6 +17,7 @@ export default function ChongQingMapOption({data, max}:{
                 color: '#fff'
             },
             trigger: 'item',
+            // @ts-ignore
             formatter: (params) => {
                 return `${params.name}<br/>数值：${params.value || 0}`;
             }

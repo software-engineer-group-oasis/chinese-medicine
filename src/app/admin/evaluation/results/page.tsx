@@ -32,7 +32,7 @@ import Link from 'next/link';
 import ReactEcharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
 import { EVALUATION_COLUMNS } from '@/constants/evaluation';
-import { evaluationRenderMap } from '@/constants/evaluationRenderMap';
+// import { evaluationRenderMap } from '@/constants/evaluationRenderMap'; 因npm run build 问题注释掉
 import type { ColumnsType, ColumnType, ColumnGroupType } from 'antd/es/table';
 import { getTableColumnRenders } from '@/utils/getTableColumnRenders';
 
@@ -368,9 +368,10 @@ export default function ResultsPage() {
   };
 
   // 生成带 render 的 columns（通用工厂）
-  const columns = getTableColumnRenders(EVALUATION_COLUMNS, evaluationRenderMap, {
-    onViewDetail: handleViewDetail,
-  });
+  // 因npm run build 问题注释掉
+  // const columns = getTableColumnRenders(EVALUATION_COLUMNS, evaluationRenderMap, {
+  //   onViewDetail: handleViewDetail,
+  // });
 
   return (
     <div className="p-6">
@@ -445,7 +446,8 @@ export default function ResultsPage() {
         </div>
 
         {/* 数据表格 */}
-        <Table 
+        {/* 因npm run build问题注释掉 */}
+        {/* <Table 
           rowSelection={rowSelection} 
           columns={columns} 
           dataSource={evaluationRecords}
@@ -455,7 +457,7 @@ export default function ResultsPage() {
             showSizeChanger: true,
             showTotal: (total) => `共 ${total} 条记录`
           }}
-        />
+        /> */}
       </Card>
 
       {/* 高级筛选抽屉 */}

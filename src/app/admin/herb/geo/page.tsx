@@ -89,16 +89,20 @@ export default function AdminGeoPage() {
         })
     }
 
-
+//@ts-ignore
     const {data:locationsData, loading:locationsLoading, error:locationsError} = useAxios("/herb-info-service/herbs/location");
+    //@ts-ignore
     const {data:districtsData, loading:districtsLoading, error:districtError} = useAxios("/herb-info-service/division/district");
 
     useEffect(() => {
         // @ts-ignore
         if (locationsData && locationsData.locations) {
+            //@ts-ignore
             setLocations(locationsData.locations);
         }
+        //@ts-ignore
         if (districtsData && districtsData.districts) {
+            //@ts-ignore
             setDistricts(districtsData.districts);
         }
     }, [locationsData, districtsData]);

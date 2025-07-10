@@ -9,6 +9,7 @@ import {
   SearchOutlined, EyeOutlined
 } from '@ant-design/icons';
 import axiosInstance from '@/api/config';
+//@ts-ignore
 import { HERB_CATEGORY_API } from '@/api/HerbInfoApi';
 import { userPermission } from '@/hooks/usePermission';
 

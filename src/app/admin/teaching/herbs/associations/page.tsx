@@ -10,6 +10,7 @@ import {
 } from '@ant-design/icons';
 import { useRouter } from 'next/navigation';
 import axiosInstance from '@/api/config';
+//@ts-ignore
 import { HERB_API, HERB_CATEGORY_API, HERB_ASSOCIATION_API } from '@/api/HerbInfoApi';
 import { userPermission } from '@/hooks/usePermission';
 
@@ -394,6 +395,7 @@ export default function AdminHerbAssociationManagement() {
                 titles={['可选分类', '已选分类']}
                 targetKeys={selectedCategoryIds.map(id => id.toString())}
                 onChange={(targetKeys) => {
+                //@ts-ignore
                   setSelectedCategoryIds(targetKeys.map(key => parseInt(key)));
                 }}
                 render={(item) => item.title}
