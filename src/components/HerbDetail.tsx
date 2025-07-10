@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import GrowthTimeline from '@/components/GrowthTimeline';
 import CommentSection from '@/components/CommentSection';
+import { QRCode } from 'antd'
 import HerbAIQA from './HerbAIQA';
 import Herb3D from '@/components/3D-Herb';
 import axiosInstance from '@/api/config';
@@ -10,8 +11,7 @@ export default function HerbDetail({ herbId, allHerbs = [] }: { herbId: string, 
   const [detail, setDetail] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [courseIds, setCourseIds] = useState<number[]>([]);
-
-  // 获取药材详情
+ // 获取药材详情
   useEffect(() => {
     setLoading(true);
     axiosInstance.get(HERB_API.GET_HERB_DETAIL(herbId))
@@ -52,19 +52,19 @@ export default function HerbDetail({ herbId, allHerbs = [] }: { herbId: string, 
   }, [detail, allHerbs]);
 
   // 相关培训/课题（前端关键词过滤，假设有allTrainings/allResearches全量数据）
-  // 这里用mock数据举例
-  const allTrainings = [];
-  const allResearches = [];
+  const allTrainings: any[] = [];
+  const allResearches: any[] = [];
   const relatedTrainings = allTrainings.filter((item: any) => item.title?.includes(detail?.name));
   const relatedResearches = allResearches.filter((item: any) => item.title?.includes(detail?.name));
-
+  const QRURL=`https://baike.baidu.com/item/${detail?.name || ''}`;
+  
   if (loading) return <div className="p-12 text-center">加载中...</div>;
   if (!detail) return <div className="p-12 text-center text-red-500">未找到该药材信息</div>;
 
   return (
     <div className="bg-[#f8f8f5] min-h-screen">
       {/* 顶部花式字体+英文名+3D模型展示区 */}
-      <div className="w-full flex flex-col items-center justify-center py-20 mb-20" style={{background: '#6bb89e', borderRadius: '0 0 32px 32px'}}>
+      <div className="w-full flex flex-col items-center justify-center py-20 mb-10" style={{background: '#6bb89e', borderRadius: '0 0 32px 32px'}}>
         <div style={{ fontFamily: 'STKaiti, KaiTi, cursive', fontSize: 36, color: '#fff', textShadow: '2px 2px 8px #8C6B2F', marginBottom: 8 }}>
           {detail.name}
         </div>
@@ -84,6 +84,8 @@ export default function HerbDetail({ herbId, allHerbs = [] }: { herbId: string, 
               <h1 className="text-2xl font-bold mb-2 text-[#355C3A]">{detail.name}</h1>
               <ul className="text-base text-gray-700 leading-7">
                 {/* <li><b>学名</b>：{detail.scientificName || '-'}</li> */}
+                {/* <li><b>类别</b>：{detail.cat || '-'}</li> */}
+                <li><b>分类</b>：{detail.herbLinkCategoryList?.map((c: any) => c.categoryName).join('、') || '-'}</li>
                 <li><b>产地代表</b>：{detail.origin || '-'}</li>
                 <li><b>简介</b>：{detail.des || '-'}</li>
                 {/* 你可以根据后端返回字段补充更多 */}
@@ -123,6 +125,14 @@ export default function HerbDetail({ herbId, allHerbs = [] }: { herbId: string, 
         </section>
         {/* 右侧侧边栏 */}
         <aside className="w-72 flex-shrink-0">
+          {/* 二维码展示 */}
+          <div className="bg-white rounded-2xl shadow p-6">
+            <h3 className="text-base font-semibold text-[#355C3A] mb-2">扫描二维码 了解详细</h3>
+            <QRCode value={QRURL} />
+          </div>
+          <br></br>
+          
+          {/* 相似草药 */}
           <div className="bg-white rounded-2xl shadow p-6 mb-6">
             <h3 className="text-base font-semibold text-[#355C3A] mb-2">🔗 相似药材词条</h3>
             <ul className="text-sm text-gray-700 space-y-1">
@@ -131,10 +141,13 @@ export default function HerbDetail({ herbId, allHerbs = [] }: { herbId: string, 
               ))}
             </ul>
           </div>
+          {/* ai问答 */}
           <div className="bg-white rounded-2xl shadow p-6">
             <h3 className="text-base font-semibold text-[#355C3A] mb-2">🤖 AI 问答</h3>
             <HerbAIQA herbName={detail.name} />
           </div>
+
+
         </aside>
       </div>
     </div>

@@ -3,7 +3,7 @@ import useAuthStore from "@/store/useAuthStore";
 
 const axiosInstance = axios.create({
     baseURL: process.env.NEXT_PUBLIC_BASE_URL,
-    timeout: 10000,
+    timeout: 30000,
     headers: {
         'Content-Type': 'application/json',
     }
