@@ -7,11 +7,12 @@ import { useEffect, useState } from "react";
 export default function TeamMembers({
   members,
   onUpdate,
+  checkCaptain
 }: {
   members: TeamMember[];
   onUpdate: () => void;
+  checkCaptain:()=> boolean
 }) {
-  const { user, initializeAuth } = useAuthStore(); // 与checkAuth一起用于判断该用户是否为组长
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [showTransCaptainModal, setShowTransCaptainModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState<TeamMember>();
@@ -72,11 +73,6 @@ export default function TeamMembers({
 
   const captain = () => {
     return members.find((member: TeamMember) => member.teamMemberIsCaptain);
-  };
-
-  const checkCaptain = () => {
-    return members.filter((member: TeamMember) => member.userId === user.id)[0]
-      .teamMemberIsCaptain;
   };
 
   // 添加团队成员部分
@@ -160,12 +156,17 @@ export default function TeamMembers({
   // 更新成员信息部分
   const putMember = async (values) => {
     try {
+      const body = {
+        ...values,
+        teamMemberIsCaptain: (selectedMember as TeamMember).teamMemberIsCaptain
+      }
       const data = (
         await axiosInstance.put(
           `/herb-research-service/teams/member/${selectedMember?.teamMemberId}`,
-          values
+          body
         )
       ).data;
+      console.log(data);
       if (data.code === 0) {
         message.success("更新队员信息成功");
         onUpdate(); // 通知父组件
@@ -185,13 +186,6 @@ export default function TeamMembers({
   const closePutModal = () => {
     setShowPutModal(false);
   };
-
-  useEffect(() => {
-    if (!user) {
-      initializeAuth();
-    }
-    //console.log("captain:", captain())
-  }, []);
 
   return (
     <div className="w-[80%]">

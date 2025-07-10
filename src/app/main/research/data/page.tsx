@@ -11,6 +11,7 @@ import axiosInstance from "@/api/config";
 import TopicsTable from "@/components/research/TopicsTable";
 import TeamMembers from "@/components/research/TeamMembers";
 import TeamContentsTable from "@/components/research/TeamContentsTable";
+import useAuthStore from "@/store/useAuthStore";
 
 export default function ResearchData() {
   const [team, setTeam] = useState<Team>();
@@ -19,6 +20,7 @@ export default function ResearchData() {
   const [contents, setContents] = useState<Content[]>([]);
   const params = useSearchParams();
   const teamId = params.get("teamId") || "";
+  const { user, initializeAuth } = useAuthStore(); // 与checkAuth一起用于判断该用户是否为组长
   const { data: teamData, loading: teamLoading } = useAxios(
     `/herb-research-service/teams/${teamId}`
   );
@@ -87,9 +89,21 @@ export default function ResearchData() {
     }
   }, [membersData, contentsData]);
 
+  useEffect(() => {
+    if (!user) {
+      initializeAuth();
+    }
+    //console.log("captain:", captain())
+  }, []);
+
   if (teamLoading || membersLoading || contentsLoading) {
     return <Skeleton active />;
   }
+
+  const checkCaptain = () => {
+    return members.filter((member: TeamMember) => member.userId === user.id)[0]
+      .teamMemberIsCaptain;
+  };
 
   if (team) {
     return (
@@ -100,8 +114,8 @@ export default function ResearchData() {
 
         {/* <button onClick={fetchTopics}>fetchTopics</button> */}
         <div className="flex flex-col items-center justify-center gap-16 mt-20">
-          <TeamMembers members={members} onUpdate={fetchMembers}/>
-          <TopicsTable topics={topics} />
+          <TeamMembers members={members} onUpdate={fetchMembers} checkCaptain={checkCaptain}/>
+          <TopicsTable topics={topics} onUpdate={fetchTopics} checkCaptain={checkCaptain}/>
           <TeamContentsTable contents={contents} />
         </div>
       </>

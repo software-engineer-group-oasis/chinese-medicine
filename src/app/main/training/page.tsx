@@ -39,7 +39,7 @@ export default function TrainingPage() {
     "all",
     ...Array.from(new Set(defaultMaterials.map((item) => item.type))),
   ];
-  const { user, initializeAuth } = useAuthStore();
+  const { user, initializeAuth, token } = useAuthStore();
   useEffect(() => {
     if (!user) {
       initializeAuth();

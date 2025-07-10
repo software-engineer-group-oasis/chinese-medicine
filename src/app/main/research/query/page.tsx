@@ -97,7 +97,7 @@ export default function QueryPage() {
                             {/*{topic.topicName}*/}
                             <Typography>
                                 <Link href={`/main/research/query/detail?topicId=${topic.topicId}`}>
-                                    <Title>{topic.topicName}</Title>
+                                    <Title className="hover:underline">{topic.topicName}</Title>
                                 </Link>
                                 <Paragraph>
                                     <pre>简述：{topic.topicDes}</pre>

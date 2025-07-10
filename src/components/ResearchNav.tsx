@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { DatabaseTwoTone, UpCircleTwoTone } from "@ant-design/icons";
 import { Team } from "@/constTypes/research";
-import { Tag, Divider, Flex } from "antd";
+import { Tag, Divider, Flex, Button } from "antd";
 
 // const routes = [
 //   {
@@ -16,7 +16,7 @@ import { Tag, Divider, Flex } from "antd";
 //     icon: () => <UpCircleTwoTone />,
 //   },
 // ];
-const colors = ["magenta", "red", "volcano", "orange", "gold"]
+const colors = ["magenta", "red", "volcano", "orange", "gold"];
 
 export default function ResearchNav({ teams }: { teams: Team[] }) {
   if (teams && teams.length > 0) {
@@ -38,18 +38,19 @@ export default function ResearchNav({ teams }: { teams: Team[] }) {
             ))} */}
             <div className="text-lg">我的团队：</div>
             <Flex gap="4px 0" wrap>
-                {
-                    teams.filter((team:Team)=>team.teamIsvalid).map((team:Team, index:number)=>(
-                        <Tag color={colors[index]}>
-                            <Link href={`/main/research/data?teamId=${team.teamId}`}>{team.teamName}</Link>
-                        </Tag>
-                    ))
-                }
+              {teams
+                .filter((team: Team) => team.teamIsvalid)
+                .map((team: Team, index: number) => (
+                  <Tag color={colors[index]}>
+                    <Link href={`/main/research/data?teamId=${team.teamId}`}>
+                      {team.teamName}
+                    </Link>
+                  </Tag>
+                ))}
             </Flex>
-            
           </ul>
         </nav>
       </>
     );
-  } else return <></>
+  } else return <></>;
 }

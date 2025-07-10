@@ -73,3 +73,7 @@ export interface Contents {
     contentBlocks: ContentBlock[],
     userId: number,
 }
+
+export const TopicStatus = ["立项中", "进行中", "已结题"]
+
+export const TopicStatusColor = ["green", "blue", "red"]
