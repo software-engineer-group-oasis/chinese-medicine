@@ -28,6 +28,8 @@ export type Course = {
   labs?: any[];
   resources?: any[];
   herbs?: any[];
+  // 添加视频URL字段
+  videoUrl?: string;
   author?: string;
   authorAvatar?: string;
   authorTitle?: string;

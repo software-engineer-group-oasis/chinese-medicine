@@ -10,6 +10,7 @@ import {
 } from '@ant-design/icons';
 import axiosInstance from '@/api/config';
 import { userPermission } from '@/hooks/usePermission';
+import { RESOURCE_API } from '@/api/HerbInfoApi';
 
 const { Option } = Select;
 
@@ -60,15 +61,15 @@ export default function CourseResourceManager({ courseId }: CourseResourceManage
   const fetchResources = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get(`/herb-teaching-service/courses/${courseId}/resources`);
+      const response = await axiosInstance.get(RESOURCE_API.GET_COURSE_RESOURCES(courseId));
       if (response.data.code === 0) {
         setResources(response.data.data || []);
       } else {
-        message.error('获取课程资源失败');
+        message.error('获取资源列表失败');
       }
     } catch (error) {
-      console.error('获取课程资源错误:', error);
-      message.error('获取课程资源失败，请稍后重试');
+      console.error('获取资源列表错误:', error);
+      message.error('获取资源列表失败');
     } finally {
       setLoading(false);
     }
@@ -115,26 +116,26 @@ export default function CourseResourceManager({ courseId }: CourseResourceManage
       if (editingResource) {
         // 更新资源
         const response = await axiosInstance.put(
-          `/herb-teaching-service/${courseId}/resources/${editingResource.courseResourceId}`, 
+          RESOURCE_API.UPDATE_RESOURCE(editingResource.courseResourceId), 
           resourceData
         );
         if (response.data.code === 0) {
           message.success('资源更新成功');
           fetchResources(); // 刷新资源列表
         } else {
-          message.error('资源更新失败');
+          message.error(response.data.message || '资源更新失败');
         }
       } else {
         // 创建新资源
         const response = await axiosInstance.post(
-          `/herb-teaching-service/${courseId}/resources`, 
+          RESOURCE_API.CREATE_RESOURCE(courseId), 
           resourceData
         );
         if (response.data.code === 0) {
           message.success('资源创建成功');
           fetchResources(); // 刷新资源列表
         } else {
-          message.error('资源创建失败');
+          message.error(response.data.message || '资源创建失败');
         }
       }
       
@@ -147,14 +148,12 @@ export default function CourseResourceManager({ courseId }: CourseResourceManage
   // 处理删除资源
   const handleDelete = async (resourceId: number) => {
     try {
-      const response = await axiosInstance.delete(
-        `/herb-teaching-service/${courseId}/resources/${resourceId}`
-      );
+      const response = await axiosInstance.delete(RESOURCE_API.DELETE_RESOURCE(resourceId));
       if (response.data.code === 0) {
         message.success('资源删除成功');
         fetchResources(); // 刷新资源列表
       } else {
-        message.error('资源删除失败');
+        message.error(response.data.message || '资源删除失败');
       }
     } catch (error) {
       console.error('删除资源错误:', error);

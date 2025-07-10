@@ -9,7 +9,7 @@ import {
   ExperimentOutlined, EyeOutlined, SearchOutlined
 } from '@ant-design/icons';
 import axiosInstance from '@/api/config';
-import { LAB_API } from '@/api/HerbInfoApi';
+import { COURSE_API, LAB_API } from '@/api/HerbInfoApi';
 import { userPermission } from '@/hooks/usePermission';
 
 const { Option } = Select;
@@ -67,12 +67,19 @@ export default function AdminLabManagement() {
   // 获取课程列表
   const fetchCourses = async () => {
     try {
-      const response = await axiosInstance.get('/herb-teaching-service/courses');
+      setLoading(true);
+      const response = await axiosInstance.get(COURSE_API.GET_COURSES());
       if (response.data.code === 0) {
-        setCourses(response.data.data || []);
+        const courses = response.data.data?.list || response.data.data || [];
+        setCourses(courses);
+      } else {
+        message.error('获取课程列表失败');
       }
     } catch (error) {
       console.error('获取课程列表错误:', error);
+      message.error('获取课程列表失败');
+    } finally {
+      setLoading(false);
     }
   };
 

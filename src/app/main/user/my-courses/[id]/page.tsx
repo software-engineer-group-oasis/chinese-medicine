@@ -13,6 +13,7 @@ import CourseResourceManager from '@/components/course/CourseResourceManager';
 import CourseLabManager from '@/components/course/CourseLabManager';
 import CourseHerbManager from '@/components/course/CourseHerbManager';
 import axiosInstance from '@/api/config';
+import { COURSE_API } from '@/api/HerbInfoApi';
 import useAuthStore from '@/store/useAuthStore';
 import { userPermission } from '@/hooks/usePermission';
 import type { Course } from '@/constTypes/course';
@@ -36,7 +37,7 @@ export default function CourseEditPage({ params }: { params: { id: string } }) {
   const fetchCourseDetails = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get(`/herb-teaching-service/courses/${courseId}`);
+      const response = await axiosInstance.get(COURSE_API.GET_COURSE_DETAIL(courseId));
       if (response.data.code === 0) {
         // 适配课程数据格式
         const courseData = response.data.data;
@@ -144,7 +145,7 @@ export default function CourseEditPage({ params }: { params: { id: string } }) {
         <div className="flex items-start">
           <div className="w-32 h-32 bg-gray-200 rounded-md overflow-hidden mr-6">
             <img 
-              src={course.coverImageUrl} 
+              src={'/images/草药.svg'} //course.coverImageUrl||
               alt={course.courseName} 
               className="w-full h-full object-cover"
             />

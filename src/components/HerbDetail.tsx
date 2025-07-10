@@ -88,7 +88,6 @@ export default function HerbDetail({ herbId, allHerbs = [] }: { herbId: string, 
                 <li><b>分类</b>：{detail.herbLinkCategoryList?.map((c: any) => c.categoryName).join('、') || '-'}</li>
                 <li><b>产地代表</b>：{detail.origin || '-'}</li>
                 <li><b>简介</b>：{detail.des || '-'}</li>
-                {/* 你可以根据后端返回字段补充更多 */}
               </ul>
             </div>
           </div>
