@@ -1,6 +1,7 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import  useRequest  from '@/hooks/useRequest';
+import { message } from 'antd';
 //组件使用：CommentSection({ targetType, targetId }: Props)
 
 // API端点常量
@@ -28,22 +29,35 @@ interface Comment {
   liked: boolean;
 }
 
+interface CommentsListResponse {
+  code: number;
+  data: {
+    list: Comment[];
+  };
+  message?: string;
+}
+
+interface CommentResponse {
+  code: number;
+  data: Comment;
+  message?: string;
+}
+
 interface Props {
   targetType: string;
   targetId: number;
 }
 
-
-
 export default function CommentSection({ targetType, targetId }: Props) {
   const [sort, setSort] = useState<'hot' | 'new'>('hot');
   const [newComment, setNewComment] = useState('');
   const [comments, setComments] = useState<Comment[]>([]);
+  const [likedComments, setLikedComments] = useState<Set<number>>(new Set());
 
-  const { data: commentsData, get: getComments } = useRequest();
-  const { post: postComment } = useRequest();
-  const { post: postLike } = useRequest();
-  const { post: postReply } = useRequest();
+  const { data: commentsData, get: getComments } = useRequest<CommentsListResponse>();
+  const { post: postComment } = useRequest<CommentResponse>();
+  const { post: postLike } = useRequest<CommentResponse>();
+  const { post: postReply } = useRequest<CommentResponse>();
 
   // 获取评论
   useEffect(() => {
@@ -51,7 +65,7 @@ export default function CommentSection({ targetType, targetId }: Props) {
   }, [sort,targetType, targetId]);
 
   useEffect(() => {
-    if (commentsData) {
+    if (commentsData && commentsData.data) {
       setComments(commentsData.data.list || []);
     }
   }, [commentsData]);
@@ -72,60 +86,71 @@ export default function CommentSection({ targetType, targetId }: Props) {
 
     setComments(prev => [response.data, ...prev]);
     setNewComment('');
+    message.success('评论发布成功');
     } catch (error) {
       console.error('发表评论失败:', error);
+      message.error('评论发布失败，请稍后重试');
     }
   };
 
   // 点赞
   const handleLike = async (id: number) => {
+    // 检查是否已经点赞
+    if (likedComments.has(id)) {
+      message.warning('您已经点过赞了');
+      return;
+    }
+
     try {
-      await postLike(COMMENT_API.LIKE(id), {});
-      setComments(prev =>
-        prev.map(c =>
-          c.commentId === id
-            ? { ...c, likeCount: c.likeCount + 1 }
-            : {
-                ...c,
-                children: c.children.map(r =>
-                  r.commentId === id ? { ...r, likeCount: r.likeCount + 1 } : r
-                )
-              }
-        )
-      );
+      const response = await postLike(COMMENT_API.LIKE(id), {});
+      if (response && response.code === 0) {
+        // 添加到已点赞集合
+        setLikedComments(prev => new Set([...prev, id]));
+        
+        setComments(prev =>
+          prev.map(c => {
+            if (c.commentId === id) {
+              return { ...c, likeCount: c.likeCount + 1, liked: true };
+            }
+            return {
+              ...c,
+              children: c.children.map(r =>
+                r.commentId === id ? { ...r, likeCount: r.likeCount + 1, liked: true } : r
+              )
+            };
+          })
+        );
+        message.success('点赞成功');
+      } else {
+        message.error('点赞失败');
+      }
     } catch (error) {
       console.error('点赞失败:', error);
+      message.error('点赞失败，请稍后重试');
     }
   };
 
-  // 回复
-  const handleReply = async (parentId: number, text: string) => {
+  // 回复 - 单独开楼
+  const handleReply = async (parentId: number, text: string, replyToUserName: string) => {
     try {
       const response = await postReply(COMMENT_API.REPLY, {
         parentId,
-        content: text,
+        content: `回复 @${replyToUserName}：${text}`,
         targetType,
         targetId
       });
-      const newReply = response.data;
-
-      setComments(prev =>
-        prev.map(c => {
-          if (c.commentId === parentId) {
-            return { ...c, children: [...c.children, newReply] };
-          }
-          return {
-            ...c,
-            children: c.children.map(r =>
-              r.commentId === parentId
-                ? { ...r, children: [...r.children, newReply] }
-                : r
-            )
-          };
-        })
-      );
+      
+      if (response && response.data) {
+        const newReply = response.data;
+        // 将回复作为新评论添加到列表顶部
+        setComments(prev => [newReply, ...prev]);
+        message.success('回复成功');
+      } else {
+        message.error('回复失败');
+      }
     } catch (error) {
       console.error('回复失败:', error);
+      message.error('回复失败，请稍后重试');
     }
   };
 
@@ -151,22 +176,32 @@ export default function CommentSection({ targetType, targetId }: Props) {
       </div>
       <div>
         {sortedComments.map(comment => (
-          <CommentItem key={comment.commentId} comment={comment} onLike={handleLike} onReply={handleReply} sort={sort} />
+          <CommentItem 
+            key={comment.commentId} 
+            comment={comment} 
+            onLike={handleLike} 
+            onReply={handleReply} 
+            sort={sort}
+            isLiked={likedComments.has(comment.commentId)}
+          />
         ))}
         {sortedComments.length === 0 && <div className="text-gray-400">暂无评论，快来抢沙发吧！</div>}
       </div>
     </div>
   );
 }
-function CommentItem({ comment, onLike, onReply, sort }: {
+
+function CommentItem({ comment, onLike, onReply, sort, isLiked }: {
     comment: Comment;
     onLike: (id: number) => void;
-    onReply: (id: number, text: string) => void;
+    onReply: (id: number, text: string, replyToUserName: string) => void;
     sort: 'hot' | 'new';
+    isLiked: boolean;
 }) {
 
     const [showReply, setShowReply] = useState(false);
     const [replyText, setReplyText] = useState('');
+    
     return (
         <div className="border-b border-gray-100 pb-4 mb-4">
             <div className="flex items-center gap-2 mb-1">
@@ -175,7 +210,13 @@ function CommentItem({ comment, onLike, onReply, sort }: {
             </div>
             <div className="text-gray-700 mb-2">{comment.content}</div>
             <div className="flex items-center gap-4 text-sm">
-                <button className="hover:text-[#8C6B2F]" onClick={() => onLike(comment.commentId)}>👍 {comment.likeCount}</button>
+                <button 
+                    className={`hover:text-[#8C6B2F] ${isLiked ? 'text-[#8C6B2F]' : ''}`} 
+                    onClick={() => onLike(comment.commentId)}
+                    disabled={isLiked}
+                >
+                    👍 {comment.likeCount}
+                </button>
                 <button className="hover:text-[#5B8FF9]" onClick={() => setShowReply(!showReply)}>回复</button>
             </div>
             {showReply && (
@@ -184,15 +225,17 @@ function CommentItem({ comment, onLike, onReply, sort }: {
                         className="border rounded px-2 py-1 flex-1 text-sm"
                         value={replyText}
                         onChange={e => setReplyText(e.target.value)}
-                        placeholder="写下你的回复..."
+                        placeholder={`回复 @${comment.userName}...`}
                     />
                     <button
                         className="bg-[#355C3A] text-white px-3 py-1 rounded text-sm"
                         onClick={() => {
                             if (replyText.trim()) {
-                                onReply(comment.commentId, replyText);
+                                onReply(comment.commentId, replyText, comment.userName);
                                 setReplyText('');
                                 setShowReply(false);
+                            } else {
+                                message.warning('请输入回复内容');
                             }
                         }}
                     >发送</button>
@@ -202,7 +245,14 @@ function CommentItem({ comment, onLike, onReply, sort }: {
             {comment.children && comment.children.length > 0 && (
                 <div className="ml-6 mt-3 border-l-2 border-gray-100 pl-4">
                     {comment.children.sort((a, b) => sort === 'hot' ? b.likeCount - a.likeCount : 0).map(reply => (
-                        <CommentItem key={reply.commentId} comment={reply} onLike={onLike} onReply={onReply} sort={sort} />
+                        <CommentItem 
+                            key={reply.commentId} 
+                            comment={reply} 
+                            onLike={onLike} 
+                            onReply={onReply} 
+                            sort={sort}
+                            isLiked={false} // 子评论的点赞状态需要单独管理
+                        />
                     ))}
                 </div>
             )}

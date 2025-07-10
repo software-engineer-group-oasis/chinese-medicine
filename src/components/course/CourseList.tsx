@@ -24,7 +24,7 @@ export default function CourseList({ courses, href }: CourseListProps) {
                 cover={
                   <div className="relative pt-[56.25%] bg-gray-100">
                     <Image
-                      src={course.coverImageUrl}
+                      src={ '/images/草药.svg'}//course.coverImageUrl ||
                       alt={course.courseName}
                       fill
                       style={{ objectFit: 'cover' }}

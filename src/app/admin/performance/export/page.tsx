@@ -1,6 +1,6 @@
 // 业绩导出页面
 "use client"
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Card from 'antd/es/card';
 import Table from 'antd/es/table';
 import Button from 'antd/es/button';
@@ -29,28 +29,152 @@ import {
 } from '@ant-design/icons';
 import Link from 'next/link';
 import ReactECharts from 'echarts-for-react';
-// 导入模拟数据
-import { 
-  mockPerformanceRecords, 
-  mockPerformanceTypes,
-  PerformanceRecord
-} from '@/mock/performance';
+import useAxios from '@/hooks/useAxios';
+import axiosInstance from '@/api/config';
+import { exportToExcel } from '@/utils/exportToExcel';
+import { FormInstance } from 'antd';
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
-const { TabPane } = Tabs;
+
 const { RangePicker } = DatePicker;
 
+// 参数清洗函数
+const cleanParams = (params: any) => {
+  const cleaned: any = {};
+  Object.keys(params).forEach(key => {
+    // 不过滤0值，因为后端已经处理了
+    if (params[key] !== undefined && params[key] !== '' && params[key] !== null) {
+      cleaned[key] = params[key];
+    }
+  });
+  return cleaned;
+};
+
 export default function PerformanceExportPage() {
-  // 状态管理
-  const [performanceRecords, setPerformanceRecords] = useState<PerformanceRecord[]>(mockPerformanceRecords);
+  // 分页和筛选参数
+  const [pageNum, setPageNum] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [searchParams, setSearchParams] = useState<any>({});
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [isExportModalVisible, setIsExportModalVisible] = useState(false);
-  const [isFilterDrawerVisible, setIsFilterDrawerVisible] = useState(false);
   const [isStatisticsDrawerVisible, setIsStatisticsDrawerVisible] = useState(false);
-  const [activeTab, setActiveTab] = useState('all');
-  const [searchParams, setSearchParams] = useState({});
-  const [exportColumns, setExportColumns] = useState<string[]>(['title', 'userName', 'department', 'typeName', 'submitTime', 'status', 'score', 'comment']);
+  const [exportColumns, setExportColumns] = useState<string[]>(['performName', 'submitUserName', 'performTypeName', 'performTime', 'performStatusName', 'performComment']);
+  const [form] = Form.useForm();
+
+  // 构建请求参数
+  const requestParams = useMemo(() => {
+    const params = {
+      page: pageNum,
+      size: pageSize,
+      keyword: searchParams.keyword || undefined,
+      performTypeId: searchParams.performTypeId || undefined,
+      performStatus: searchParams.performStatus || undefined
+      // 状态筛选发送到后端，确保分页正确
+    };
+    
+    return params;
+  }, [pageNum, pageSize, searchParams.keyword, searchParams.performTypeId, searchParams.performStatus]);
+
+  // 获取业绩数据（后端接口）
+  const [performanceData, setPerformanceData] = useState<any>(null);
+  const [performanceLoading, setPerformanceLoading] = useState(false);
+
+  // 获取业绩列表数据
+  const fetchPerformanceData = async () => {
+    setPerformanceLoading(true);
+    try {
+      const res = await axiosInstance.get('/performance-service/performances', {
+        params: requestParams
+      });
+      if (res.data.code === 0) {
+        setPerformanceData(res.data);
+      } else {
+        message.error(res.data.message || '获取业绩失败');
+      }
+    } catch (e) {
+      message.error('网络错误，获取业绩失败');
+    }
+    setPerformanceLoading(false);
+  };
+
+  // 监听参数变化重新获取数据
+  useEffect(() => {
+    fetchPerformanceData();
+  }, [pageNum, pageSize, searchParams.keyword, searchParams.performTypeId, searchParams.performStatus]);
+  
+  // 使用后端返回的数据
+  const performanceRecords = performanceData?.data?.list || [];
+  const total = performanceData?.data?.total || 0;
+
+  // 获取业绩统计数据（后端接口）
+  const { data: statisticsData } = useAxios(
+    '/performance-service/performances/statistics',
+    'GET',
+    null,
+    null
+  ) as any;
+
+  // 使用useMemo优化数据处理
+  const processedStats = useMemo(() => {
+    const stats = statisticsData?.data || {};
+    
+    // 处理类型分布数据
+    const typeDistributionArr = stats.typeDistribution
+      ? Object.entries(stats.typeDistribution)
+          .map(([performTypeName, count]) => ({ performTypeName, count }))
+          .filter((item: any) => item.count > 0)
+      : [];
+
+    // 处理月度趋势数据
+    const monthlyTrendArr = stats.monthlyTrend
+      ? Object.entries(stats.monthlyTrend)
+          .map(([month, count]) => ({ month, count }))
+          .filter((item: any) => item.count > 0)
+          .sort((a: any, b: any) => a.month.localeCompare(b.month))
+      : [];
+
+    return {
+      typeDistributionArr,
+      monthlyTrendArr,
+      stats
+    };
+  }, [statisticsData]);
+
+  // 获取业绩类型分布数据
+  const getPerformanceTypeData = () => {
+    return processedStats.typeDistributionArr.map((item: any) => ({
+      name: item.performTypeName,
+      value: item.count
+    }));
+  };
+
+  // 获取业绩状态分布数据
+  const getPerformanceStatusData = () => {
+    const total = processedStats.stats.totalCount || 0;
+    const approved = processedStats.stats.approvedCount || 0;
+    const rejected = processedStats.stats.rejectedCount || 0;
+    const pending = processedStats.stats.pendingCount || 0;
+    
+    return [
+      { name: '已通过', value: approved },
+      { name: '已驳回', value: rejected },
+      { name: '待审核', value: pending }
+    ];
+  };
+
+  // 获取月度业绩提交趋势数据
+  const getMonthlySubmissionData = () => {
+    const months = processedStats.monthlyTrendArr.map((item: any) => item.month);
+    const counts = processedStats.monthlyTrendArr.map((item: any) => item.count);
+    
+    return {
+      months,
+      approvedData: counts, // 简化处理，实际应该按状态分类
+      rejectedData: new Array(months.length).fill(0),
+      pendingData: new Array(months.length).fill(0)
+    };
+  };
 
   // 处理行选择变化
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
@@ -65,9 +189,15 @@ export default function PerformanceExportPage() {
 
   // 处理搜索
   const handleSearch = (values: any) => {
-    setSearchParams(values);
-    setIsFilterDrawerVisible(false);
-    // 这里可以添加API调用，根据搜索条件获取业绩记录
+    // 类型转换，保证和后端一致
+    const params = {
+      ...values,
+      performTypeId: values.performTypeId ? Number(values.performTypeId) : undefined,
+      performStatus: values.performStatus ? Number(values.performStatus) : undefined,
+    };
+    
+    setSearchParams(cleanParams(params));
+    setPageNum(1);
     message.success('搜索条件已应用');
   };
 
@@ -79,193 +209,75 @@ export default function PerformanceExportPage() {
     }
 
     // 获取选中的记录
-    const selectedRecords = performanceRecords.filter(record => 
-      selectedRowKeys.includes(record.id)
+    const selectedRecords = performanceRecords.filter((record: any) => 
+      selectedRowKeys.includes(record.performId)
     );
 
-    // 根据导出类型执行不同的操作
     if (type === 'excel') {
+      exportToExcel(selectedRecords, columns, '业绩导出.xlsx');
       message.success(`已导出 ${selectedRowKeys.length} 条记录到Excel文件`);
     } else if (type === 'pdf') {
-      message.success(`已导出 ${selectedRowKeys.length} 条记录到PDF文件`);
+      message.success(`已导出 ${selectedRowKeys.length} 条记录到PDF文件（请用Excel导出）`);
     } else if (type === 'print') {
-      message.success(`已准备 ${selectedRowKeys.length} 条记录用于打印`);
+      message.success(`已准备 ${selectedRowKeys.length} 条记录用于打印（请用Excel导出）`);
     }
 
     setIsExportModalVisible(false);
   };
 
-  // 根据状态筛选记录
-  const getFilteredRecords = () => {
-    let filtered = [...performanceRecords];
-    
-    // 根据标签页筛选状态
-    if (activeTab === 'approved') {
-      filtered = filtered.filter(record => record.status === 'approved');
-    } else if (activeTab === 'rejected') {
-      filtered = filtered.filter(record => record.status === 'rejected');
-    } else if (activeTab === 'pending') {
-      filtered = filtered.filter(record => record.status === 'pending');
-    }
-    
-    // 这里可以添加更多的筛选逻辑，根据searchParams
-    
-    return filtered;
-  };
+  // getFilteredRecords已不再需要，数据由后端分页筛选
 
-  // 表格列定义
   const columns = [
     {
       title: '标题',
-      dataIndex: 'title',
-      key: 'title',
+      dataIndex: 'performName',
+      key: 'performName',
     },
     {
       title: '提交人',
-      dataIndex: 'userName',
-      key: 'userName',
-    },
-    {
-      title: '部门',
-      dataIndex: 'department',
-      key: 'department',
+      dataIndex: 'submitUserName',
+      key: 'submitUserName',
     },
     {
       title: '业绩类型',
-      dataIndex: 'typeName',
-      key: 'typeName',
+      dataIndex: 'performTypeName',
+      key: 'performTypeName',
       render: (text: string) => {
         const colorMap: Record<string, string> = {
           '教学成果': 'blue',
           '科研成果': 'green',
-          '学术贡献': 'purple',
-          '社会服务': 'orange'
+          '社会服务': 'orange',
+          '学术交流': 'purple',
+          '其他业绩': 'yellow'
         };
         return <Tag color={colorMap[text] || 'default'}>{text}</Tag>;
       }
     },
     {
-      title: '提交时间',
-      dataIndex: 'submitTime',
-      key: 'submitTime',
-      sorter: (a: PerformanceRecord, b: PerformanceRecord) => 
-        new Date(a.submitTime).getTime() - new Date(b.submitTime).getTime()
+      title: '业绩时间',
+      dataIndex: 'performTime',
+      key: 'performTime',
     },
     {
       title: '状态',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: string) => {
-        const statusMap: Record<string, { color: string, text: string }> = {
-          'pending': { color: 'gold', text: '待审核' },
-          'approved': { color: 'green', text: '已通过' },
-          'rejected': { color: 'red', text: '已驳回' }
+      dataIndex: 'performStatusName',
+      key: 'performStatusName',
+      render: (text: string) => {
+        const colorMap: Record<string, string> = {
+          '已提交': 'gold',
+          '已通过': 'green',
+          '已驳回': 'red'
         };
-        const { color, text } = statusMap[status] || { color: 'default', text: '未知' };
-        return <Tag color={color}>{text}</Tag>;
+        return <Tag color={colorMap[text] || 'default'}>{text}</Tag>;
       }
-    },
-    {
-      title: '评分',
-      dataIndex: 'score',
-      key: 'score',
-      render: (score: number) => score ? `${score}分` : '-'
     },
     {
       title: '评语',
-      dataIndex: 'comment',
-      key: 'comment',
+      dataIndex: 'performComment',
+      key: 'performComment',
       ellipsis: true,
     }
   ];
-
-  // 获取业绩类型分布数据
-  const getPerformanceTypeData = () => {
-    const typeCount: Record<string, number> = {};
-    const filteredRecords = getFilteredRecords();
-    
-    filteredRecords.forEach(record => {
-      if (typeCount[record.typeName]) {
-        typeCount[record.typeName]++;
-      } else {
-        typeCount[record.typeName] = 1;
-      }
-    });
-    
-    return Object.keys(typeCount).map(typeName => ({
-      name: typeName,
-      value: typeCount[typeName]
-    }));
-  };
-
-  // 获取业绩状态分布数据
-  const getPerformanceStatusData = () => {
-    const statusCount = {
-      approved: 0,
-      rejected: 0,
-      pending: 0
-    };
-    const filteredRecords = getFilteredRecords();
-    
-    filteredRecords.forEach(record => {
-      if (statusCount[record.status as keyof typeof statusCount] !== undefined) {
-        statusCount[record.status as keyof typeof statusCount]++;
-      }
-    });
-    
-    return [
-      { name: '已通过', value: statusCount.approved },
-      { name: '已驳回', value: statusCount.rejected },
-      { name: '待审核', value: statusCount.pending }
-    ];
-  };
-
-  // 获取部门业绩分布数据
-  const getDepartmentPerformanceData = () => {
-    const departmentCount: Record<string, number> = {};
-    const filteredRecords = getFilteredRecords();
-    
-    filteredRecords.forEach(record => {
-      if (departmentCount[record.department]) {
-        departmentCount[record.department]++;
-      } else {
-        departmentCount[record.department] = 1;
-      }
-    });
-    
-    return Object.keys(departmentCount).map(department => ({
-      name: department,
-      value: departmentCount[department]
-    }));
-  };
-
-  // 获取月度业绩提交趋势数据
-  const getMonthlySubmissionData = () => {
-    const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
-    const approvedData = new Array(12).fill(0);
-    const rejectedData = new Array(12).fill(0);
-    const pendingData = new Array(12).fill(0);
-    
-    performanceRecords.forEach(record => {
-      const date = new Date(record.submitTime);
-      const month = date.getMonth();
-      
-      if (record.status === 'approved') {
-        approvedData[month]++;
-      } else if (record.status === 'rejected') {
-        rejectedData[month]++;
-      } else if (record.status === 'pending') {
-        pendingData[month]++;
-      }
-    });
-    
-    return {
-      months,
-      approvedData,
-      rejectedData,
-      pendingData
-    };
-  };
 
   // 业绩类型分布图表配置
   const typeDistributionOption = {
@@ -280,7 +292,7 @@ export default function PerformanceExportPage() {
     legend: {
       orient: 'vertical',
       left: 'left',
-      data: mockPerformanceTypes.map(type => type.name)
+      data: getPerformanceTypeData().map(item => item.name)
     },
     series: [
       {
@@ -302,7 +314,10 @@ export default function PerformanceExportPage() {
         labelLine: {
           show: false
         },
-        data: getPerformanceTypeData()
+        data: getPerformanceTypeData().map((item: any, idx: number) => ({
+          ...item,
+          itemStyle: { color: ['#1677ff', '#52c41a', '#722ed1', '#faad14', '#f5222d'][idx % 5] }
+        }))
       }
     ]
   };
@@ -344,46 +359,6 @@ export default function PerformanceExportPage() {
         },
         data: getPerformanceStatusData(),
         color: ['#52c41a', '#f5222d', '#faad14']
-      }
-    ]
-  };
-
-  // 部门业绩分布图表配置
-  const departmentDistributionOption = {
-    title: {
-      text: '部门业绩分布',
-      left: 'center'
-    },
-    tooltip: {
-      trigger: 'item',
-      formatter: '{a} <br/>{b}: {c} ({d}%)'
-    },
-    legend: {
-      orient: 'vertical',
-      left: 'left',
-      data: Array.from(new Set(performanceRecords.map(record => record.department)))
-    },
-    series: [
-      {
-        name: '部门业绩',
-        type: 'pie',
-        radius: ['50%', '70%'],
-        avoidLabelOverlap: false,
-        label: {
-          show: false,
-          position: 'center'
-        },
-        emphasis: {
-          label: {
-            show: true,
-            fontSize: '18',
-            fontWeight: 'bold'
-          }
-        },
-        labelLine: {
-          show: false
-        },
-        data: getDepartmentPerformanceData()
       }
     ]
   };
@@ -450,23 +425,59 @@ export default function PerformanceExportPage() {
       </Breadcrumb>
 
       <Title level={2}>业绩导出</Title>
-      <Text type="secondary" className="block mb-6">导出业绩评价详情：哪些业绩审核通过、哪些没有、最终分数</Text>
+      <Text type="secondary" className="block mb-6">导出业绩评价详情：哪些业绩审核通过、驳回</Text>
 
       <Card>
-        {/* 搜索和操作工具栏 */}
+        {/* 多条件查询工具栏 */}
+        <div className="mb-4">
+          <Form
+            layout="inline"
+            form={form}
+            onFinish={handleSearch}
+            className="flex flex-wrap gap-4 items-end"
+          >
+            <Form.Item name="keyword" label="业绩标题">
+              <Input placeholder="请输入业绩标题" style={{ width: 200 }} />
+            </Form.Item>
+            
+            <Form.Item name="performTypeId" label="业绩类型">
+              <Select placeholder="请选择业绩类型" allowClear style={{ width: 150 }}>
+                <Option value="1">教学成果</Option>
+                <Option value="2">科研成果</Option>
+                <Option value="3">社会服务</Option>
+                <Option value="4">学术交流</Option>
+                <Option value="5">其他业绩</Option>
+              </Select>
+            </Form.Item>
+            
+            <Form.Item name="performStatus" label="状态">
+              <Select placeholder="请选择状态" allowClear style={{ width: 120 }}>
+                <Option value="1">已提交</Option>
+                <Option value="2">已通过</Option>
+                <Option value="3">已驳回</Option>
+              </Select>
+            </Form.Item>
+            
+            <Form.Item>
+              <Space>
+                <Button type="primary" htmlType="submit" icon={<SearchOutlined />}>
+                  查询
+                </Button>
+                <Button onClick={() => {
+                  form.resetFields();
+                  setSearchParams({});
+                  setPageNum(1);
+                }}>
+                  重置
+                </Button>
+              </Space>
+            </Form.Item>
+          </Form>
+        </div>
+
+        {/* 操作工具栏 */}
         <div className="flex justify-between mb-4">
           <Space>
-            <Input.Search 
-              placeholder="搜索业绩标题" 
-              onSearch={(value) => console.log(value)} 
-              style={{ width: 250 }}
-            />
-            <Button 
-              icon={<FilterOutlined />} 
-              onClick={() => setIsFilterDrawerVisible(true)}
-            >
-              高级筛选
-            </Button>
             <Button 
               icon={<SettingOutlined />} 
               onClick={() => setIsStatisticsDrawerVisible(true)}
@@ -486,25 +497,24 @@ export default function PerformanceExportPage() {
           </Space>
         </div>
 
-        {/* 标签页 */}
-        <Tabs activeKey={activeTab} onChange={setActiveTab} className="mb-4">
-          <TabPane tab="全部" key="all" />
-          <TabPane tab={<span><CheckCircleOutlined /> 已通过</span>} key="approved" />
-          <TabPane tab={<span><CloseCircleOutlined /> 已驳回</span>} key="rejected" />
-          <TabPane tab={<span><ExclamationCircleOutlined /> 待审核</span>} key="pending" />
-        </Tabs>
-
         {/* 数据表格 */}
         <Table 
           rowSelection={rowSelection}
           columns={columns} 
-          dataSource={getFilteredRecords()}
-          rowKey="id"
+          dataSource={performanceRecords}
+          rowKey={(record: { performId: string | number }) => record.performId}
           pagination={{
-            pageSize: 10,
+            current: pageNum,
+            pageSize: pageSize,
+            total: total,
             showSizeChanger: true,
-            showTotal: (total) => `共 ${total} 条记录`
+            showTotal: (total) => `共 ${total} 条记录`,
+            onChange: (page, size) => {
+              setPageNum(page);
+              setPageSize(size);
+            }
           }}
+          loading={performanceLoading}
         />
       </Card>
 
@@ -557,40 +567,22 @@ export default function PerformanceExportPage() {
           >
             <Row>
               <Col span={8}>
-                <Checkbox value="title">业绩标题</Checkbox>
+                <Checkbox value="performName">业绩标题</Checkbox>
               </Col>
               <Col span={8}>
-                <Checkbox value="userName">提交人</Checkbox>
+                <Checkbox value="submitUserName">提交人</Checkbox>
               </Col>
               <Col span={8}>
-                <Checkbox value="department">部门</Checkbox>
+                <Checkbox value="performTypeName">业绩类型</Checkbox>
               </Col>
               <Col span={8}>
-                <Checkbox value="position">职位</Checkbox>
+                <Checkbox value="performTime">业绩时间</Checkbox>
               </Col>
               <Col span={8}>
-                <Checkbox value="typeName">业绩类型</Checkbox>
+                <Checkbox value="performStatusName">状态</Checkbox>
               </Col>
               <Col span={8}>
-                <Checkbox value="submitTime">提交时间</Checkbox>
-              </Col>
-              <Col span={8}>
-                <Checkbox value="reviewTime">审核时间</Checkbox>
-              </Col>
-              <Col span={8}>
-                <Checkbox value="status">状态</Checkbox>
-              </Col>
-              <Col span={8}>
-                <Checkbox value="score">评分</Checkbox>
-              </Col>
-              <Col span={8}>
-                <Checkbox value="comment">评语</Checkbox>
-              </Col>
-              <Col span={8}>
-                <Checkbox value="description">业绩描述</Checkbox>
-              </Col>
-              <Col span={8}>
-                <Checkbox value="attachments">附件列表</Checkbox>
+                <Checkbox value="performComment">评语</Checkbox>
               </Col>
             </Row>
           </Checkbox.Group>
@@ -610,63 +602,7 @@ export default function PerformanceExportPage() {
         </div>
       </Modal>
 
-      {/* 高级筛选抽屉 */}
-      <Drawer
-        title="高级筛选"
-        placement="right"
-        onClose={() => setIsFilterDrawerVisible(false)}
-        open={isFilterDrawerVisible}
-        width={500}
-        footer={
-          <div style={{ textAlign: 'right' }}>
-            <Space>
-              <Button onClick={() => {}}>重置</Button>
-              <Button type="primary" onClick={() => handleSearch({})}>应用筛选</Button>
-            </Space>
-          </div>
-        }
-      >
-        <Form
-          layout="vertical"
-          onFinish={handleSearch}
-        >
-          <Form.Item name="title" label="业绩标题">
-            <Input placeholder="请输入业绩标题" />
-          </Form.Item>
-          
-          <Form.Item name="userName" label="提交人">
-            <Input placeholder="请输入提交人姓名" />
-          </Form.Item>
-          
-          <Form.Item name="department" label="部门">
-            <Select placeholder="请选择部门" allowClear>
-              <Option value="中医学院">中医学院</Option>
-              <Option value="药学院">药学院</Option>
-              <Option value="护理学院">护理学院</Option>
-            </Select>
-          </Form.Item>
-          
-          <Form.Item name="typeId" label="业绩类型">
-            <Select placeholder="请选择业绩类型" allowClear>
-              {mockPerformanceTypes.map(type => (
-                <Option key={type.id} value={type.id}>{type.name}</Option>
-              ))}
-            </Select>
-          </Form.Item>
-          
-          <Form.Item name="dateRange" label="提交日期范围">
-            <RangePicker style={{ width: '100%' }} />
-          </Form.Item>
-          
-          <Form.Item name="status" label="状态">
-            <Select placeholder="请选择状态" allowClear>
-              <Option value="pending">待审核</Option>
-              <Option value="approved">已通过</Option>
-              <Option value="rejected">已驳回</Option>
-            </Select>
-          </Form.Item>
-        </Form>
-      </Drawer>
+
 
       {/* 统计分析抽屉 */}
       <Drawer
@@ -676,61 +612,42 @@ export default function PerformanceExportPage() {
         open={isStatisticsDrawerVisible}
         width={700}
       >
-        <Tabs defaultActiveKey="1">
-          <TabPane tab="业绩类型分布" key="1">
-            <ReactECharts option={typeDistributionOption} style={{ height: 400 }} />
-          </TabPane>
-          <TabPane tab="业绩状态分布" key="2">
-            <ReactECharts option={statusDistributionOption} style={{ height: 400 }} />
-          </TabPane>
-          <TabPane tab="部门业绩分布" key="3">
-            <ReactECharts option={departmentDistributionOption} style={{ height: 400 }} />
-          </TabPane>
-          <TabPane tab="月度业绩提交趋势" key="4">
-            <ReactECharts option={monthlySubmissionOption} style={{ height: 400 }} />
-          </TabPane>
-        </Tabs>
+        <Tabs 
+          defaultActiveKey="1"
+          items={[
+            {
+              key: '1',
+              label: '业绩类型分布',
+              children: <ReactECharts option={typeDistributionOption} style={{ height: 400 }} />
+            },
+            {
+              key: '2',
+              label: '业绩状态分布',
+              children: <ReactECharts option={statusDistributionOption} style={{ height: 400 }} />
+            },
+            {
+              key: '4',
+              label: '月度业绩提交趋势',
+              children: <ReactECharts option={monthlySubmissionOption} style={{ height: 400 }} />
+            }
+          ]}
+        />
         
         <Divider>统计摘要</Divider>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card size="small" title="业绩总览">
             <div className="mb-2">
-              <Text>总业绩数：{performanceRecords.length}</Text>
+              <Text>总业绩数：{total}</Text>
             </div>
             <div className="mb-2">
-              <Text>已通过：{performanceRecords.filter(r => r.status === 'approved').length}</Text>
+              <Text>已通过：{performanceRecords.filter((r: { performStatusName: string }) => r.performStatusName === '已通过').length}</Text>
             </div>
             <div className="mb-2">
-              <Text>已驳回：{performanceRecords.filter(r => r.status === 'rejected').length}</Text>
+              <Text>已驳回：{performanceRecords.filter((r: { performStatusName: string }) => r.performStatusName === '已驳回').length}</Text>
             </div>
             <div>
-              <Text>待审核：{performanceRecords.filter(r => r.status === 'pending').length}</Text>
-            </div>
-          </Card>
-          
-          <Card size="small" title="评分统计">
-            <div className="mb-2">
-              <Text>平均分：
-                {Math.round(performanceRecords
-                  .filter(r => r.score !== undefined && r.score !== null)
-                  .reduce((sum, r) => sum + (r.score || 0), 0) / 
-                  performanceRecords.filter(r => r.score !== undefined && r.score !== null).length * 100) / 100}
-              </Text>
-            </div>
-            <div className="mb-2">
-              <Text>最高分：
-                {Math.max(...performanceRecords
-                  .filter(r => r.score !== undefined && r.score !== null)
-                  .map(r => r.score || 0))}
-              </Text>
-            </div>
-            <div>
-              <Text>最低分：
-                {Math.min(...performanceRecords
-                  .filter(r => r.score !== undefined && r.score !== null && r.score > 0)
-                  .map(r => r.score || 0))}
-              </Text>
+              <Text>待审核：{performanceRecords.filter((r: { performStatusName: string }) => r.performStatusName === '待审核').length}</Text>
             </div>
           </Card>
         </div>

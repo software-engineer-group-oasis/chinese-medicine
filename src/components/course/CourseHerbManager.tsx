@@ -1,33 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Table, Button, Modal, Form, Input, Select, 
-  message, Space, Tooltip, Tag, Popconfirm, Empty
+  message, Space, Tooltip, Tag, Popconfirm, Empty, Transfer
 } from 'antd';
 import { 
   DeleteOutlined, PlusOutlined, SearchOutlined,
   LinkOutlined, CheckCircleOutlined
 } from '@ant-design/icons';
 import axiosInstance from '@/api/config';
+import { HERB_API, COURSE_HERB_API } from '@/api/HerbInfoApi';
 import { userPermission } from '@/hooks/usePermission';
 
 const { Option } = Select;
 
 interface Herb {
-  herbId: number;
-  herbName: string;
-  herbAlias?: string;
-  herbImageUrl?: string;
-  herbDescription?: string;
-}
+//   herbId: number;
+//   herbName: string;
+//   herbAlias?: string;
+//   herbImageUrl?: string;
+//   herbDescription?: string;
+// }
 
-interface CourseHerb {
-  courseHerbId: number;
-  courseId: number;
-  herbId: number;
-  herbName: string;
-  herbAlias?: string;
-  herbImageUrl?: string;
-  linkTime: string;
+// interface CourseHerb {
+//   courseHerbId: number;
+//   courseId: number;
+//   herbId: number;
+//   herbName: string;
+//   herbAlias?: string;
+//   herbImageUrl?: string;
+//   linkTime: string;
+  id: number;
+  name: string;
+  alias?: string;
+  image?: string;
+  des?: string;
 }
 
 interface CourseHerbManagerProps {
@@ -35,24 +41,23 @@ interface CourseHerbManagerProps {
 }
 
 export default function CourseHerbManager({ courseId }: CourseHerbManagerProps) {
-  const [courseHerbs, setCourseHerbs] = useState<CourseHerb[]>([]);
-  const [availableHerbs, setAvailableHerbs] = useState<Herb[]>([]);
+  const [courseHerbIds, setCourseHerbIds] = useState<number[]>([]);
+  const [allHerbs, setAllHerbs] = useState<Herb[]>([]);
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [selectedHerbIds, setSelectedHerbIds] = useState<number[]>([]);
-  const [form] = Form.useForm();
   
   const permission = userPermission();
   const canLinkHerb = permission?.hasPermission('course:update');
 
-  // 获取课程关联的药材列表
-  const fetchCourseHerbs = async () => {
+  // 获取课程关联的药材ID列表
+  const fetchCourseHerbIds = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get(`/herb-teaching-service/courses/${courseId}/herbs`);
+      const response = await axiosInstance.get(COURSE_HERB_API.GET_COURSE_HERB_IDS(courseId));
       if (response.data.code === 0) {
-        setCourseHerbs(response.data.data || []);
+        setCourseHerbIds(response.data.data || []);
       } else {
         message.error('获取课程关联药材失败');
       }
@@ -64,31 +69,25 @@ export default function CourseHerbManager({ courseId }: CourseHerbManagerProps) 
     }
   };
 
-  // 获取可用药材列表
-  const fetchAvailableHerbs = async () => {
+  // 获取所有药材列表
+  const fetchAllHerbs = async () => {
     try {
-      const response = await axiosInstance.get('/herb-service/herbs', {
-        params: { keyword: searchValue, pageSize: 50, pageNum: 1 }
-      });
+      const response = await axiosInstance.get(HERB_API.GET_ALL_HERBS);
       if (response.data.code === 0) {
-        // 过滤掉已经关联的药材
-        const linkedHerbIds = courseHerbs.map(herb => herb.herbId);
-        const filteredHerbs = response.data.data.list.filter(
-          (herb: Herb) => !linkedHerbIds.includes(herb.herbId)
-        );
-        setAvailableHerbs(filteredHerbs);
+        setAllHerbs(response.data.herbs || []);
       } else {
-        message.error('获取可用药材失败');
+        message.error('获取药材列表失败');
       }
     } catch (error) {
-      console.error('获取可用药材错误:', error);
-      message.error('获取可用药材失败，请稍后重试');
+      console.error('获取药材列表错误:', error);
+      message.error('获取药材列表失败，请稍后重试');
     }
   };
 
   useEffect(() => {
     if (courseId) {
-      fetchCourseHerbs();
+      fetchCourseHerbIds();
+      fetchAllHerbs();
     }
   }, [courseId]);
 
@@ -97,99 +96,112 @@ export default function CourseHerbManager({ courseId }: CourseHerbManagerProps) 
     setIsModalVisible(true);
     setSelectedHerbIds([]);
     setSearchValue('');
-    fetchAvailableHerbs();
   };
 
   // 处理搜索药材
   const handleSearch = () => {
-    fetchAvailableHerbs();
+    // 搜索逻辑在渲染时处理
   };
 
-  // 处理选择药材
-  const handleSelectHerb = (herbId: number, selected: boolean) => {
-    if (selected) {
-      setSelectedHerbIds([...selectedHerbIds, herbId]);
-    } else {
-      setSelectedHerbIds(selectedHerbIds.filter(id => id !== herbId));
+  // 处理添加单个药材
+  const handleAddHerb = async (herbId: number) => {
+    try {
+      const response = await axiosInstance.post(COURSE_HERB_API.ADD_HERB_TO_COURSE(courseId, herbId));
+      if (response.data.code === 0) {
+        message.success('药材添加成功');
+        fetchCourseHerbIds(); // 刷新关联药材列表
+      } else {
+        message.error(response.data.message || '药材添加失败');
+      }
+    } catch (error) {
+      console.error('添加药材错误:', error);
+      message.error('药材添加失败，请稍后重试');
     }
   };
 
-  // 处理关联药材
-  const handleLinkHerbs = async () => {
+  // 处理批量更新药材
+  const handleBatchUpdateHerbs = async () => {
     if (selectedHerbIds.length === 0) {
       message.warning('请选择要关联的药材');
       return;
     }
 
     try {
-      const response = await axiosInstance.post(`/herb-teaching-service/${courseId}/herbs/link`, {
+      const response = await axiosInstance.put(COURSE_HERB_API.BATCH_UPDATE_COURSE_HERBS(courseId), {
+        courseId: courseId,
         herbIds: selectedHerbIds
       });
       if (response.data.code === 0) {
-        message.success('药材关联成功');
-        fetchCourseHerbs(); // 刷新关联药材列表
+        message.success('药材批量更新成功');
+        fetchCourseHerbIds(); // 刷新关联药材列表
         setIsModalVisible(false);
       } else {
-        message.error('药材关联失败');
+        message.error('药材批量更新失败');
       }
     } catch (error) {
-      console.error('关联药材错误:', error);
-      message.error('药材关联失败，请稍后重试');
+      console.error('批量更新药材错误:', error);
+      message.error('药材批量更新失败，请稍后重试');
     }
   };
 
-  // 处理取消关联药材
-  const handleUnlinkHerb = async (courseHerbId: number) => {
+  // 处理移除药材
+  const handleRemoveHerb = async (herbId: number) => {
     try {
-      const response = await axiosInstance.delete(
-        `/herb-teaching-service/${courseId}/herbs/${courseHerbId}`
-      );
+      const response = await axiosInstance.delete(COURSE_HERB_API.REMOVE_HERB_FROM_COURSE(courseId, herbId));
       if (response.data.code === 0) {
-        message.success('取消关联成功');
-        fetchCourseHerbs(); // 刷新关联药材列表
+        message.success('药材移除成功');
+        fetchCourseHerbIds(); // 刷新关联药材列表
       } else {
-        message.error('取消关联失败');
+        message.error('药材移除失败');
       }
     } catch (error) {
-      console.error('取消关联药材错误:', error);
-      message.error('取消关联失败，请稍后重试');
+      console.error('移除药材错误:', error);
+      message.error('药材移除失败，请稍后重试');
     }
   };
+
+  // 获取课程关联的药材详情
+  const courseHerbs = allHerbs.filter(herb => courseHerbIds.includes(herb.id));
+
+  // 获取可添加的药材（未关联的）
+  const availableHerbs = allHerbs.filter(herb => !courseHerbIds.includes(herb.id));
 
   // 关联药材列表列定义
   const columns = [
     {
       title: '药材名称',
-      dataIndex: 'herbName',
-      key: 'herbName',
+      dataIndex: 'name',
+      key: 'name',
     },
     {
       title: '别名',
-      dataIndex: 'herbAlias',
-      key: 'herbAlias',
+      dataIndex: 'alias',
+      key: 'alias',
       render: (text: string) => text || '-',
     },
     {
-      title: '关联时间',
-      dataIndex: 'linkTime',
-      key: 'linkTime',
+      title: '描述',
+      dataIndex: 'des',
+      key: 'des',
+      ellipsis: true,
+      render: (text: string) => text || '-',
     },
     {
       title: '操作',
       key: 'action',
-      render: (_: any, record: CourseHerb) => (
+      render: (_: any, record: Herb) => (
         <Space size="middle">
           <Tooltip title="查看药材详情">
             <Button 
               type="link" 
               icon={<SearchOutlined />} 
-              onClick={() => window.open(`/main/herb?id=${record.herbName}`, '_blank')}
+              onClick={() => window.open(`/main/herb?id=${record.name}`, '_blank')}
             />
           </Tooltip>
-          <Tooltip title="取消关联">
+          <Tooltip title="移除药材">
             <Popconfirm
-              title="确定要取消关联这个药材吗?"
-              onConfirm={() => handleUnlinkHerb(record.courseHerbId)}
+              title="确定要移除这个药材吗?"
+              onConfirm={() => handleRemoveHerb(record.id)}
               okText="确定"
               cancelText="取消"
             >
@@ -223,7 +235,7 @@ export default function CourseHerbManager({ courseId }: CourseHerbManagerProps) 
       {courseHerbs.length > 0 ? (
         <Table 
           columns={columns} 
-          dataSource={courseHerbs.map(herb => ({ ...herb, key: herb.courseHerbId }))} 
+          dataSource={courseHerbs.map(herb => ({ ...herb, key: herb.id }))} 
           loading={loading}
           pagination={false}
         />
@@ -235,25 +247,18 @@ export default function CourseHerbManager({ courseId }: CourseHerbManagerProps) 
       <Modal
         title="关联药材"
         open={isModalVisible}
-        onOk={handleLinkHerbs}
+        onOk={handleBatchUpdateHerbs}
         onCancel={() => setIsModalVisible(false)}
-        width={700}
+        width={800}
       >
-        <div className="mb-4 flex">
-          <Input 
+        <div className="mb-4">
+          <Input.Search
             placeholder="输入药材名称搜索" 
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
+            onSearch={handleSearch}
             style={{ width: '300px' }}
           />
-          <Button 
-            type="primary" 
-            icon={<SearchOutlined />} 
-            onClick={handleSearch}
-            className="ml-2"
-          >
-            搜索
-          </Button>
         </div>
 
         <div className="max-h-96 overflow-y-auto">
@@ -261,36 +266,38 @@ export default function CourseHerbManager({ courseId }: CourseHerbManagerProps) 
             <Table 
               rowSelection={{
                 type: 'checkbox',
-                onSelect: (record, selected) => handleSelectHerb(record.herbId, selected),
-                onSelectAll: (selected, selectedRows) => {
-                  if (selected) {
-                    setSelectedHerbIds(selectedRows.map(row => row.herbId));
-                  } else {
-                    setSelectedHerbIds([]);
-                  }
+                selectedRowKeys: selectedHerbIds,
+                onChange: (selectedRowKeys) => {
+                  setSelectedHerbIds(selectedRowKeys as number[]);
                 },
               }}
               columns={[
                 {
                   title: '药材名称',
-                  dataIndex: 'herbName',
-                  key: 'herbName',
+                  dataIndex: 'name',
+                  key: 'name',
                 },
                 {
                   title: '别名',
-                  dataIndex: 'herbAlias',
-                  key: 'herbAlias',
+                  dataIndex: 'alias',
+                  key: 'alias',
                   render: (text: string) => text || '-',
                 },
                 {
                   title: '描述',
-                  dataIndex: 'herbDescription',
-                  key: 'herbDescription',
+                  dataIndex: 'des',
+                  key: 'des',
                   ellipsis: true,
                   render: (text: string) => text || '-',
                 },
               ]} 
-              dataSource={availableHerbs.map(herb => ({ ...herb, key: herb.herbId }))} 
+              dataSource={availableHerbs
+                .filter(herb => 
+                  !searchValue || 
+                  herb.name.toLowerCase().includes(searchValue.toLowerCase()) ||
+                  (herb.alias && herb.alias.toLowerCase().includes(searchValue.toLowerCase()))
+                )
+                .map(herb => ({ ...herb, key: herb.id }))} 
               pagination={false}
               size="small"
             />
@@ -307,7 +314,7 @@ export default function CourseHerbManager({ courseId }: CourseHerbManagerProps) 
             <Button 
               type="primary" 
               icon={<LinkOutlined />} 
-              onClick={handleLinkHerbs}
+              onClick={handleBatchUpdateHerbs}
               disabled={selectedHerbIds.length === 0}
             >
               确认关联

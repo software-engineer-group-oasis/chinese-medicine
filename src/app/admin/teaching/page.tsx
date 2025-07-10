@@ -1,50 +1,211 @@
 "use client"
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Card from 'antd/es/card';
 import Row from 'antd/es/row';
 import Col from 'antd/es/col';
 import Button from 'antd/es/button';
 import Divider from 'antd/es/divider';
 import Statistic from 'antd/es/statistic';
-import { BookOutlined, VideoCameraOutlined, TagsOutlined, AppstoreOutlined, BarChartOutlined, CloudUploadOutlined } from '@ant-design/icons';
+import { BookOutlined, VideoCameraOutlined, TagsOutlined, AppstoreOutlined, BarChartOutlined, CloudUploadOutlined, ExperimentOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import AdminBreadcrumb from '@/components/AdminBreadcrumb';
 import ReactECharts from 'echarts-for-react';
-import { mockCategories, mockResources } from '@/mock/teaching';
+import axiosInstance from '@/api/config';
+import { HERB_API, COURSE_HERB_API, COURSE_API, LAB_API, RESOURCE_API, CATEGORY_API } from '@/api/HerbInfoApi';
+import { message } from 'antd';
+
+interface TeachingStats {
+  totalCourses: number;
+  totalResources: number;
+  totalCategories: number;
+  totalTags: number;
+  totalVisits: number;
+  totalHerbs: number;
+  totalLabs: number;
+}
+
+interface Category {
+  id: number;
+  name: string;
+  count: number;
+}
+
+interface ResourceType {
+  type: string;
+  count: number;
+}
+
+interface VisitData {
+  month: string;
+  visits: number;
+}
 
 export default function TeachingPage() {
-  // 模拟统计数据
-  const [stats] = useState({
-    totalCourses: 42,
-    totalResources: 128,
-    totalCategories: 6,
-    totalTags: 18,
-    totalVisits: 1024
-  });
+  const [stats, setStats] = useState<TeachingStats>({
+    totalCourses: 10,
+    totalResources: 13,
+    totalCategories: 3,
+    totalTags: 3,
+    totalVisits: 40,
+    totalHerbs: 10,
+    totalLabs: 10
+    });
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [resourceTypes, setResourceTypes] = useState<ResourceType[]>([]);
+  const [visitData, setVisitData] = useState<VisitData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // 获取统计数据
+  const fetchStats = async () => {
+    try {
+      setLoading(true);
+      
+      // 并行获取各种数据
+      const [
+        coursesResponse,
+        herbsResponse,
+        labsResponse,
+        categoriesResponse,
+        resourcesResponse
+      ] = await Promise.all([
+        axiosInstance.get(COURSE_API.GET_COURSES()),
+        axiosInstance.get(HERB_API.GET_ALL_HERBS),
+        axiosInstance.get(LAB_API.GET_ALL_LABS()),
+        axiosInstance.get(CATEGORY_API.GET_ALL_CATEGORIES()),
+        axiosInstance.get(RESOURCE_API.GET_ALL_RESOURCES())
+      ]);
+
+      // 计算统计数据
+      const totalCourses = coursesResponse.data.code === 0 ? (coursesResponse.data.data?.list?.length || coursesResponse.data.data?.length || 0) : 10;
+      const totalHerbs = herbsResponse.data.code === 0 ? (herbsResponse.data.herbs?.length || 0) : 0;
+      const totalLabs = labsResponse.data.code === 0 ? (labsResponse.data.data?.length || 0) : 0;
+      const totalCategories = categoriesResponse.data.code === 0 ? (categoriesResponse.data.data?.length || 0) : 0;
+      const totalResources = resourcesResponse.data.code === 0 ? (resourcesResponse.data.data?.length || 0) : 0;
+
+      setStats({
+        totalCourses,
+        totalResources,
+        totalCategories,
+        totalTags: 18, // 暂时使用固定值
+        totalVisits: 1024, // 暂时使用固定值
+        totalHerbs,
+        totalLabs
+      });
+
+      // 同时处理类别统计和资源类型统计
+      if (categoriesResponse.data.code === 0) {
+        const categoriesData = categoriesResponse.data.data || [];
+        
+        // 统计每个类别的课程数量
+        const categoryStats = await Promise.all(
+          categoriesData.map(async (category: any) => {
+            try {
+              // 根据API文档，使用正确的查询参数
+              const coursesResponse = await axiosInstance.get(COURSE_API.GET_COURSES({ categoryId: category.id }));
+              const count = coursesResponse.data.code === 0 ? (coursesResponse.data.data?.list?.length || coursesResponse.data.data?.length || 0) : 0;
+              return {
+                id: category.id,
+                name: category.name,
+                count
+              };
+            } catch (error) {
+              console.error(`获取类别 ${category.name} 统计错误:`, error);
+              return {
+                id: category.id,
+                name: category.name,
+                count: 0
+              };
+            }
+          })
+        );
+        
+        setCategories(categoryStats);
+      }
+
+      if (resourcesResponse.data.code === 0) {
+        const resources = resourcesResponse.data.data || [];
+        
+        // 统计资源类型 - 根据API文档，resourceType字段
+        const typeCount: Record<string, number> = {};
+        resources.forEach((resource: any) => {
+          // 根据API文档，resourceType: 0表示视频, 1表示文档
+          const type = resource.courseResourceType === 0 ? '视频' : 
+                      resource.courseResourceType === 1 ? '文档' : '其他';
+          typeCount[type] = (typeCount[type] || 0) + 1;
+        });
+        
+        const resourceTypesData = Object.entries(typeCount).map(([type, count]) => ({
+          type,
+          count
+        }));
+        
+        setResourceTypes(resourceTypesData);
+      }
+
+    } catch (error) {
+      console.error('获取统计数据错误:', error);
+      message.error('获取统计数据失败，请稍后重试');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 获取访问量趋势（模拟数据）
+  const fetchVisitData = async () => {
+    // 由于没有访问量API，使用模拟数据
+    // 可以根据实际需求添加访问量统计API
+    const mockVisitData = [
+      { month: '1月', visits: 120 },
+      { month: '2月', visits: 132 },
+      { month: '3月', visits: 101 },
+      { month: '4月', visits: 134 },
+      { month: '5月', visits: 90 },
+      { month: '6月', visits: 230 },
+      { month: '7月', visits: 210 }
+    ];
+    setVisitData(mockVisitData);
+  };
+
+  // 计算总访问量
+  const calculateTotalVisits = () => {
+    return visitData.reduce((sum, item) => sum + item.visits, 0);
+  };
+
+  useEffect(() => {
+    fetchStats();
+    fetchVisitData();
+  }, []);
+
+  // 更新统计信息，包括访问量
+  useEffect(() => {
+    if (visitData.length > 0) {
+      setStats(prev => ({
+        ...prev,
+        totalVisits: calculateTotalVisits()
+      }));
+    }
+  }, [visitData]);
 
   // 课程类别分布数据
-  const categoryPieData = mockCategories.map(cat => ({
-    value: stats.totalCourses / mockCategories.length, // mock数据均分
+  const categoryPieData = categories.map(cat => ({
+    value: cat.count,
     name: cat.name
   }));
 
   // 资源类型分布数据
-  const resourceTypeCount = mockResources.reduce((acc, cur) => {
-    acc[cur.type] = (acc[cur.type] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-  const resourcePieData = [
-    { value: resourceTypeCount['video'] || 0, name: '视频' },
-    { value: resourceTypeCount['pdf'] || 0, name: 'PDF文档' },
-    { value: resourceTypeCount['ppt'] || 0, name: 'PPT' }
-  ];
+  const resourcePieData = resourceTypes.map(type => ({
+    value: type.count,
+    name: type.type
+  }));
 
-  // 访问量趋势（mock）
-  const visitLineData = [120, 132, 101, 134, 90, 230, 210];
+  // 访问量趋势数据
+  const visitLineData = visitData.map(item => item.visits);
+  const visitLineLabels = visitData.map(item => item.month);
+
   const visitLineOption = {
     title: { text: '访问量趋势', left: 'center', textStyle: { fontSize: 14 } },
     tooltip: { trigger: 'axis' },
-    xAxis: { type: 'category', data: ['1月','2月','3月','4月','5月','6月','7月'] },
+    xAxis: { type: 'category', data: visitLineLabels },
     yAxis: { type: 'value' },
     series: [{
       name: '访问量', type: 'line', smooth: true, data: visitLineData,
@@ -83,43 +244,58 @@ export default function TeachingPage() {
 
       {/* 统计卡片 */}
       <Row gutter={[16, 16]} className="mb-6">
-        <Col xs={24} sm={12} md={5}>
+        <Col xs={24} sm={12} md={4}>
           <Card bordered={false} className="shadow-sm hover:shadow-md transition-shadow">
             <Statistic 
               title="课程总数" 
               value={stats.totalCourses} 
               prefix={<BookOutlined />} 
               valueStyle={{ color: '#1677ff' }}
+              loading={loading}
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12} md={5}>
+        <Col xs={24} sm={12} md={4}>
           <Card bordered={false} className="shadow-sm hover:shadow-md transition-shadow">
             <Statistic 
               title="资源总数" 
               value={stats.totalResources} 
               prefix={<CloudUploadOutlined />} 
               valueStyle={{ color: '#52c41a' }}
+              loading={loading}
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12} md={5}>
+        <Col xs={24} sm={12} md={4}>
+          <Card bordered={false} className="shadow-sm hover:shadow-md transition-shadow">
+            <Statistic 
+              title="中草药总数" 
+              value={stats.totalHerbs} 
+              prefix={<span>🌿</span>} 
+              valueStyle={{ color: '#52c41a' }}
+              loading={loading}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} md={4}>
+          <Card bordered={false} className="shadow-sm hover:shadow-md transition-shadow">
+            <Statistic 
+              title="实验总数" 
+              value={stats.totalLabs} 
+              prefix={<ExperimentOutlined />} 
+              valueStyle={{ color: '#fa8c16' }}
+              loading={loading}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} md={4}>
           <Card bordered={false} className="shadow-sm hover:shadow-md transition-shadow">
             <Statistic 
               title="课程类别" 
               value={stats.totalCategories} 
               prefix={<AppstoreOutlined />} 
               valueStyle={{ color: '#faad14' }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={5}>
-          <Card bordered={false} className="shadow-sm hover:shadow-md transition-shadow">
-            <Statistic 
-              title="标签数量" 
-              value={stats.totalTags} 
-              prefix={<TagsOutlined />} 
-              valueStyle={{ color: '#722ed1' }}
+              loading={loading}
             />
           </Card>
         </Col>
@@ -130,6 +306,7 @@ export default function TeachingPage() {
               value={stats.totalVisits} 
               prefix={<BarChartOutlined />} 
               valueStyle={{ color: '#f5222d' }}
+              loading={loading}
             />
           </Card>
         </Col>
@@ -166,6 +343,20 @@ export default function TeachingPage() {
             </Card>
           </Link>
         </Col>
+        {/* <Col xs={24} sm={12} md={8}>
+          <Link href="/admin/teaching/herbs">
+            <Card 
+              hoverable 
+              className="h-full"
+              cover={<div className="bg-green-50 p-6 flex justify-center"><span style={{ fontSize: '48px', color: '#52c41a' }}>🌿</span></div>}
+            >
+              <Card.Meta 
+                title="中草药管理" 
+                description="管理中草药信息、分类、关联关系" 
+              />
+            </Card>
+          </Link>
+        </Col> */}
         <Col xs={24} sm={12} md={8}>
           <Link href="/admin/teaching/categories">
             <Card 
@@ -195,22 +386,22 @@ export default function TeachingPage() {
           </Link>
         </Col>
         {/* <Col xs={24} sm={12} md={8}>
-          <Link href="/admin/teaching/statistics">
+          <Link href="/admin/teaching/labs">
             <Card 
               hoverable 
               className="h-full"
-              cover={<div className="bg-red-50 p-6 flex justify-center"><BarChartOutlined style={{ fontSize: '48px', color: '#f5222d' }} /></div>}
+              cover={<div className="bg-orange-50 p-6 flex justify-center"><ExperimentOutlined style={{ fontSize: '48px', color: '#fa8c16' }} /></div>}
             >
               <Card.Meta 
-                title="统计分析" 
-                description="课程访问量、资源下载量等数据分析" 
+                title="实验管理" 
+                description="管理课程实验，查看实验详情，支持批量操作" 
               />
             </Card>
           </Link>
         </Col> */}
       </Row>
 
-      {/* 数据可视化区块（可后续补充ECharts图表） */}
+      {/* 数据可视化区块 */}
       <Divider orientation="left">数据可视化</Divider>
       <Row gutter={[16, 16]}>
         <Col xs={24} md={8}>

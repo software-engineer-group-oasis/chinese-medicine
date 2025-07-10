@@ -9,6 +9,7 @@ export const COURSE_TARGETS = [
   { label: '本科生', value: '本科生' },
   { label: '研究生', value: '研究生' },
   { label: '博士生', value: '博士生' },
+  { label: '其他专业人士', value: '其他专业人士' },
 ];
 
 export const COURSE_TAGS = [

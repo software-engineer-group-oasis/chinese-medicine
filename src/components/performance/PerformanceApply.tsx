@@ -224,7 +224,7 @@ export default function PerformanceApply({
         fileSize: fileList[0].size,
         };
 
-        const attachRes = await post(API.POST_File(performId), attachment);
+        const attachRes = await post(API.POST_File(performId), attachment) as any;
         if (attachRes && attachRes.code === 0) {
           if (onSuccess) {
             onSuccess();

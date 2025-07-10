@@ -23,6 +23,11 @@ const COURSE_API = {
 function adaptCourseFromServer(raw: any): Course {
   console.log('原始课程数据:', raw);
   
+  // 查找视频资源
+  const videoResource = raw.resources?.find((r: any) => 
+    r.courseResourceType === 0 || r.courseResourceTypeName === '视频'
+  );
+  
   // 确保类型字段是字符串
   const adaptedCourse = {
     courseId: raw.courseId,
@@ -40,6 +45,8 @@ function adaptCourseFromServer(raw: any): Course {
     labs: raw.labs || [],
     resources: raw.resources || [],
     herbs: raw.herbs || [],
+    // 添加视频URL字段 - 从courseResourceContent获取
+    videoUrl: raw.videoUrl || videoResource?.courseResourceContent || '',
     // 添加额外字段用于UI显示
     author: raw.teacherName || '',
     authorAvatar: raw.teacherAvatar || '',
@@ -131,43 +138,64 @@ const submitRating = async (courseId: number, ratingValue: number) => {
  const url = `/herb-teaching-service/courses/${courseId}/ratings`;
  try {
     const payload = {
-      // courseId,
       ratingValue,
     };
-const res=axiosInstance.post(url, payload)
-.then(res => {
-  if(res.data.code === 0) {
-      console.log('评分提交成功:', res.data);
-      return res.data;
-  }
-})
-  .catch(err => {
-    throw new Error(`评分提交失败: ${err.message}`);
-  });
-} catch (error) {
+    const response = await axiosInstance.post(url, payload);
+    const res = response.data as any;
+    if(res.code === 0) {
+      console.log('评分提交成功:', res);
+      message.success('评分提交成功');
+      return res;
+    } else {
+      throw new Error(res.message || '评分提交失败');
+    }
+  } catch (error) {
     console.error('评分提交错误:', error);
     message.error('评分提交失败，请稍后重试');
     throw error;
   }
-  
 };
 //编辑课程
 // 新增课程
   const createCourse = async (courseData: any) => {
-    const res = await post(COURSE_API.CREATE, courseData);
-    if (res) {
-      message.success('课程新增成功');
+    try {
+      console.log('创建课程，数据:', courseData);
+      const response = await axiosInstance.post(COURSE_API.CREATE, courseData);
+      const res = response.data as any;
+      console.log('创建课程响应:', res);
+      
+      if (res && res.code === 0) {
+        message.success('课程新增成功');
+        return res;
+      } else {
+        throw new Error(res?.message || '课程创建失败');
+      }
+    } catch (error) {
+      console.error('创建课程失败:', error);
+      message.error('课程创建失败，请稍后重试');
+      throw error;
     }
-    return res;
   };
 
   // 编辑课程
   const updateCourse = async (id: number | string, courseData: any) => {
-    const res = await put(COURSE_API.UPDATE(id), courseData);
-    if (res) {
-      message.success('课程更新成功');
+    try {
+      console.log('更新课程，ID:', id, '数据:', courseData);
+      const response = await axiosInstance.put(COURSE_API.UPDATE(id), courseData);
+      const res = response.data as any;
+      console.log('更新课程响应:', res);
+      
+      if (res && res.code === 0) {
+        message.success('课程更新成功');
+        return res;
+      } else {
+        throw new Error(res?.message || '课程更新失败');
+      }
+    } catch (error) {
+      console.error('更新课程失败:', error);
+      message.error('课程更新失败，请稍后重试');
+      throw error;
     }
-    return res;
   };
   const deleteCourse = async (id: number | string) => {
     const res = await del(COURSE_API.DELETE(id));

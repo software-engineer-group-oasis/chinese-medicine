@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Rate, Button, Input, message, Typography, Divider } from 'antd';
 import { StarOutlined, SendOutlined } from '@ant-design/icons';
-import { submitRating,fetchUserRating } from '@/hooks/useCourses';
+import { useCourses } from '@/hooks/useCourses';
 const { TextArea } = Input;
 const { Title, Text } = Typography;
 
@@ -21,17 +21,24 @@ export default function RatingPanel({
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [hasRated, setHasRated] = useState<boolean>(false);
   
+  // 使用useCourses hook获取评分相关函数
+  const { submitRating, fetchUserRating } = useCourses({});
+  
   useEffect(() => {
-    const checkRating =async() => {
-      const {hasRated,ratingValue} = await fetchUserRating(courseId);
+    const checkRating = async() => {
+      try {
+        const {hasRated, ratingValue} = await fetchUserRating(courseId);
 
-      if(hasRated){
-        setHasRated(hasRated);
-        setRating(ratingValue);
+        if(hasRated){
+          setHasRated(hasRated);
+          setRating(ratingValue);
+        }
+      } catch (error) {
+        console.error('获取用户评分失败:', error);
       }
     };
     checkRating();
-  }, [courseId]);
+  }, [courseId, fetchUserRating]);
 
   const handleRatingChange = (value: number) => {
     setRating(value);
@@ -49,14 +56,15 @@ export default function RatingPanel({
       // 添加API调用来提交评分
       await submitRating(courseId, rating);
       
-    
       if (onRatingSubmit) {
         onRatingSubmit(rating);
       }
       
       setHasRated(true);
+      message.success('评分提交成功');
     } catch (error) {
       console.error('Rating submission error:', error);
+      message.error('评分提交失败，请稍后重试');
     } finally {
       setSubmitting(false);
     }

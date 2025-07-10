@@ -12,6 +12,9 @@ export default function HerbHome({
   setPropertyFilter,
   partFilter,
   setPartFilter,
+  categoryFilter,
+  setCategoryFilter,
+  categories,
   page,
   setPage,
   herbsToShow,
@@ -79,6 +82,22 @@ export default function HerbHome({
                 type={partFilter === tag ? 'primary' : 'default'}
                 onClick={() => { setPartFilter(tag); setPage(1); }}
               >{tag}</Button>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Text strong>类别:</Text>
+            <Button
+              size="small"
+              type={categoryFilter === '全部' ? 'primary' : 'default'}
+              onClick={() => { setCategoryFilter('全部'); setPage(1); }}
+            >全部</Button>
+            {categories.map((category: any) => (
+              <Button
+                key={category.id}
+                size="small"
+                type={categoryFilter === category.name ? 'primary' : 'default'}
+                onClick={() => { setCategoryFilter(category.name); setPage(1); }}
+              >{category.name}</Button>
             ))}
           </div>
         </div>

@@ -1,6 +1,6 @@
 // 工作业绩管理模块主页面
 "use client"
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Card from 'antd/es/card';
 import Row from 'antd/es/row';
 import Col from 'antd/es/col';
@@ -16,12 +16,42 @@ import Link from 'next/link';
 // 导入echarts图表组件
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
-// 导入模拟数据
-import { mockPerformanceStats } from '@/mock/performance';
+import useAxios from '@/hooks/useAxios';
 
 export default function PerformancePage() {
-  // 使用模拟数据统计
-  const [stats] = useState(mockPerformanceStats);
+  // 获取业绩统计数据（后端接口）
+  const { data: statisticsData, loading: statisticsLoading } = useAxios(
+    '/performance-service/performances/statistics',
+    'GET',
+    null,
+    null
+  ) as any;
+
+  // 使用useMemo优化数据处理
+  const processedData = useMemo(() => {
+    const stats = statisticsData?.data || {};
+    
+    // 处理类型分布数据
+    const typeDistributionArr = stats.typeDistribution
+      ? Object.entries(stats.typeDistribution)
+          .map(([performTypeName, count]) => ({ performTypeName, count }))
+          .filter((item: any) => item.count > 0)
+      : [];
+
+    // 处理月度趋势数据
+    const monthlyTrendArr = stats.monthlyTrend
+      ? Object.entries(stats.monthlyTrend)
+          .map(([month, count]) => ({ month, count }))
+          .filter((item: any) => item.count > 0)
+          .sort((a: any, b: any) => a.month.localeCompare(b.month))
+      : [];
+
+    return {
+      typeDistributionArr,
+      monthlyTrendArr,
+      stats
+    };
+  }, [statisticsData]);
 
   // 业绩类型分布饼图配置
   const typeDistributionOption: EChartsOption = {
@@ -39,7 +69,7 @@ export default function PerformancePage() {
     legend: {
       orient: 'vertical',
       left: 'left',
-      data: stats.typeDistribution.map(item => item.type)
+      data: processedData.typeDistributionArr.map((item: any) => item.performTypeName)
     },
     series: [
       {
@@ -66,12 +96,11 @@ export default function PerformancePage() {
         labelLine: {
           show: false
         },
-        data: [
-          { value: stats.typeDistribution[0].count, name: stats.typeDistribution[0].type, itemStyle: { color: '#1677ff' } },
-          { value: stats.typeDistribution[1].count, name: stats.typeDistribution[1].type, itemStyle: { color: '#52c41a' } },
-          { value: stats.typeDistribution[2].count, name: stats.typeDistribution[2].type, itemStyle: { color: '#722ed1' } },
-          { value: stats.typeDistribution[3].count, name: stats.typeDistribution[3].type, itemStyle: { color: '#faad14' } }
-        ]
+        data: processedData.typeDistributionArr.map((item: any, idx: number) => ({
+          value: item.count,
+          name: item.performTypeName,
+          itemStyle: { color: ['#1677ff', '#52c41a', '#722ed1', '#faad14', '#f5222d'][idx % 5] }
+        }))
       }
     ]
   };
@@ -90,7 +119,7 @@ export default function PerformancePage() {
     },
     xAxis: {
       type: 'category',
-      data: stats.monthlySubmission.map(item => item.month)
+      data: processedData.monthlyTrendArr.map((item: any) => item.month)
     },
     yAxis: {
       type: 'value'
@@ -100,7 +129,7 @@ export default function PerformancePage() {
         name: '提交数量',
         type: 'line',
         smooth: true,
-        data: stats.monthlySubmission.map(item => item.count),
+        data: processedData.monthlyTrendArr.map((item: any) => item.count),
         itemStyle: {
           color: '#1677ff'
         },
@@ -122,46 +151,6 @@ export default function PerformancePage() {
     ]
   };
 
-  // 平均分数雷达图配置
-  const scoreRadarOption: EChartsOption = {
-    title: {
-      text: '各类业绩平均分数',
-      left: 'center',
-      textStyle: {
-        fontSize: 14
-      }
-    },
-    tooltip: {
-      trigger: 'item'
-    },
-    radar: {
-      indicator: stats.typeDistribution.map(item => ({
-        name: item.type,
-        max: 100
-      })),
-      radius: 120
-    },
-    series: [
-      {
-        type: 'radar',
-        data: [
-          {
-            value: stats.typeDistribution.map(item => item.avgScore || 0),
-            name: '平均分数',
-            areaStyle: {
-              color: 'rgba(82, 196, 26, 0.2)'
-            },
-            lineStyle: {
-              color: '#52c41a'
-            },
-            itemStyle: {
-              color: '#52c41a'
-            }
-          }
-        ]
-      }
-    ]
-  };
 
   return (
     <div className="p-6">
@@ -173,7 +162,7 @@ export default function PerformancePage() {
           <Card bordered={false} className="shadow-sm hover:shadow-md transition-shadow">
             <Statistic 
               title="总业绩数" 
-              value={stats.totalCount} 
+              value={processedData.stats.totalCount || 0} 
               prefix={<LineChartOutlined />} 
               valueStyle={{ color: '#1677ff' }}
             />
@@ -183,7 +172,7 @@ export default function PerformancePage() {
           <Card bordered={false} className="shadow-sm hover:shadow-md transition-shadow">
             <Statistic 
               title="待审核业绩" 
-              value={stats.pendingCount} 
+              value={processedData.stats.pendingCount || 0} 
               prefix={<ClockCircleOutlined />}
               valueStyle={{ color: '#faad14' }}
             />
@@ -193,7 +182,7 @@ export default function PerformancePage() {
           <Card bordered={false} className="shadow-sm hover:shadow-md transition-shadow">
             <Statistic 
               title="已通过业绩" 
-              value={stats.approvedCount} 
+              value={processedData.stats.approvedCount || 0} 
               prefix={<CheckCircleOutlined />}
               valueStyle={{ color: '#52c41a' }}
             />
@@ -203,7 +192,7 @@ export default function PerformancePage() {
           <Card bordered={false} className="shadow-sm hover:shadow-md transition-shadow">
             <Statistic 
               title="已驳回业绩" 
-              value={stats.rejectedCount} 
+              value={processedData.stats.rejectedCount || 0} 
               prefix={<CloseCircleOutlined />}
               valueStyle={{ color: '#f5222d' }}
             />
@@ -222,8 +211,8 @@ export default function PerformancePage() {
               cover={<div className="bg-blue-50 p-6 flex justify-center"><AuditOutlined style={{ fontSize: '48px', color: '#1677ff' }} /></div>}
             >
               <Card.Meta 
-                title="业绩审核与评分" 
-                description="审核教师/科研人员上传的工作业绩，进行评分和评语" 
+                title="业绩审核" 
+                description="审核教师/科研人员上传的工作业绩，进行评语" 
               />
             </Card>
           </Link>
@@ -237,41 +226,13 @@ export default function PerformancePage() {
             >
               <Card.Meta 
                 title="业绩导出" 
-                description="导出业绩评价详情，包括通过/未通过业绩和最终分数" 
+                description="导出业绩评价详情，包括通过/未通过业绩" 
               />
             </Card>
           </Link>
         </Col>
         <Col xs={24} sm={12} md={8}>
-          <Link href="/admin/performance/standards">
-            <Card 
-              hoverable 
-              className="h-full"
-              cover={<div className="bg-purple-50 p-6 flex justify-center"><StarOutlined style={{ fontSize: '48px', color: '#722ed1' }} /></div>}
-            >
-              <Card.Meta 
-                title="评分标准管理" 
-                description="设置不同类型业绩的评分标准和权重" 
-              />
-            </Card>
-          </Link>
-        </Col>
-        <Col xs={24} sm={12} md={8}>
-          <Link href="/admin/performance/history">
-            <Card 
-              hoverable 
-              className="h-full"
-              cover={<div className="bg-yellow-50 p-6 flex justify-center"><HistoryOutlined style={{ fontSize: '48px', color: '#faad14' }} /></div>}
-            >
-              <Card.Meta 
-                title="审核历史" 
-                description="查看历史审核记录和审核日志" 
-              />
-            </Card>
-          </Link>
-        </Col>
-        <Col xs={24} sm={12} md={8}>
-          <Link href="/admin/performance/statistics">
+          <Link href="/admin/performance/analysis">
             <Card 
               hoverable 
               className="h-full"
@@ -289,19 +250,14 @@ export default function PerformancePage() {
       {/* 数据可视化 */}
       <Divider orientation="left">数据分析</Divider>
       <Row gutter={[16, 16]}>
-        <Col xs={24} md={8}>
+        <Col xs={24} md={12}>
           <Card bordered={false} className="shadow-sm">
             <ReactECharts option={typeDistributionOption} style={{ height: '300px' }} />
           </Card>
         </Col>
-        <Col xs={24} md={8}>
+        <Col xs={24} md={12}>
           <Card bordered={false} className="shadow-sm">
             <ReactECharts option={monthlySubmissionOption} style={{ height: '300px' }} />
-          </Card>
-        </Col>
-        <Col xs={24} md={8}>
-          <Card bordered={false} className="shadow-sm">
-            <ReactECharts option={scoreRadarOption} style={{ height: '300px' }} />
           </Card>
         </Col>
       </Row>
