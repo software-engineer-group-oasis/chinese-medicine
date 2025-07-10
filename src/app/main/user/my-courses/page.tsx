@@ -8,10 +8,11 @@ import {
 import { 
   PlusOutlined, EditOutlined, DeleteOutlined, 
   EyeOutlined, CheckCircleOutlined, ClockCircleOutlined,
-  ExclamationCircleOutlined
+  ExclamationCircleOutlined, ExperimentOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import CourseList from '@/components/course/CourseList';
+import CourseLabManager from '@/components/course/CourseLabManager';
 import useAuthStore from '@/store/useAuthStore';
 import axiosInstance from '@/api/config';
 import { COURSE_CATEGORIES, COURSE_TARGETS } from '@/constants/course';
@@ -29,11 +30,12 @@ const { confirm } = Modal;
 export default function MyCoursesPage() {
 
   const [activeTab, setActiveTab] = useState('1');
+  const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
   // const [myCourses, setMyCourses] = useState<Course[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [form] = Form.useForm();
-  const { user } = useAuthStore();
+  const { user } = useAuthStore() as any;
 
   const { courses, loading, createCourse, updateCourse, deleteCourse ,refetchCourses} = useCourses({});
   const myCourses = courses.filter(course => course.teacherId === user.id);
@@ -43,6 +45,9 @@ export default function MyCoursesPage() {
   const canCreateCourse = permission?.hasPermission('course:create');
   const canUpdateCourse = permission?.hasPermission('course:update');
   const canDeleteCourse = permission?.hasPermission('course:delete');
+
+  // 获取选中的课程
+  const selectedCourse = myCourses.find(course => course.courseId === selectedCourseId);
 
   // 打开创建/编辑课程模态框
   const showModal = (course: Course | null = null) => {
@@ -221,7 +226,105 @@ export default function MyCoursesPage() {
                 </div>
               )}
         </TabPane>
-
+        <TabPane tab="实验管理" key="3">
+          {isTeacher && myCourses.length > 0 ? (
+            <div className="mt-6">
+              <Title level={4}>实验管理</Title>
+              <div className="mb-4">
+                <Text type="secondary">选择要管理实验的课程：</Text>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {myCourses.map(course => (
+                  <div
+                    key={course.courseId}
+                    className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+                    onClick={() => {
+                      setSelectedCourseId(course.courseId);
+                      setActiveTab('4');
+                    }}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-semibold text-lg">{course.courseName}</h3>
+                      <ExperimentOutlined style={{ fontSize: '20px', color: '#fa8c16' }} />
+                    </div>
+                    <p className="text-gray-600 text-sm mb-2">{course.courseDes}</p>
+                    <div className="flex gap-2">
+                      <Tag color="blue">{course.courseType}</Tag>
+                      <Tag color="green">{course.courseObject}</Tag>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <Empty 
+              description={isTeacher ? "暂无课程，请先创建课程" : "只有教师可以管理实验"} 
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+            />
+          )}
+        </TabPane>
+        <TabPane tab="课程实验详情" key="4">
+          {isTeacher && myCourses.length > 0 && (
+            <div className="mt-6">
+              <div className="mb-4">
+                <Button 
+                  type="link" 
+                  onClick={() => setActiveTab('3')}
+                  className="mb-4"
+                >
+                  ← 返回课程选择
+                </Button>
+              </div>
+              <Title level={4}>
+                {selectedCourse ? `${selectedCourse.courseName} - 实验管理` : '课程实验管理'}
+              </Title>
+              <div className="mb-4">
+                {selectedCourse && (
+                  <div className="bg-blue-50 p-4 rounded-lg mb-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-semibold text-lg">{selectedCourse.courseName}</h3>
+                        <p className="text-gray-600">{selectedCourse.courseDes}</p>
+                        <div className="flex gap-2 mt-2">
+                          <Tag color="blue">{selectedCourse.courseType}</Tag>
+                          <Tag color="green">{selectedCourse.courseObject}</Tag>
+                        </div>
+                      </div>
+                      <ExperimentOutlined style={{ fontSize: '32px', color: '#fa8c16' }} />
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="text-center">
+                <Button 
+                  type="primary" 
+                  size="large"
+                  icon={<ExperimentOutlined />}
+                  onClick={() => setActiveTab('5')}
+                  disabled={!selectedCourseId}
+                >
+                  进入实验管理
+                </Button>
+              </div>
+            </div>
+          )}
+        </TabPane>
+        <TabPane tab="实验内容" key="5">
+          {isTeacher && selectedCourseId && (
+            <div className="mt-6">
+              <div className="mb-4">
+                <Button 
+                  type="link" 
+                  onClick={() => setActiveTab('4')}
+                  className="mb-4"
+                >
+                  ← 返回课程选择
+                </Button>
+              </div>
+              <CourseLabManager courseId={selectedCourseId} />
+            </div>
+          )}
+        </TabPane>
       </Tabs>
 
       {/* 创建/编辑课程模态框 */}

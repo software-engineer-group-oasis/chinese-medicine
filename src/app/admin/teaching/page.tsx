@@ -6,7 +6,7 @@ import Col from 'antd/es/col';
 import Button from 'antd/es/button';
 import Divider from 'antd/es/divider';
 import Statistic from 'antd/es/statistic';
-import { BookOutlined, VideoCameraOutlined, TagsOutlined, AppstoreOutlined, BarChartOutlined, CloudUploadOutlined } from '@ant-design/icons';
+import { BookOutlined, VideoCameraOutlined, TagsOutlined, AppstoreOutlined, BarChartOutlined, CloudUploadOutlined, ExperimentOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import AdminBreadcrumb from '@/components/AdminBreadcrumb';
 import ReactECharts from 'echarts-for-react';
@@ -190,6 +190,20 @@ export default function TeachingPage() {
               <Card.Meta 
                 title="标签管理" 
                 description="增删改查课程标签，支持批量打标签" 
+              />
+            </Card>
+          </Link>
+        </Col>
+        <Col xs={24} sm={12} md={8}>
+          <Link href="/admin/teaching/labs">
+            <Card 
+              hoverable 
+              className="h-full"
+              cover={<div className="bg-orange-50 p-6 flex justify-center"><ExperimentOutlined style={{ fontSize: '48px', color: '#fa8c16' }} /></div>}
+            >
+              <Card.Meta 
+                title="实验管理" 
+                description="管理课程实验，查看实验详情，支持批量操作" 
               />
             </Card>
           </Link>
