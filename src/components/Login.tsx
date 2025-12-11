@@ -38,51 +38,76 @@ const Login = ({ onLoginSuccess, onLoginError }: LoginProps) => {
         // 模拟调用验证码
         // TencentCaptcha 使用通过script 标签引入的
         //@ts-ignore
-        if (typeof TencentCaptcha === 'undefined') {
-            setError('验证码加载中，请稍候...');
-            setLoading(false);
-            return;
-        }
+        // if (typeof TencentCaptcha === 'undefined') {
+        //     setError('验证码加载中，请稍候...');
+        //     setLoading(false);
+        //     return;
+        // }
 
         // 初始化验证码
         //@ts-ignore
-        const captcha = new TencentCaptcha(captchaAppId, (res) => {
-            if (res.ret === 0) {
-                // 验证码通过，继续登录流程
-                fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/auth/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        username,
-                        password,
-                        ticket: res.ticket,
-                        randStr: res.randstr,
-                    }),
-                })
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.code === 0) {
-                            console.log('data', data)
-                            console.log("user in Login", data.user);
-                            onLoginSuccess?.(data.user, data.token);
-                        } else {
-                            throw new Error(data.message || '登录失败');
-                        }
-                    })
-                    .catch((err) => {
-                        setError(err.message || '网络异常');
-                        onLoginError?.(err.message || '登录失败');
-                    })
-                    .finally(() => {
-                        setLoading(false);
-                    });
-            } else {
-                setError('验证码校验失败');
-                setLoading(false);
-            }
-        });
+        // const captcha = new TencentCaptcha(captchaAppId, (res) => {
+        //     if (res.ret === 0) {
+        //         // 验证码通过，继续登录流程
+        //         fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/auth/login`, {
+        //             method: 'POST',
+        //             headers: { 'Content-Type': 'application/json' },
+        //             body: JSON.stringify({
+        //                 username,
+        //                 password,
+        //                 ticket: res.ticket,
+        //                 randStr: res.randstr,
+        //             }),
+        //         })
+        //             .then(r => r.json())
+        //             .then(data => {
+        //                 if (data.code === 0) {
+        //                     console.log('data', data)
+        //                     console.log("user in Login", data.user);
+        //                     onLoginSuccess?.(data.user, data.token);
+        //                 } else {
+        //                     throw new Error(data.message || '登录失败');
+        //                 }
+        //             })
+        //             .catch((err) => {
+        //                 setError(err.message || '网络异常');
+        //                 onLoginError?.(err.message || '登录失败');
+        //             })
+        //             .finally(() => {
+        //                 setLoading(false);
+        //             });
+        //     } else {
+        //         setError('验证码校验失败');
+        //         setLoading(false);
+        //     }
+        // });
 
-        captcha.show();
+        // captcha.show();
+        fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/auth/login`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                username,
+                password,
+            }),
+        })
+            .then(r => r.json())
+            .then(data => {
+                if (data.code === 0) {
+                    console.log('data', data)
+                    console.log("user in Login", data.user);
+                    onLoginSuccess?.(data.user, data.token);
+                } else {
+                    throw new Error(data.message || '登录失败');
+                }
+            })
+            .catch((err) => {
+                setError(err.message || '网络异常');
+                onLoginError?.(err.message || '登录失败');
+            })
+            .finally(() => {
+                setLoading(false);
+            });
     }, [username, password]);
 
     return (
@@ -120,7 +145,7 @@ const Login = ({ onLoginSuccess, onLoginError }: LoginProps) => {
                 <Link href="/register" className={'text-sky-500 hover:underline hover:font-bold'}><ArrowRightOutlined />去注册</Link>
                 <Link href="/forget-password" className={'text-sky-500 hover:underline hover:font-bold'}><ArrowRightOutlined />忘记密码</Link>
                 {/* 加载验证码 SDK */}
-                <Script src={process.env.NEXT_PUBLIC_TENCENT_CAPTCHA_URL} />
+                {/*<Script src={process.env.NEXT_PUBLIC_TENCENT_CAPTCHA_URL} />*/}
             </div>
     );
 };
